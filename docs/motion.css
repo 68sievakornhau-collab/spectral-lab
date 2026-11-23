@@ -74,3 +74,16 @@ body[data-collecting] #simulate{opacity:1;box-shadow:0 0 17px #338aca80}
 .motion-reduced *,.motion-reduced *::before,.motion-reduced *::after{animation:none!important;transition:none!important}
 .status[data-state=error]{color:#ffb5be;border-color:#ef879980}.status[data-state=error]::before{background:#ff9eac}
 @media(prefers-reduced-motion:reduce){.hero-figure .lab-art,.molecular-field{transform:none}}
+
+/* Interactive particles stay in a small, decorative scene layer. */
+.scene-particles{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2}
+.scene-particle{position:absolute;left:var(--start-x);top:var(--start-y);width:var(--size);height:var(--size);border-radius:50%;background:var(--tone);box-shadow:0 0 12px var(--tone);opacity:0;animation:particle-flight var(--duration) var(--delay) ease-in-out infinite}
+.scene-particle:nth-child(3n){border-radius:2px}
+@keyframes particle-flight{
+  0%{transform:translate3d(-7vw,12vh,0) scale(.65);opacity:0}
+  12%{opacity:.72}
+  48%{transform:translate3d(4vw,-7vh,0) scale(1.12);opacity:.8}
+  88%{opacity:.56}
+  100%{transform:translate3d(11vw,-16vh,0) scale(.7);opacity:0}
+}
+@media(prefers-reduced-motion:reduce){.scene-particle{animation:none;opacity:.16}}

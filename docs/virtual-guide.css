@@ -1,0 +1,110 @@
+.virtual-guide{--guide-cyan:#80ebf5;--guide-line:#28506a;margin:0 0 26px;padding:clamp(18px,3vw,34px);border:1px solid #3d6680;border-radius:22px;background:linear-gradient(135deg,#102945ed,#0b1b30f5 67%,#14213b);box-shadow:inset 0 1px #d5f6ff12,0 24px 70px #01091670;overflow:hidden;position:relative}
+.virtual-guide::before{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,transparent,#76eafa80,#a28dff70,transparent)}
+.guide-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:22px}
+.guide-eyebrow{display:flex;align-items:center;gap:9px;margin:0 0 7px;color:#82dcec;font:700 .72rem/1.2 var(--display);letter-spacing:.16em}
+.guide-eyebrow span,.guide-live-dot{width:7px;height:7px;border-radius:50%;background:#7cf3d1;box-shadow:0 0 12px #76f0d4;flex:none}
+.guide-heading h2{font-size:clamp(1.4rem,3vw,2.05rem);letter-spacing:-.035em;margin:0 0 7px}
+.guide-intro{max-width:680px;color:#a9bfd3;font-size:.93rem;margin:0}
+.guide-demo-badge{display:inline-flex;align-items:center;gap:8px;flex:none;padding:8px 11px;border:1px solid #3a5a77;border-radius:999px;background:#091b2e;color:#a7c2dc;font:700 .65rem/1.2 var(--display);letter-spacing:.09em}
+.guide-demo-badge span{color:#9e8aff;font-size:.9rem}
+.guide-layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,.76fr);gap:clamp(18px,3vw,34px);align-items:stretch}
+.guide-stage-wrap{min-width:0}
+.guide-stage{position:relative;overflow:hidden;border:1px solid #315773;border-radius:16px;background:radial-gradient(ellipse at 56% 52%,#183b57,#091a2e 76%);box-shadow:inset 0 0 42px #3cc2e111}
+.guide-stage::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 12%,#74e4ff08 46%,transparent 72%);animation:guide-stage-light 13s ease-in-out infinite alternate}
+@keyframes guide-stage-light{to{transform:translateX(9%);opacity:.45}}
+.guide-stage-label{position:absolute;z-index:1;top:13px;left:15px;right:15px;display:flex;align-items:center;gap:8px;color:#8eabc1;font:700 .63rem/1.2 var(--display);letter-spacing:.11em;pointer-events:none}
+.guide-stage-index{margin-left:auto;font-variant-numeric:tabular-nums;color:#b6d4e5}
+.guide-art{display:block;width:100%;height:auto;min-height:245px}
+.guide-stage-caption{position:absolute;bottom:10px;left:15px;right:15px;display:flex;justify-content:center;gap:7px;color:#8ca7bf;font-size:.7rem;text-align:center;pointer-events:none}
+.guide-controls{display:flex;align-items:center;gap:9px;margin-top:12px}
+.guide-controls button{min-height:42px}
+.guide-transport{display:flex;gap:7px;margin-left:auto}
+.guide-arrow{min-width:44px;font-size:1.2rem!important;padding:.4rem!important}
+.guide-info{min-width:0;display:flex;flex-direction:column;align-items:stretch;padding:6px 0 2px}
+.guide-step-line{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#8ceaf0;font:700 .69rem/1.2 var(--display);letter-spacing:.1em}
+.guide-step-kind{color:#748da6;font-size:.6rem}
+.guide-info h3{font:650 clamp(1.28rem,2.2vw,1.7rem)/1.2 var(--display);letter-spacing:-.025em;margin:11px 0 8px}
+.guide-info>p:not(.guide-readout-note,.guide-model-note,.guide-complete,.guide-safety-note){color:#b4c6d7;font-size:.91rem;line-height:1.65;margin:0 0 14px}
+.guide-state-panel{display:flex;align-items:center;gap:10px;min-height:43px;padding:9px 11px;border:1px solid #2e526a;border-radius:10px;background:#0a1c30;color:#c7dce9;font-size:.79rem}
+.guide-state-icon{display:grid;place-items:center;width:25px;height:25px;border-radius:8px;background:#12354a;color:#81e9f2;font-size:1rem;flex:none}
+.guide-demo-readout{display:none;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:11px}
+.guide-demo-readout>div{padding:7px 9px;border:1px solid #294760;border-radius:9px;background:#0a1b2d}
+.guide-demo-readout span,.guide-demo-readout strong{display:block}
+.guide-demo-readout span{font-size:.65rem;color:#95aec2}
+.guide-demo-readout strong{font:700 1rem/1.25 var(--display);font-variant-numeric:tabular-nums}
+.guide-demo-readout>div:nth-child(1) strong{color:#ff9ba7}.guide-demo-readout>div:nth-child(2) strong{color:#83edba}.guide-demo-readout>div:nth-child(3) strong{color:#88bdff}
+.guide-readout-note,.guide-model-note{display:none;color:#829bb0;font-size:.67rem;line-height:1.45;margin:7px 0 0}
+.guide-gaussian{display:none;margin-top:11px;padding:10px;border:1px solid #31516c;border-radius:10px;background:linear-gradient(130deg,#0b1c31,#102743)}
+.guide-equation{text-align:center;color:#c2e8f2;font:600 .82rem/1.5 var(--display);letter-spacing:.01em}
+.guide-parameters{display:flex;justify-content:center;gap:clamp(9px,2vw,20px);margin-top:8px;color:#90a9bf;font-size:.7rem}
+.guide-parameters b{color:#c5c4ff;font-weight:700}
+.guide-progress-label{display:flex;justify-content:space-between;gap:10px;margin-top:auto;padding-top:16px;color:#91a9bd;font-size:.72rem}
+.guide-progress-label span:last-child{font-variant-numeric:tabular-nums;color:#d8eaf5}
+#guideProgress{width:100%;height:6px;margin:7px 0 11px;accent-color:#65e0e8}
+.guide-step-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+.guide-step-list button{min-height:34px;padding:.3rem .45rem;background:#0b1c30;color:#8ea9bf;border:1px solid #2b4963;box-shadow:none;font:700 .69rem var(--display)}
+.guide-step-list button[aria-current=step]{border-color:#65ddeb;background:#14384b;color:#d8fbff;box-shadow:0 0 16px #53d8e529}
+.guide-complete{padding:9px 10px;border:1px solid #337865;border-radius:9px;background:#0b2a2b;color:#a9f4d6;font-size:.78rem;line-height:1.5;margin:10px 0 0}
+.guide-try{width:100%;margin-top:11px}
+.guide-try span{font-size:1rem}
+.guide-safety-note{margin:8px 0 0;color:#728ba2;font-size:.65rem;line-height:1.45;text-align:center}
+
+/* The tutorial scene is illustrative and never shares state with the live sensor. */
+.guide-walker{transition:transform .92s cubic-bezier(.2,.72,.23,1);transform-box:view-box;transform-origin:0 0}
+.guide-body,.guide-facing,.guide-leg,.guide-arm,.guide-head,.guide-shadow{transform-box:fill-box;transform-origin:center}
+.guide-facing{transform-origin:80px 120px;transition:transform .35s ease}
+.guide-head{transform-origin:85px 72px;transition:transform .4s ease}
+.guide-leg{transform-origin:72px 154px}.guide-arm{transform-origin:58px 98px}
+.guide-held-flask{opacity:0;transform-origin:0 0;transition:opacity .3s ease}
+#virtualGuide[data-pose=walking] .guide-leg.leg-one,#virtualGuide[data-pose=walking] .guide-arm.arm-two{animation:guide-step .38s ease-in-out infinite alternate}
+#virtualGuide[data-pose=walking] .guide-leg.leg-two,#virtualGuide[data-pose=walking] .guide-arm.arm-one{animation:guide-step-reverse .38s ease-in-out infinite alternate}
+@keyframes guide-step{to{transform:rotate(15deg)}}@keyframes guide-step-reverse{to{transform:rotate(-15deg)}}
+#virtualGuide[data-pose=inspecting] .guide-head,#virtualGuide[data-pose=measuring] .guide-head{transform:rotate(10deg) translateY(4px)}
+#virtualGuide[data-pose=selecting] .guide-arm.arm-two,#virtualGuide[data-pose=analyzing] .guide-arm.arm-two{transform:rotate(22deg)}
+#virtualGuide[data-pose=measuring] .guide-held-flask,#virtualGuide[data-pose=presenting] .guide-held-flask{opacity:1}
+#virtualGuide[data-step="1"] .guide-sensor-lens,#virtualGuide[data-step="1"] .guide-connection-beam{animation:guide-connect 1.8s ease-in-out infinite}
+@keyframes guide-connect{0%,100%{opacity:.16}50%{opacity:.94;filter:drop-shadow(0 0 10px #70ecff)}}
+#virtualGuide[data-step="2"] .guide-database{filter:drop-shadow(0 0 12px #a48effa3)}
+#virtualGuide[data-step="2"] .guide-database rect:first-child{animation:guide-select-card 1.8s ease-in-out infinite alternate}
+@keyframes guide-select-card{to{stroke:#c1aaff;fill:#1b3151}}
+#virtualGuide[data-step="3"] .guide-sample-liquid{animation:guide-liquid 2.1s ease-in-out infinite alternate}
+#virtualGuide[data-step="3"] .guide-sample-bubble{animation:guide-bubble 2.6s ease-in infinite}
+#virtualGuide[data-step="3"] .guide-sample-bubble.bubble-two{animation-delay:-1.3s}
+#virtualGuide[data-step="3"] .guide-light-beam{animation:guide-beam 1.4s ease-in-out infinite}
+@keyframes guide-liquid{to{transform:translateY(4px)}}@keyframes guide-bubble{0%,100%{opacity:.2;transform:translateY(3px)}70%{opacity:1;transform:translateY(-17px)}}@keyframes guide-beam{0%,100%{opacity:.2}50%{opacity:.95}}
+#virtualGuide[data-step="4"] .guide-rgb-bars{animation:guide-bars 1.5s ease-in-out infinite alternate}
+@keyframes guide-bars{to{opacity:.55;transform:translateY(3px)}}
+#virtualGuide[data-step="5"] .guide-graph-line{stroke-dasharray:190;stroke-dashoffset:190;animation:guide-graph-reveal 2.2s cubic-bezier(.2,.7,.2,1) forwards}
+#virtualGuide[data-step="5"] .guide-graph-point{animation:guide-point-pulse 1.6s ease-in-out infinite alternate}
+@keyframes guide-graph-reveal{to{stroke-dashoffset:0}}@keyframes guide-point-pulse{to{opacity:.48;r:6px}}
+.guide-bottle{transform-box:fill-box;transform-origin:center;animation:guide-bottle-path 15s ease-in-out infinite}
+@keyframes guide-bottle-path{0%,100%{transform:translate(0,0) rotate(0);opacity:.72}50%{transform:translate(23px,-15px) rotate(9deg);opacity:1}}
+.guide-vapor circle{animation:guide-vapor-path 3.8s ease-out infinite}
+.guide-vapor circle:nth-child(2){animation-delay:-1.25s}.guide-vapor circle:nth-child(3){animation-delay:-2.5s}
+@keyframes guide-vapor-path{0%{transform:translate(0,10px) scale(.5);opacity:0}35%{opacity:.6}100%{transform:translate(17px,-37px) scale(1.4);opacity:0}}
+.guide-orbit{animation:guide-orbit-path 10s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+.guide-orbit.orbit-b{animation-duration:13s;animation-delay:-5s}
+@keyframes guide-orbit-path{0%{transform:translate(-18px,13px) rotate(-18deg);opacity:.3}50%{opacity:.8}100%{transform:translate(48px,-18px) rotate(28deg);opacity:.5}}
+.guide-particles circle{animation:guide-particle-path 6s ease-in-out infinite alternate}
+.guide-particles circle:nth-child(2n){animation-duration:9s;animation-delay:-3s}
+@keyframes guide-particle-path{0%{transform:translate(-15px,8px);opacity:.25}100%{transform:translate(20px,-22px);opacity:.8}}
+.guide-readout{opacity:0;transition:opacity .25s ease}
+#virtualGuide[data-step="3"] .guide-readout{opacity:1}
+.guide-graph-line{transition:stroke .4s ease}
+.guide-display .guide-graph-line{opacity:.25}
+#virtualGuide[data-step="5"] .guide-display .guide-graph-line{opacity:1}
+.guide-display .guide-rgb-bars{opacity:.28}
+#virtualGuide[data-step="3"] .guide-display .guide-rgb-bars,#virtualGuide[data-step="4"] .guide-display .guide-rgb-bars{opacity:1}
+.guide-display .guide-graph-point{opacity:.15}
+#virtualGuide[data-step="5"] .guide-display .guide-graph-point{opacity:1}
+.virtual-guide[data-playback=paused] .guide-stage *, .virtual-guide[data-playback=paused] .guide-stage *::before, .virtual-guide[data-playback=paused] .guide-stage *::after{animation-play-state:paused!important}
+.guide-stage[data-step="1"] .guide-sensor,#virtualGuide[data-step="1"] .guide-sensor{filter:drop-shadow(0 0 13px #6feaff45)}
+.guide-stage[data-step="3"] .guide-sample{filter:drop-shadow(0 0 12px #53e3d966)}
+.guide-stage[data-step="4"] .guide-display,#virtualGuide[data-step="4"] .guide-display{filter:drop-shadow(0 0 12px #75c9ff60)}
+.guide-stage[data-step="5"] .guide-display{filter:drop-shadow(0 0 15px #82eaff70)}
+
+@media(max-width:900px){.guide-layout{grid-template-columns:minmax(0,1.2fr) minmax(245px,.8fr)}.guide-art{min-height:210px}}
+@media(max-width:720px){.virtual-guide{padding:18px;margin-bottom:19px;border-radius:17px}.guide-heading{align-items:flex-start;flex-direction:column;gap:12px;margin-bottom:16px}.guide-demo-badge{font-size:.59rem}.guide-layout{grid-template-columns:1fr;gap:14px}.guide-info{padding:5px 1px 0}.guide-progress-label{margin-top:14px;padding-top:0}.guide-art{min-height:0}.guide-stage-caption{font-size:.61rem}.guide-controls{gap:7px}.guide-controls>button{font-size:.78rem;padding-inline:.7rem}.guide-stage-label{top:10px;left:11px;right:11px;font-size:.56rem}.guide-info h3{margin-top:8px}.guide-try{margin-top:9px}}
+@media(max-width:385px){.guide-controls{flex-wrap:wrap}.guide-controls>button:first-child{flex:1}.guide-transport{margin-left:auto}.guide-stage-caption{left:7px;right:7px;gap:4px;font-size:.56rem}.guide-art{width:108%;max-width:none;margin-left:-4%}}
+@media(prefers-reduced-motion:reduce){.guide-stage::before,.guide-walker,.guide-bottle,.guide-vapor circle,.guide-orbit,.guide-particles circle,#virtualGuide[data-step] .guide-sensor-lens,#virtualGuide[data-step] .guide-connection-beam,#virtualGuide[data-step] .guide-database rect:first-child,#virtualGuide[data-step] .guide-sample-liquid,#virtualGuide[data-step] .guide-sample-bubble,#virtualGuide[data-step] .guide-light-beam,#virtualGuide[data-step] .guide-rgb-bars,#virtualGuide[data-step="5"] .guide-graph-line,#virtualGuide[data-step="5"] .guide-graph-point{animation:none!important;transition:none!important}#virtualGuide[data-step="5"] .guide-graph-line{stroke-dashoffset:0;opacity:1}#virtualGuide[data-step] .guide-connection-beam{opacity:.3}}
+.motion-reduced .guide-stage::before,.motion-reduced .guide-walker,.motion-reduced .guide-bottle,.motion-reduced .guide-vapor circle,.motion-reduced .guide-orbit,.motion-reduced .guide-particles circle,.motion-reduced #virtualGuide [data-step] .guide-sensor-lens,.motion-reduced #virtualGuide [data-step] .guide-connection-beam,.motion-reduced #virtualGuide [data-step] .guide-database rect:first-child,.motion-reduced #virtualGuide [data-step] .guide-sample-liquid,.motion-reduced #virtualGuide [data-step] .guide-sample-bubble,.motion-reduced #virtualGuide [data-step] .guide-light-beam,.motion-reduced #virtualGuide [data-step] .guide-rgb-bars,.motion-reduced #virtualGuide[data-step="5"] .guide-graph-line,.motion-reduced #virtualGuide[data-step="5"] .guide-graph-point{animation:none!important;transition:none!important}

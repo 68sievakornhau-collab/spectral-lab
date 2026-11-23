@@ -9,11 +9,13 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="motion.css">
 <link rel="stylesheet" href="science-world.css">
+<link rel="stylesheet" href="virtual-guide.css">
 <script type="module" src="app.mjs"></script>
+<script type="module" src="virtual-guide.mjs"></script>
 </head>
 <body>
 <div class="atmosphere" aria-hidden="true">
- <div class="molecular-field">
+ <div class="scene-particles" aria-hidden="true"><i class="scene-particle" style="--start-x:37%;--start-y:53%;--size:3px;--duration:14s;--delay:-1.7s;--tone:#9a86f4"></i><i class="scene-particle" style="--start-x:74%;--start-y:11%;--size:4px;--duration:15s;--delay:-3.4s;--tone:#77e5bc"></i><i class="scene-particle" style="--start-x:11%;--start-y:64%;--size:2px;--duration:16s;--delay:-5.1s;--tone:#ef9bc9"></i><i class="scene-particle" style="--start-x:48%;--start-y:22%;--size:3px;--duration:17s;--delay:-6.8s;--tone:#6beafa"></i><i class="scene-particle" style="--start-x:85%;--start-y:75%;--size:4px;--duration:18s;--delay:-8.5s;--tone:#9a86f4"></i><i class="scene-particle" style="--start-x:22%;--start-y:33%;--size:2px;--duration:19s;--delay:-10.2s;--tone:#77e5bc"></i><i class="scene-particle" style="--start-x:59%;--start-y:86%;--size:3px;--duration:20s;--delay:-11.9s;--tone:#ef9bc9"></i><i class="scene-particle" style="--start-x:96%;--start-y:44%;--size:4px;--duration:21s;--delay:-13.6s;--tone:#6beafa"></i><i class="scene-particle" style="--start-x:33%;--start-y:2%;--size:2px;--duration:13s;--delay:-15.3s;--tone:#9a86f4"></i><i class="scene-particle" style="--start-x:70%;--start-y:55%;--size:3px;--duration:14s;--delay:-17s;--tone:#77e5bc"></i><i class="scene-particle" style="--start-x:7%;--start-y:13%;--size:4px;--duration:15s;--delay:-18.7s;--tone:#ef9bc9"></i><i class="scene-particle" style="--start-x:44%;--start-y:66%;--size:2px;--duration:16s;--delay:-20.4s;--tone:#6beafa"></i></div><div class="molecular-field">
   <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
    <defs><g id="background-molecule" fill="#142f4e" stroke="currentColor" stroke-width="1.4">
     <path d="m0 26 37-23 41 21 0 46-38 24L0 72Z M78 24l38-18m-76 88 17 30M0 26l-30-13" fill="none"/>
@@ -162,6 +164,117 @@
       <figcaption>ภาพประกอบห้องปฏิบัติการ</figcaption>
     </figure>
   </div>
+  <section class="virtual-guide" id="virtualGuide" data-step="1" data-pose="idle" aria-labelledby="guideTitle">
+    <div class="guide-heading">
+      <div><p class="guide-eyebrow"><span></span> INTERACTIVE LAB ORIENTATION</p><h2 id="guideTitle">ทดลองครั้งแรก เริ่มตรงนี้</h2><p class="guide-intro">นักวิทยาศาสตร์จะพาคุณรู้จักขั้นตอนตั้งแต่เชื่อมต่อเซนเซอร์ จนถึงการสร้างกราฟสเปกตรัม</p></div>
+      <span class="guide-demo-badge"><span aria-hidden="true">✦</span> VIRTUAL DEMONSTRATION</span>
+    </div>
+    <div class="guide-layout">
+      <div class="guide-stage-wrap">
+        <div class="guide-stage" id="guideStage" data-step="1">
+          <div class="guide-stage-label"><span class="guide-live-dot"></span><span>SCIENCE WORLD</span><span class="guide-stage-index" id="guideStageIndex">01 / 05</span></div>
+          <svg class="guide-art" viewBox="0 0 880 410" role="img" aria-labelledby="guideArtTitle guideArtDescription">
+            <title id="guideArtTitle">ฉากสาธิตการวิเคราะห์ RGB และสเปกตรัม</title><desc id="guideArtDescription">ห้องทดลองเสมือนพร้อมนักวิทยาศาสตร์ เซนเซอร์ RGB ตัวอย่างสาร และจอแสดงกราฟ</desc>
+            <defs>
+              <linearGradient id="guideWall" x2="0" y2="1"><stop stop-color="#102a48"/><stop offset="1" stop-color="#091a30"/></linearGradient>
+              <linearGradient id="guideBench" x2="0" y2="1"><stop stop-color="#204967"/><stop offset="1" stop-color="#0c2239"/></linearGradient>
+              <linearGradient id="guideGlass" x2="1" y2="1"><stop stop-color="#80f2ff" stop-opacity=".55"/><stop offset="1" stop-color="#7668ec" stop-opacity=".2"/></linearGradient>
+              <linearGradient id="guideBeam" x2="1" y2="0"><stop stop-color="#78e8ff" stop-opacity="0"/><stop offset=".5" stop-color="#78e8ff" stop-opacity=".54"/><stop offset="1" stop-color="#a994ff" stop-opacity="0"/></linearGradient>
+              <linearGradient id="guideSpectrum" x2="1" y2="0"><stop stop-color="#538bff"/><stop offset=".34" stop-color="#53e7ff"/><stop offset=".58" stop-color="#77f0b5"/><stop offset=".78" stop-color="#ffe17b"/><stop offset="1" stop-color="#ff7da8"/></linearGradient>
+              <filter id="guideGlow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <clipPath id="guideTubeClip"><path d="M0 0h32v80a16 16 0 0 1-32 0z"/></clipPath>
+            </defs>
+            <rect width="880" height="410" rx="20" fill="url(#guideWall)"/>
+            <path d="M24 52h832M24 60h832" stroke="#7fb9dc" stroke-opacity=".12"/>
+            <path d="M61 61v154m1-153h120M311 61v119m1-118h116M600 61v131m1-130h213" stroke="#83b9d8" stroke-opacity=".15" stroke-width="2"/>
+            <path d="M95 102h71m-71 13h71m-71 13h71m-71 13h71" stroke="#5ca5c7" stroke-opacity=".24"/>
+            <g class="guide-float guide-bottle" aria-hidden="true"><path d="M127 91h17v15l9 10v39h-35v-39l9-10z" fill="#233e78" stroke="#9a8df5"/><path d="M122 128h25v17h-25z" fill="#7f6add" opacity=".74"/><rect x="130" y="85" width="11" height="8" rx="2" fill="#c4baff"/></g>
+            <g class="guide-vapor" fill="#9feeff"><circle cx="141" cy="87" r="3"/><circle cx="151" cy="74" r="2"/><circle cx="135" cy="66" r="2.5"/></g>
+            <path d="M34 275h812l-28 30H56z" fill="url(#guideBench)" stroke="#416c88"/>
+            <path d="M54 305h772v12H54z" fill="#102940" stroke="#365e7b"/>
+            <path d="M85 317v68m690-68v68" stroke="#264b67" stroke-width="14"/>
+            <path d="M54 385h772" stroke="#58d6ed" stroke-opacity=".28" stroke-width="2"/>
+            <ellipse cx="435" cy="365" rx="325" ry="16" fill="#020a16" opacity=".43"/>
+            <g class="guide-station guide-sensor" transform="translate(185 193)">
+              <rect width="112" height="72" rx="12" fill="#102b45" stroke="#5b819b" stroke-width="2"/>
+              <rect x="10" y="10" width="92" height="48" rx="7" fill="#071a2d" stroke="#2a526b"/>
+              <circle class="guide-sensor-lens" cx="56" cy="34" r="14" fill="#163d5c" stroke="#68dff2" stroke-width="2"/>
+              <circle cx="56" cy="34" r="6" fill="#66dff3" opacity=".75"/>
+              <circle cx="56" cy="34" r="2" fill="#e1fcff"/>
+              <path d="M19 65h74" stroke="#7da1b7" stroke-width="3" stroke-linecap="round"/>
+              <text x="56" y="88" text-anchor="middle" fill="#9cb6c9" font-size="10" letter-spacing="1.2">RGB SENSOR</text>
+              <path class="guide-connection-beam" d="M56 33 250-91 250 114Z" fill="url(#guideBeam)" opacity="0"/>
+            </g>
+            <g class="guide-database" transform="translate(337 206)">
+              <rect width="103" height="60" rx="9" fill="#132d49" stroke="#4d7794"/>
+              <path d="M0 17h103M0 34h103" stroke="#426783"/>
+              <circle cx="13" cy="9" r="3" fill="#65e6c5"/><circle cx="13" cy="26" r="3" fill="#a894ff"/><circle cx="13" cy="43" r="3" fill="#6bcdf4"/>
+              <path d="M23 8h47m-47 17h62m-62 17h38" stroke="#afc8dc" stroke-opacity=".65" stroke-width="3" stroke-linecap="round"/>
+              <text x="52" y="78" text-anchor="middle" fill="#9cb6c9" font-size="10" letter-spacing="1">DATABASE</text>
+            </g>
+            <g class="guide-sample" transform="translate(482 182)">
+              <path d="M4 6h44m-37 0v66a16 16 0 0 0 32 0V6" fill="url(#guideGlass)" stroke="#9beeff" stroke-width="2"/>
+              <g clip-path="url(#guideTubeClip)"><path class="guide-sample-liquid" d="M0 43q14-7 32 0v50H0Z" fill="#47d9cd" fill-opacity=".8"/><circle class="guide-sample-bubble" cx="10" cy="64" r="3" fill="#d4ffff"/><circle class="guide-sample-bubble bubble-two" cx="23" cy="74" r="2" fill="#fff"/></g>
+              <path d="M12 17v39m24-37v28" stroke="#e4fbff" stroke-opacity=".52" stroke-width="2"/>
+              <text x="26" y="99" text-anchor="middle" fill="#9cb6c9" font-size="10" letter-spacing="1">SAMPLE</text>
+              <path class="guide-light-beam" d="M-16 46h67" stroke="#77f2ff" stroke-width="3" filter="url(#guideGlow)" opacity="0"/>
+            </g>
+            <g class="guide-display" transform="translate(627 101)">
+              <rect width="193" height="147" rx="12" fill="#071a2b" stroke="#5792b1" stroke-width="2"/>
+              <rect x="9" y="9" width="175" height="127" rx="7" fill="#0b2035" stroke="#264d68"/>
+              <path d="M24 115h146M24 35v80M24 77h146M24 58h146M24 96h146" stroke="#6a99b5" stroke-opacity=".21"/>
+              <g class="guide-rgb-bars"><rect x="36" y="46" width="14" height="69" rx="3" fill="#ff8199"/><rect x="59" y="65" width="14" height="50" rx="3" fill="#69e4ae"/><rect x="82" y="54" width="14" height="61" rx="3" fill="#77aaff"/></g>
+              <path class="guide-graph-axis" d="M105 115h61M105 115V39" stroke="#8ba9c0" stroke-width="1.5"/>
+              <path class="guide-graph-line" d="M108 111c12-1 14-5 22-9 14-8 14-51 25-57 13-7 17 43 32 57" fill="none" stroke="url(#guideSpectrum)" stroke-width="3" stroke-linecap="round"/>
+              <circle class="guide-graph-point" cx="155" cy="45" r="4" fill="#b8fff6" filter="url(#guideGlow)"/>
+              <text x="96" y="162" text-anchor="middle" fill="#9cb6c9" font-size="10" letter-spacing="1">SPECTRUM MODEL</text>
+            </g>
+            <path d="M240 241C325 152 441 292 545 215S690 158 719 181" fill="none" stroke="#55b9dd" stroke-opacity=".14" stroke-width="2" stroke-dasharray="5 8"/>
+            <g class="guide-orbit orbit-a" fill="#74e8f2"><circle cx="0" cy="0" r="4"/><circle cx="22" cy="-9" r="3"/><circle cx="41" cy="4" r="3.5"/><path d="M4-2 20-8m4 1 15 8" stroke="#8aebfa" stroke-opacity=".7"/></g>
+            <g class="guide-orbit orbit-b" fill="#b699ff"><circle cx="0" cy="0" r="3"/><circle cx="20" cy="9" r="4"/><path d="m3 1 14 7" stroke="#c9b9ff" stroke-opacity=".7"/></g>
+            <g id="guideWalker" class="guide-walker" transform="translate(25 145) scale(.66)">
+              <ellipse class="guide-shadow" cx="80" cy="235" rx="42" ry="8" fill="#010813" opacity=".7"/>
+              <g class="guide-body"><g class="guide-facing">
+                <use class="guide-leg leg-one" href="#scientist-leg"/><g transform="translate(22 0)"><use class="guide-leg leg-two" href="#scientist-leg"/></g>
+                <use class="guide-arm arm-one" href="#scientist-sleeve"/><use href="#scientist-coat"/>
+                <g class="guide-head"><use href="#scientist-face"/><g fill="#10233b"><ellipse cx="75" cy="47" rx="2.4" ry="3.1"/><ellipse cx="96" cy="47" rx="2.4" ry="3.1"/></g></g>
+                <g class="guide-arm arm-two"><path d="M103 91q11-2 16 9l5 30 11-10 7 9-16 19q-10 7-17-4l-12-34Z" fill="#c4ddef" stroke="#7fb0cb" stroke-width="1.4"/><path d="m133 121 8-8q4-3 7 1l-5 8 12-6q4 1 2 4l-15 11Z" fill="#e4a489" stroke="#a56b68"/></g>
+              </g></g>
+              <g class="guide-held-flask" transform="translate(135 115)"><path d="M4 0h15v8l5 6v26H-1V14l5-6z" fill="#34788a" stroke="#9df6f3"/><path d="M1 26h20v8H1Z" fill="#55e4d1"/><rect x="7" y="-4" width="9" height="5" rx="2" fill="#9ef3fa"/></g>
+            </g>
+            <g class="guide-readout" transform="translate(497 110)"><rect width="109" height="54" rx="8" fill="#0a1e32" stroke="#42718c"/><text x="12" y="20" fill="#ff9ba7" font-size="10">R <tspan id="guideR">—</tspan></text><text x="12" y="36" fill="#83edba" font-size="10">G <tspan id="guideG">—</tspan></text><text x="60" y="20" fill="#88bdff" font-size="10">B <tspan id="guideB">—</tspan></text><text x="60" y="36" fill="#9cb6c9" font-size="8">RGB*</text></g>
+            <g class="guide-particles" fill="#92f5ff"><circle cx="304" cy="112" r="2"/><circle cx="554" cy="112" r="2.5"/><circle cx="577" cy="268" r="1.7"/><circle cx="458" cy="121" r="2"/><circle cx="270" cy="175" r="1.5"/></g>
+          </svg>
+          <div class="guide-stage-caption"><span id="guideStageCaption">รอเริ่มการสาธิต</span><span aria-hidden="true">•</span><span>ค่าภาพประกอบเท่านั้น</span></div>
+        </div>
+        <div class="guide-controls" aria-label="ควบคุมบทเรียน">
+          <button type="button" id="guideStart"><span aria-hidden="true">▶</span> Start Tutorial</button>
+          <button type="button" class="secondary" id="guidePause" disabled>Pause</button>
+          <div class="guide-transport"><button type="button" class="secondary guide-arrow" id="guidePrevious" aria-label="ขั้นตอนก่อนหน้า" disabled>←</button><button type="button" class="secondary guide-arrow" id="guideNext" aria-label="ขั้นตอนถัดไป">→</button></div>
+        </div>
+      </div>
+      <div class="guide-info">
+        <div class="guide-step-line"><span id="guideStepNumber">STEP 01</span><span class="guide-step-kind">LAB WORKFLOW</span></div>
+        <h3 id="guideStepTitle">เชื่อมต่อเซนเซอร์</h3>
+        <p id="guideStepDescription">เริ่มจากเชื่อมต่อ ESP32-C3 ผ่าน Bluetooth แล้วตรวจสอบสถานะก่อนนำตัวอย่างไปวัด</p>
+        <div class="guide-state-panel" aria-live="polite" aria-atomic="true"><span class="guide-state-icon" id="guideStateIcon" aria-hidden="true">⌁</span><span id="guideStateText">พร้อมเชื่อมต่อเซนเซอร์</span></div>
+        <div class="guide-demo-readout" id="guideReadout">
+          <div><span>R</span><strong id="guideReadR">—</strong></div><div><span>G</span><strong id="guideReadG">—</strong></div><div><span>B</span><strong id="guideReadB">—</strong></div>
+        </div>
+        <p class="guide-readout-note" id="guideReadoutNote">* ตัวเลขที่เคลื่อนไหวเป็นภาพสาธิตเท่านั้น ไม่ได้อ่านจากเซนเซอร์และไม่ถูกบันทึก</p>
+        <div class="guide-gaussian" id="guideGaussian"><div class="guide-equation">A(λ) = H · exp[−(λ−μ)² / 2σ²]</div><div class="guide-parameters"><span>H <b>0.82*</b></span><span>μ <b>542 nm*</b></span><span>σ <b>38 nm*</b></span></div></div>
+        <p class="guide-model-note" id="guideModelNote">* พารามิเตอร์ตัวอย่างเพื่ออธิบาย Gaussian เท่านั้น</p>
+        <div class="guide-progress-label"><span>ความคืบหน้าบทเรียน</span><span id="guideProgressText">0 / 5</span></div>
+        <progress id="guideProgress" max="5" value="0" aria-label="ความคืบหน้าการสาธิต"></progress>
+        <div class="guide-step-list" role="group" aria-label="เลือกขั้นตอนการสาธิต">
+          <button type="button" data-guide-step="1" aria-label="ไปขั้นตอน 1 เชื่อมต่อเซนเซอร์" aria-current="step">01</button><button type="button" data-guide-step="2" aria-label="ไปขั้นตอน 2 เลือกฐานข้อมูล">02</button><button type="button" data-guide-step="3" aria-label="ไปขั้นตอน 3 วัดค่า RGB">03</button><button type="button" data-guide-step="4" aria-label="ไปขั้นตอน 4 วิเคราะห์ข้อมูล">04</button><button type="button" data-guide-step="5" aria-label="ไปขั้นตอน 5 สร้างสเปกตรัม">05</button>
+        </div>
+        <p class="guide-complete" id="guideComplete" hidden>ครบทั้ง 5 ขั้นตอนแล้ว คุณพร้อมเริ่มต้นกับการทดลองจริง</p>
+        <button type="button" class="guide-try" id="guideTry">Try Experiment <span aria-hidden="true">↗</span></button>
+        <p class="guide-safety-note">การสาธิตนี้แยกจาก Sensor Connection และระบบวิเคราะห์จริงโดยสมบูรณ์</p>
+      </div>
+    </div>
+  </section>
   <div class="card sensor-card" id="sensorCard" data-link="disconnected">
     <div class="signal-panel" aria-hidden="true"><span class="radio-icon"><svg viewBox="0 0 24 24"><path d="m6 6 12 12-6 4V2l6 4L6 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="signal-track"><i></i></span><span class="signal-terminal"></span></div>
     <div class="card-head"><div><h2>Sensor Connection</h2><p class="muted">ESP32-C3 Super Mini · TCS34725</p></div><span id="connection" class="status" role="status">Disconnected</span></div>

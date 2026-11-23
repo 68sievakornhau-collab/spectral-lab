@@ -75,3 +75,58 @@
   .analysis-scientist{width:48px;height:64px}
 }
 @media(prefers-reduced-motion:reduce){.analysis-scientist [data-pose=analyzing] .character-rig{animation:none}}
+
+/* Scene-wide routes keep decorative motion inside the illustration. */
+.hero-figure{overflow:hidden;isolation:isolate}
+.hero-scientist[data-pose=walking] .character-rig{animation:scientist-route 22s linear infinite}
+.hero-scientist[data-pose=walking] .character-turn{animation:scientist-facing 22s linear infinite}
+@keyframes scientist-route{
+  0%{transform:translate(-180px,18px)}
+  13%{transform:translate(-55px,8px)}
+  27%{transform:translate(140px,-6px)}
+  36%{transform:translate(360px,9px)}
+  43%{transform:translate(360px,9px)}
+  59%{transform:translate(200px,-3px)}
+  72%{transform:translate(-85px,8px)}
+  83%{transform:translate(-85px,8px)}
+  100%{transform:translate(-180px,18px)}
+}
+@keyframes scientist-facing{
+  0%,37%{transform:scaleX(1)}
+  39%,88%{transform:scaleX(-1)}
+  90%,100%{transform:scaleX(1)}
+}
+.reagent-bottles .reagent{animation:reagent-crossing 17s ease-in-out infinite}
+.reagent-bottles .reagent-alt{animation:reagent-arc 21s ease-in-out infinite}
+@keyframes reagent-crossing{
+  0%{transform:translate(-165px,72px) rotate(-12deg);opacity:0}
+  10%{opacity:1}
+  48%{transform:translate(255px,-40px) rotate(14deg);opacity:1}
+  62%{transform:translate(348px,-10px) rotate(3deg);opacity:0}
+  100%{transform:translate(348px,-10px);opacity:0}
+}
+@keyframes reagent-arc{
+  0%{transform:translate(205px,155px) rotate(5deg);opacity:0}
+  12%{opacity:.85}
+  53%{transform:translate(-62px,8px) rotate(-18deg);opacity:.85}
+  68%,100%{transform:translate(-184px,-24px) rotate(-4deg);opacity:0}
+}
+.molecular-field .orbit-near{animation:molecule-route-one 26s ease-in-out infinite alternate}
+.molecular-field .orbit-far{animation:molecule-route-two 32s ease-in-out infinite alternate}
+.molecular-field .orbit-mid{animation:molecule-route-three 29s ease-in-out infinite alternate}
+@keyframes molecule-route-one{0%{transform:translate(-3vw,8vh) rotate(-24deg)}50%{transform:translate(15vw,-5vh) rotate(27deg)}100%{transform:translate(2vw,11vh) rotate(77deg)}}
+@keyframes molecule-route-two{0%{transform:translate(5vw,-4vh) rotate(18deg)}50%{transform:translate(-13vw,9vh) rotate(-30deg)}100%{transform:translate(9vw,2vh) rotate(39deg)}}
+@keyframes molecule-route-three{0%{transform:translate(-8vw,-5vh) rotate(7deg)}55%{transform:translate(11vw,7vh) rotate(34deg)}100%{transform:translate(2vw,-8vh) rotate(-19deg)}}
+.field-dust circle{animation:particle-transit 12s ease-in-out infinite alternate}
+.field-dust circle:nth-child(2n){animation-duration:17s;animation-delay:-7s}
+.field-dust circle:nth-child(3n){animation-duration:21s;animation-delay:-11s}
+@keyframes particle-transit{0%{transform:translate(-5vw,7vh);opacity:.2}50%{transform:translate(4vw,-8vh);opacity:.85}100%{transform:translate(12vw,5vh);opacity:.25}}
+@media(max-width:720px){
+  .hero-scientist[data-pose=walking] .character-rig{animation-duration:18s}
+  .reagent-bottles .reagent-alt{animation:reagent-arc 24s ease-in-out infinite}
+  .molecular-field .orbit{animation-duration:36s}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-scientist[data-pose=walking] .character-rig,.hero-scientist[data-pose=walking] .character-turn,
+  .reagent-bottles .reagent,.molecular-field .orbit,.field-dust circle{animation:none!important}
+}
