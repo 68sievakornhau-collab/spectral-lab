@@ -88,7 +88,7 @@ if (guide) {
     $('guideModelNote').style.display = index === 3 ? 'block' : 'none';
     const walker = $('guideWalker');
     const facingLeft = index === 4;
-    walker.setAttribute('transform',`translate(${step.position} 145) scale(.66)`);
+    walker.setAttribute('transform',`translate(${step.position} 145) scale(.78)`);
     $('guideWalker').querySelector('.guide-facing').style.transform = facingLeft ? 'scaleX(-1)' : '';
     guide.dataset.pose = walk && started && !motionIsReduced() ? 'walking' : step.pose;
     const currentToken = ++token;

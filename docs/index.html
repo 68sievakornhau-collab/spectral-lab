@@ -32,7 +32,7 @@
 </div>
 <svg class="character-defs" width="0" height="0" aria-hidden="true" focusable="false">
  <defs>
-  <linearGradient id="coat-shading" x2="1" y2=".75"><stop stop-color="#f7fcff"/><stop offset=".52" stop-color="#e1edf7"/><stop offset="1" stop-color="#94bad5"/></linearGradient>
+  <linearGradient id="coat-shading" x2="1" y2=".75"><stop stop-color="#ffffff"/><stop offset=".52" stop-color="#f5f9fc"/><stop offset="1" stop-color="#ccdae5"/></linearGradient>
   <linearGradient id="face-shading" x2="1" y2="1"><stop stop-color="#ffd2ac"/><stop offset="1" stop-color="#cb887b"/></linearGradient>
   <g id="scientist-leg"><path d="M60 145h25l-5 53-4 24H59l2-28Z" fill="#1e3d63" stroke="#142945" stroke-width="2"/><path d="M59 217h17l12 9q2 5-5 5H58q-5-1-4-6Z" fill="#c1e2f4" stroke="#597c9c" stroke-width="1.4"/><path d="M56 229h28" stroke="#6daac8" stroke-width="2"/></g>
   <g id="scientist-sleeve"><path d="m61 89-11 4q-6 5-8 14l-5 45 12 4 16-47Z" fill="#c0d9eb" stroke="#769fbb" stroke-width="1.5"/><path d="m38 148-3 12q1 8 8 6l7-11Z" fill="#dca58f"/></g>
@@ -41,7 +41,8 @@
    <path d="M71 81 55 90q-8 5-8 18l1 66q13 11 31 3l7-7 6 7q18 5 31-5l-3-64q-1-15-14-21l-13-6-9 7Z" fill="url(#coat-shading)" stroke="#9dc3dc" stroke-width="1.6"/>
    <path d="m73 84 10 7 10-8-7 40Z" fill="#24698d"/>
    <path d="m72 82-10 12 9 7-4 8 17 23-5-42m14-8 10 12-8 7 3 8-14 23 6-40m-6 42v35M55 141h15v13H55m44-13h15v13H99" fill="none" stroke="#80a7c3" stroke-width="1.5"/>
-   <rect x="97" y="114" width="13" height="8" rx="2" fill="#6799b0"/><path d="M100 118h7" stroke="#e1f8ff"/><circle cx="88" cy="140" r="1.5" fill="#36597d"/>
+   <image class="scientist-crest" href="assets/spectral-lab-crest.webp" x="53" y="109" width="30" height="41.74" preserveAspectRatio="xMidYMid meet"/>
+   <circle cx="88" cy="140" r="1.5" fill="#36597d"/>
   </g>
   <g id="scientist-face">
    <path d="M59 40q-7-10 1-22 6-8 18-6 13-8 25 1 10 5 11 23l-6 19-47-1Z" fill="#182d4c" stroke="#386488" stroke-width="1.5"/>
@@ -232,7 +233,7 @@
             <path d="M240 241C325 152 441 292 545 215S690 158 719 181" fill="none" stroke="#55b9dd" stroke-opacity=".14" stroke-width="2" stroke-dasharray="5 8"/>
             <g class="guide-orbit orbit-a" fill="#74e8f2"><circle cx="0" cy="0" r="4"/><circle cx="22" cy="-9" r="3"/><circle cx="41" cy="4" r="3.5"/><path d="M4-2 20-8m4 1 15 8" stroke="#8aebfa" stroke-opacity=".7"/></g>
             <g class="guide-orbit orbit-b" fill="#b699ff"><circle cx="0" cy="0" r="3"/><circle cx="20" cy="9" r="4"/><path d="m3 1 14 7" stroke="#c9b9ff" stroke-opacity=".7"/></g>
-            <g id="guideWalker" class="guide-walker" transform="translate(25 145) scale(.66)">
+            <g id="guideWalker" class="guide-walker" transform="translate(25 145) scale(.78)">
               <ellipse class="guide-shadow" cx="80" cy="235" rx="42" ry="8" fill="#010813" opacity=".7"/>
               <g class="guide-body"><g class="guide-facing">
                 <use class="guide-leg leg-one" href="#scientist-leg"/><g transform="translate(22 0)"><use class="guide-leg leg-two" href="#scientist-leg"/></g>
@@ -264,8 +265,8 @@
         <p class="guide-readout-note" id="guideReadoutNote">* ตัวเลขที่เคลื่อนไหวเป็นภาพสาธิตเท่านั้น ไม่ได้อ่านจากเซนเซอร์และไม่ถูกบันทึก</p>
         <div class="guide-gaussian" id="guideGaussian"><div class="guide-equation">A(λ) = H · exp[−(λ−μ)² / 2σ²]</div><div class="guide-parameters"><span>H <b>0.82*</b></span><span>μ <b>542 nm*</b></span><span>σ <b>38 nm*</b></span></div></div>
         <p class="guide-model-note" id="guideModelNote">* พารามิเตอร์ตัวอย่างเพื่ออธิบาย Gaussian เท่านั้น</p>
-        <div class="guide-progress-label"><span>ความคืบหน้าบทเรียน</span><span id="guideProgressText">0 / 5</span></div>
-        <progress id="guideProgress" max="5" value="0" aria-label="ความคืบหน้าการสาธิต"></progress>
+        <div class="guide-progress-label"><span>ความคืบหน้าบทเรียน</span><span id="guideProgressText">1 / 5</span></div>
+        <progress id="guideProgress" max="5" value="1" aria-label="ความคืบหน้าการสาธิต"></progress>
         <div class="guide-step-list" role="group" aria-label="เลือกขั้นตอนการสาธิต">
           <button type="button" data-guide-step="1" aria-label="ไปขั้นตอน 1 เชื่อมต่อเซนเซอร์" aria-current="step">01</button><button type="button" data-guide-step="2" aria-label="ไปขั้นตอน 2 เลือกฐานข้อมูล">02</button><button type="button" data-guide-step="3" aria-label="ไปขั้นตอน 3 วัดค่า RGB">03</button><button type="button" data-guide-step="4" aria-label="ไปขั้นตอน 4 วิเคราะห์ข้อมูล">04</button><button type="button" data-guide-step="5" aria-label="ไปขั้นตอน 5 สร้างสเปกตรัม">05</button>
         </div>
