@@ -1,0 +1,77 @@
+:root {
+  --lab-ink:#061426;
+  --lab-violet:#a78bfa;
+  --gesture:.42s cubic-bezier(.21,.74,.27,1);
+  --patrol:16s;
+  --patrol-distance:125px;
+}
+.character-defs{position:absolute;overflow:hidden;pointer-events:none}
+.hero-figure{isolation:isolate}
+.lab-art{overflow:hidden}
+.lab-room{filter:drop-shadow(0 8px 16px #030e2066)}
+.lab-bench{filter:drop-shadow(0 10px 10px #0208169e)}
+.instrument-wave{stroke-dasharray:30 10;animation:instrument-flow 8s linear infinite}
+@keyframes instrument-flow{to{stroke-dashoffset:-80}}
+.reagent{transform-box:fill-box;transform-origin:center;animation:reagent-float 6.8s ease-in-out infinite alternate}
+.reagent-alt{animation-delay:-3.4s;animation-duration:8.2s}
+@keyframes reagent-float{from{transform:translate(-4px,-5px) rotate(-4deg)}to{transform:translate(8px,4px) rotate(5deg)}}
+.lab-art .beaker{animation:beaker-roll 8s ease-in-out infinite alternate}
+.lab-art .tubes{animation:tube-sway 8s ease-in-out infinite alternate;transform-origin:50% 90%}
+@keyframes beaker-roll{from{transform:translateY(-5px) rotate(-3deg)}to{transform:translateY(5px) rotate(4deg)}}
+@keyframes tube-sway{from{transform:translateY(-4px) rotate(-2deg)}to{transform:translateY(3px) rotate(3deg)}}
+.lab-art .pipette-drop{animation-name:curved-drop}
+@keyframes curved-drop{0%,56%{opacity:0;transform:translate(0,0)}63%{opacity:.85}80%{opacity:.7;transform:translate(5px,22px)}97%,100%{opacity:0;transform:translate(-6px,45px)}}
+.molecular-field{transform:translate3d(var(--field-x,0px),calc(var(--field-y,0px) + var(--field-scroll,0px)),0)}
+.scientist{pointer-events:none}
+.character-turn{transform-origin:82px 120px}
+.character-bob,.character-head,.character-turn,.arm,.character-tablet{transition:transform var(--gesture)}
+.character-head{transform-origin:85px 72px}
+.character-shadow{transform-origin:80px 234px}
+.character-eyes{transform-box:fill-box;transform-origin:center;animation:blink 5.8s linear infinite}
+.arm-left{transform-origin:57px 94px}.arm-right{transform-origin:109px 96px}
+.leg{transform-origin:70px 154px}
+.character-tablet{opacity:0}
+@keyframes blink{0%,45%,49%,100%{transform:scaleY(1)}47%{transform:scaleY(.08)}}
+.hero-scientist[data-pose=walking] .character-rig{animation:patrol var(--patrol) linear infinite}
+.hero-scientist[data-pose=walking] .character-turn{animation:turn-around var(--patrol) ease-in-out infinite}
+.hero-scientist[data-pose=walking] .character-bob{animation:body-step var(--patrol) ease-in-out infinite}
+.hero-scientist[data-pose=walking] .leg-left,.hero-scientist[data-pose=walking] .arm-right{animation:stride var(--patrol) ease-in-out infinite}
+.hero-scientist[data-pose=walking] .leg-right,.hero-scientist[data-pose=walking] .arm-left{--stride-angle:-12deg;animation:stride var(--patrol) ease-in-out infinite}
+.hero-scientist[data-pose=walking] .character-shadow{animation:shadow-step var(--patrol) ease-in-out infinite}
+@keyframes patrol{0%,8%,96%,100%{transform:translateX(0)}36%,65%{transform:translateX(var(--patrol-distance))}}
+@keyframes turn-around{0%,56%{transform:scaleX(1)}60%,96%{transform:scaleX(-1)}100%{transform:scaleX(1)}}
+@keyframes stride{
+  0%,8%,36%,65%,96%,100%{transform:rotate(0)}
+  10%,17%,24%,31%,67%,74%,81%,88%{transform:rotate(var(--stride-angle,12deg))}
+  13.5%,20.5%,27.5%,34.5%,70.5%,77.5%,84.5%,91.5%{transform:rotate(calc(-1 * var(--stride-angle,12deg)))}
+}
+@keyframes body-step{
+  0%,8%,36%,65%,96%,100%{transform:translateY(0)}
+  10%,13.5%,17%,20.5%,24%,27.5%,31%,34.5%,67%,70.5%,74%,77.5%,81%,84.5%,88%,91.5%{transform:translateY(-3px)}
+  12%,15%,19%,22%,26%,29%,33%,69%,72%,76%,79%,83%,86%,90%{transform:translateY(0)}
+}
+@keyframes shadow-step{0%,8%,36%,65%,96%,100%{transform:scaleX(1);opacity:.65}20%,82%{transform:scaleX(.89);opacity:.48}}
+.scientist[data-pose=idle] .character-head{animation:look-around 5s ease-in-out infinite alternate}
+@keyframes look-around{from{transform:rotate(-3deg)}to{transform:rotate(6deg)}}
+.scientist[data-pose=inspecting] .character-head{transform:rotate(12deg)}
+.scientist[data-pose=reading] .character-head,.scientist[data-pose=analyzing] .character-head{transform:rotate(8deg) translateY(3px)}
+.scientist[data-pose=reading] .character-tablet,.scientist[data-pose=analyzing] .character-tablet,.scientist[data-pose=inspecting] .character-tablet{opacity:1}
+.scientist[data-pose=reading] .arm-right,.scientist[data-pose=analyzing] .arm-right{transform:rotate(19deg)}
+.scientist[data-pose=acknowledged] .character-head{animation:acknowledge .6s ease-out}
+@keyframes acknowledge{45%{transform:translateY(5px) rotate(8deg)}}
+.scientist[data-pose=completed] .arm-right{transform:rotate(116deg)}
+.scientist[data-pose=completed] .character-head{transform:rotate(-8deg)}
+.spectrum-head{flex-wrap:nowrap}
+.spectrum-head>div{min-width:0}
+.analysis-scientist{display:block;flex:none;width:64px;height:84px;overflow:visible}
+.analysis-scientist .character-rig{transform:translateX(7px)}
+.analysis-scientist [data-pose=analyzing] .character-rig{animation:approach var(--gesture) both}
+@keyframes approach{from{transform:translateX(17px)}to{transform:translateX(7px)}}
+@media(max-width:930px){:root{--patrol-distance:90px}}
+@media(max-width:720px){
+  :root{--patrol-distance:76px}
+  .lab-art .reagent-alt{animation:none}
+  .lab-room{filter:none}
+  .analysis-scientist{width:48px;height:64px}
+}
+@media(prefers-reduced-motion:reduce){.analysis-scientist [data-pose=analyzing] .character-rig{animation:none}}

@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="วิเคราะห์ Raw RGB จากเซนเซอร์ BLE และสร้างสเปกตรัมการดูดกลืนด้วยโมเดล Gaussian">
+<meta name="theme-color" content="#081629">
+<title>Spectral Lab</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="motion.css">
+<link rel="stylesheet" href="science-world.css">
+<script type="module" src="app.mjs"></script>
+</head>
+<body>
+<div class="atmosphere" aria-hidden="true">
+ <div class="molecular-field">
+  <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+   <defs><g id="background-molecule" fill="#142f4e" stroke="currentColor" stroke-width="1.4">
+    <path d="m0 26 37-23 41 21 0 46-38 24L0 72Z M78 24l38-18m-76 88 17 30M0 26l-30-13" fill="none"/>
+    <circle cy="26" r="5"/><circle cx="37" cy="3" r="6"/><circle cx="78" cy="24" r="4"/><circle cx="78" cy="70" r="7"/><circle cx="40" cy="94" r="6"/><circle cy="72" r="4"/><circle cx="116" cy="6" r="4"/><circle cx="57" cy="124" r="4"/><circle cx="-30" cy="13" r="3"/>
+   </g></defs>
+   <g transform="translate(62 254)"><use class="orbit orbit-near" href="#background-molecule"/></g>
+   <g transform="translate(1050 495) scale(1.32)"><use class="orbit orbit-far" href="#background-molecule"/></g>
+   <g transform="translate(760 100) scale(.78)"><use class="orbit orbit-mid" href="#background-molecule"/></g>
+   <g transform="translate(278 641) scale(.62)"><use class="orbit orbit-mid" href="#background-molecule"/></g>
+   <g class="field-dust" fill="#81d7f6"><circle cx="99" cy="133" r="2"/><circle cx="358" cy="160" r="2"/><circle cx="450" cy="470" r="1.5"/><circle cx="545" cy="261" r="2"/><circle cx="988" cy="177" r="3"/><circle cx="934" cy="660" r="2"/><circle cx="1159" cy="402" r="2"/></g>
+  </svg>
+ </div>
+ <div class="field-scan"></div>
+</div>
+<svg class="character-defs" width="0" height="0" aria-hidden="true" focusable="false">
+ <defs>
+  <linearGradient id="coat-shading" x2="1" y2=".75"><stop stop-color="#f7fcff"/><stop offset=".52" stop-color="#e1edf7"/><stop offset="1" stop-color="#94bad5"/></linearGradient>
+  <linearGradient id="face-shading" x2="1" y2="1"><stop stop-color="#ffd2ac"/><stop offset="1" stop-color="#cb887b"/></linearGradient>
+  <g id="scientist-leg"><path d="M60 145h25l-5 53-4 24H59l2-28Z" fill="#1e3d63" stroke="#142945" stroke-width="2"/><path d="M59 217h17l12 9q2 5-5 5H58q-5-1-4-6Z" fill="#c1e2f4" stroke="#597c9c" stroke-width="1.4"/><path d="M56 229h28" stroke="#6daac8" stroke-width="2"/></g>
+  <g id="scientist-sleeve"><path d="m61 89-11 4q-6 5-8 14l-5 45 12 4 16-47Z" fill="#c0d9eb" stroke="#769fbb" stroke-width="1.5"/><path d="m38 148-3 12q1 8 8 6l7-11Z" fill="#dca58f"/></g>
+  <g id="scientist-coat">
+   <path d="M74 71h21v18H74z" fill="#c78b7b"/>
+   <path d="M71 81 55 90q-8 5-8 18l1 66q13 11 31 3l7-7 6 7q18 5 31-5l-3-64q-1-15-14-21l-13-6-9 7Z" fill="url(#coat-shading)" stroke="#9dc3dc" stroke-width="1.6"/>
+   <path d="m73 84 10 7 10-8-7 40Z" fill="#24698d"/>
+   <path d="m72 82-10 12 9 7-4 8 17 23-5-42m14-8 10 12-8 7 3 8-14 23 6-40m-6 42v35M55 141h15v13H55m44-13h15v13H99" fill="none" stroke="#80a7c3" stroke-width="1.5"/>
+   <rect x="97" y="114" width="13" height="8" rx="2" fill="#6799b0"/><path d="M100 118h7" stroke="#e1f8ff"/><circle cx="88" cy="140" r="1.5" fill="#36597d"/>
+  </g>
+  <g id="scientist-face">
+   <path d="M59 40q-7-10 1-22 6-8 18-6 13-8 25 1 10 5 11 23l-6 19-47-1Z" fill="#182d4c" stroke="#386488" stroke-width="1.5"/>
+   <path d="M62 39q-6-4-9 2-3 8 8 12m45-13q9-5 9 4-1 7-9 10" fill="#dd9e88"/>
+   <path d="M62 34q6 1 13-10 11 11 30 10l2 18q-3 21-21 24-19-2-24-20Z" fill="url(#face-shading)"/>
+   <path d="M64 27q11-4 13-13m4 13q10 3 18 2" stroke="#50729a" stroke-width="2" fill="none" stroke-linecap="round"/>
+   <path d="M61 39h19q3 0 3 4v6q-2 8-10 8h-5q-7-1-8-9Zm28 0h19l1 9q0 8-8 9h-5q-7-1-8-8v-6q0-4 1-4Z" fill="#93ecfa" fill-opacity=".39" stroke="#e5faff" stroke-width="2"/>
+   <path d="m85 48-2 8 3 1m-7 7q6 4 12-1" fill="none" stroke="#9b625d" stroke-width="1.4" stroke-linecap="round"/>
+  </g>
+ </defs>
+</svg>
+<header class="site-header"><div class="shell masthead">
+  <a class="brand" href="#sensor"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 24h26M5 22c7 0 7-15 12-15s5 15 10 15M6 22c8 0 10-8 14-8s5 8 8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><strong>SPECTRAL LAB</strong></a>
+  <nav aria-label="หน้าหลัก"><a id="connectionLink" href="#sensor" aria-current="page">Sensor Connection</a><a id="analysisLink" href="#analysis" hidden>RGB &amp; Spectrum</a></nav>
+  <button type="button" class="secondary motion-toggle" id="reduceMotion" aria-pressed="false">Reduce Motion</button>
+</div></header>
+<main class="shell">
+<section id="sensor" aria-labelledby="heroTitle">
+  <div class="hero">
+    <div class="hero-copy">
+      <h1 id="heroTitle" tabindex="-1">SPECTRAL<br><span>LAB</span></h1>
+      <p class="hero-subtitle">RGB-Based Absorption<br class="desktop-break"> Spectrum Reconstruction</p>
+      <p class="hero-tagline">Transforming Color Measurements into Scientific Spectra</p>
+    </div>
+    <figure class="hero-figure"><svg class="lab-art" viewBox="0 0 670 470" aria-hidden="true" focusable="false">
+<defs>
+ <linearGradient id="glass" x2="1" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#8af6ff" stop-opacity=".25"/><stop offset=".28" stop-color="#4d97bc" stop-opacity=".06"/><stop offset=".65" stop-color="#83d3ee" stop-opacity=".14"/><stop offset="1" stop-color="#7befff" stop-opacity=".29"/></linearGradient>
+ <linearGradient id="edge" x2="1" y2="1"><stop stop-color="#b1f6ff"/><stop offset=".49" stop-color="#4985a8"/><stop offset="1" stop-color="#8ef6ff"/></linearGradient>
+ <linearGradient id="solution" x2="0" y2="1"><stop stop-color="#50f4e7" stop-opacity=".8"/><stop offset="1" stop-color="#078691" stop-opacity=".7"/></linearGradient>
+ <linearGradient id="beakerFluid" x2="0" y2="1"><stop stop-color="#419aff" stop-opacity=".7"/><stop offset="1" stop-color="#174c9a" stop-opacity=".6"/></linearGradient>
+ <radialGradient id="halo"><stop stop-color="#1a9fac" stop-opacity=".27"/><stop offset="1" stop-color="#1a9fac" stop-opacity="0"/></radialGradient>
+ <clipPath id="flaskMask"><path d="M303 120H372V209L467 370Q478 397 449 402H230Q199 398 211 371L303 209Z"/></clipPath>
+ <clipPath id="beakerMask"><path d="M84 256H210L197 277V384Q197 400 178 402H106Q87 402 87 386V272Z"/></clipPath>
+ <clipPath id="tubeMask"><path d="M0 0H32V141a16 16 0 0 1-32 0Z"/></clipPath>
+ <g id="tubeGlass"><path d="M0 0H32V141a16 16 0 0 1-32 0Z" fill="url(#glass)" stroke="url(#edge)" stroke-width="1.6"/><ellipse cx="16" rx="17" ry="4" fill="#112640" stroke="#9cdbed"/><path d="M6 13v114m20-106v78" stroke="#c2f6ff" stroke-opacity=".37" stroke-linecap="round"/></g>
+</defs>
+<ellipse cx="350" cy="260" rx="310" ry="207" fill="url(#halo)"/>
+<g class="lab-room">
+ <path d="M77 300V81L139 35h424l60 49v216" fill="#102740" fill-opacity=".53" stroke="#3e7091" stroke-width="1.4"/>
+ <path d="M77 81h546M139 35l16 46m408-46-16 46M88 188h142m-142 49h132m254-48h139m-132 50h131" fill="none" stroke="#51819f" stroke-opacity=".55" stroke-width="2"/>
+ <path d="M151 41h400" stroke="#51d9f7" stroke-opacity=".63" stroke-width="2"/>
+ <g class="lab-instrument" transform="translate(266 57)">
+  <rect width="221" height="124" rx="12" fill="#081e34" stroke="#4c94b4" stroke-width="2"/>
+  <rect x="11" y="12" width="199" height="98" rx="7" fill="#113551"/>
+  <path d="M25 30h170M25 50h170M25 70h170M25 90h170M40 22v77m38-77v77m38-77v77m38-77v77m38-77v77" stroke="#5585a2" stroke-opacity=".38"/>
+  <path class="instrument-wave" d="M22 87c24 0 27-42 52-42 23 0 29 34 48 34s24-47 44-47 18 35 36 35" fill="none" stroke="#69e9f5" stroke-width="2"/>
+ </g>
+</g>
+<g class="lab-bench"><path d="M109 377h444l71 34H42Z" fill="#23435d" stroke="#5083a2"/><path d="M42 411h582v18H42Z" fill="#102942" stroke="#416980"/><path d="M62 430v35h20v-35m499 0v35h20v-35" fill="#102942" stroke="#365c78"/><path d="M64 416h535" stroke="#59e4f7" stroke-opacity=".55"/></g>
+<g class="reagent-bottles" transform="translate(110 143)">
+ <g class="reagent"><path d="M7 7h24v12l6 7v26H1V26l6-7Z" fill="#205c66" stroke="#6cc2cd"/><rect x="5" width="28" height="9" rx="2" fill="#4d8da6"/><path d="M6 33h25v10H6Z" fill="#a0d3dc" opacity=".53"/></g>
+ <g transform="translate(54 -17)"><g class="reagent reagent-alt"><path d="M8 8h21v13l7 7v41H1V28l7-7Z" fill="#463767" stroke="#a398de"/><rect x="5" width="27" height="9" rx="2" fill="#8f8dc0"/><path d="M5 43h26v11H5Z" fill="#c1b7ef" opacity=".55"/></g></g>
+</g>
+<g fill="none" stroke="#5797b8" stroke-opacity=".25">
+ <ellipse cx="343" cy="404" rx="271" ry="26"/><ellipse cx="343" cy="404" rx="208" ry="16"/><path d="M35 405H641M340 381v47" stroke-dasharray="5 7"/>
+</g>
+<g class="molecule" fill="#0d2943" stroke="#63cce8" stroke-width="1.5" opacity=".66">
+ <path d="M143 109l38-26 42 22 3 48-38 26-42-21Z M223 105l44-17m-81 91-6 29M143 109l-35-23"/>
+ <circle cx="143" cy="109" r="5"/><circle cx="181" cy="83" r="7"/><circle cx="223" cy="105" r="5"/><circle cx="226" cy="153" r="4"/><circle cx="188" cy="179" r="6"/><circle cx="146" cy="158" r="4"/><circle cx="267" cy="88" r="4"/><circle cx="108" cy="86" r="3"/>
+</g>
+<g class="molecule molecule-alt" fill="#102744" stroke="#57a5cd" stroke-width="1.5" opacity=".62">
+ <path d="M490 101l40-30 41 25 2 43-40 29-43-25Z M571 96l37-17m-75 89 6 36"/>
+ <circle cx="490" cy="101" r="5"/><circle cx="530" cy="71" r="6"/><circle cx="571" cy="96" r="5"/><circle cx="573" cy="139" r="4"/><circle cx="533" cy="168" r="6"/><circle cx="490" cy="143" r="4"/><circle cx="608" cy="79" r="4"/>
+</g>
+<g fill="none" opacity=".4"><path class="spectral-trace" d="M24 318c51 0 65-43 110-43s61 48 111 44 61-110 123-107 74 102 127 99 73-45 146-45" stroke="#54e5fb" stroke-width="2"/><path d="M24 326c51 0 65-29 110-29s61 35 111 30 61-78 123-76 74 78 127 75 73-49 146-49" stroke="#4785fa"/></g>
+<g transform="translate(412 113) rotate(28)">
+ <g class="pipette">
+  <path d="M0 0h13v76l-4 15v42H5V91L0 76Z" fill="url(#glass)" stroke="url(#edge)" stroke-width="1.5"/>
+  <rect x="1" y="-21" width="11" height="26" rx="5" fill="#426d91" stroke="#9bdef0"/>
+  <path d="M4 35h5m-5 8h5m-5 8h5m-5 8h5M7 92v37" stroke="#8af4fa" stroke-opacity=".72"/>
+  <circle class="pipette-drop" cx="7" cy="139" r="2.6" fill="#84eff8"/>
+ </g>
+</g>
+<g class="vessel beaker">
+ <path d="M84 256H210L197 277V384Q197 400 178 402H106Q87 402 87 386V272Z" fill="url(#glass)" stroke="url(#edge)" stroke-width="2"/>
+ <g clip-path="url(#beakerMask)"><path class="liquid" d="M64 312q32-13 63 0t85 0v104H64Z" fill="url(#beakerFluid)" stroke="#7bd1ff" stroke-width="1.5"/><path d="M99 271v112m10-107v67" stroke="#badfff" stroke-opacity=".4" stroke-linecap="round"/><path d="M177 284h14m-9 14h9m-14 14h14m-9 14h9m-14 14h14m-9 14h9m-14 14h14" stroke="#a4d5f1" stroke-opacity=".7"/></g>
+ <ellipse cx="147" cy="256" rx="64" ry="9" fill="#12334f" fill-opacity=".7" stroke="#a1ddf4"/>
+</g>
+<g class="vessel flask">
+ <path d="M303 120H372V209L467 370Q478 397 449 402H230Q199 398 211 371L303 209Z" fill="url(#glass)" stroke="url(#edge)" stroke-width="2.5"/>
+ <g clip-path="url(#flaskMask)">
+  <path class="liquid" d="M203 318c51-14 93 13 146 1s93-14 141-1v105H203Z" fill="url(#solution)" stroke="#6affea" stroke-width="2"/>
+  <path d="M314 139v73l-83 151q-12 20 1 25M362 139v72l76 133" fill="none" stroke="#d2ffff" stroke-opacity=".38" stroke-width="4" stroke-linecap="round"/>
+  <path d="M388 281h21m-13 15h22m-14 15h21m-11 15h19m-11 15h19" stroke="#b6effb" stroke-opacity=".5"/>
+  <path class="glass-sweep" d="M225 382l69-90m-44 97 71-92" stroke="#d0fff9" stroke-opacity=".48" stroke-width="6" stroke-linecap="round"/>
+  <g class="solution-dust" fill="#b6fff3"><circle cx="253" cy="381" r="2"/><circle cx="294" cy="345" r="2"/><circle cx="344" cy="376" r="2"/><circle cx="389" cy="341" r="2"/><circle cx="429" cy="373" r="2"/></g>
+  <g fill="none" stroke="#b2fff3" opacity=".72"><circle class="bubble" cx="272" cy="365" r="5"/><circle class="bubble bubble-late" cx="320" cy="379" r="8"/><circle class="bubble" cx="369" cy="356" r="4"/><circle class="bubble bubble-late" cx="402" cy="380" r="6"/></g>
+ </g>
+ <rect x="293" y="113" width="89" height="16" rx="7" fill="#1c4760" stroke="#a4eafa" stroke-width="1.6"/><ellipse cx="337" cy="114" rx="42" ry="5" fill="#112c47" stroke="#b6f4ff"/>
+</g>
+<g class="vessel tubes"><path d="M468 324h147m-136 3v66m123-66v66m-132 4h148" fill="none" stroke="#6489a6" stroke-width="5" stroke-linecap="round"/>
+ <g transform="translate(478 236)"><use href="#tubeGlass"/><g clip-path="url(#tubeMask)"><path class="tube-liquid" d="M-2 78q17-7 36 0v85H-2Z" fill="#39e3cf" fill-opacity=".58"/><circle class="bubble" cx="13" cy="113" r="3" fill="#b8fff6"/></g></g>
+ <g transform="translate(527 219)"><use href="#tubeGlass"/><g clip-path="url(#tubeMask)"><path class="tube-liquid" d="M-2 83q16-8 36 0v79H-2Z" fill="#5a9eff" fill-opacity=".65"/><circle class="bubble bubble-late" cx="19" cy="116" r="3" fill="#bddaff"/></g></g>
+ <g transform="translate(575 236)"><use href="#tubeGlass"/><g clip-path="url(#tubeMask)"><path class="tube-liquid" d="M-2 70q16-7 36 0v90H-2Z" fill="#9a7cf2" fill-opacity=".67"/><circle class="bubble" cx="12" cy="113" r="3" fill="#e3d7ff"/></g></g>
+ <path d="M465 324h153" stroke="#90b9ce" stroke-width="4" stroke-linecap="round"/>
+</g>
+<g transform="translate(164 238) scale(.88)"><g class="scientist hero-scientist" id="heroScientist" data-pose="walking"><g class="character-rig">
+  <ellipse class="character-shadow" cx="80" cy="234" rx="42" ry="8" fill="#010813" opacity=".65"/>
+  <g class="character-bob">
+   <g class="character-turn">
+    <use class="leg leg-left" href="#scientist-leg"/>
+    <g transform="translate(22 0)"><use class="leg leg-right" href="#scientist-leg"/></g>
+    <use class="arm arm-left" href="#scientist-sleeve"/>
+    <use href="#scientist-coat"/>
+    <g class="character-head">
+     <use href="#scientist-face"/>
+     <g class="character-eyes" fill="#10233b"><ellipse cx="75" cy="47" rx="2.4" ry="3.1"/><ellipse cx="96" cy="47" rx="2.4" ry="3.1"/></g>
+     <path d="M61 41h47m-30 0v6m14-6v6" stroke="#83ebf8" stroke-width="1.2" fill="none" opacity=".9"/>
+    </g>
+    <g class="arm arm-right">
+     <path d="M103 91q11-2 16 9l5 30 11-10 7 9-16 19q-10 7-17-4l-12-34Z" fill="#c4ddef" stroke="#7fb0cb" stroke-width="1.4"/>
+     <path d="m133 121 8-8q4-3 7 1l-5 8 12-6q4 1 2 4l-15 11Z" fill="#e4a489" stroke="#a56b68" stroke-width="1"/>
+    </g>
+    <g class="character-tablet" transform="translate(89 128) rotate(-14)"><rect width="38" height="29" rx="4" fill="#143751" stroke="#86e2f5" stroke-width="1.5"/><path d="M7 18l6-5 5 3 7-8 6 2M7 22h24" fill="none" stroke="#6be5e7" stroke-width="1.4"/></g>
+   </g>
+  </g>
+ </g></g></g>
+<g class="particles" fill="#72efff"><circle cx="64" cy="165" r="2"/><circle cx="266" cy="233" r="2.5"/><circle cx="437" cy="107" r="2"/><circle cx="612" cy="179" r="2"/><circle cx="451" cy="191" r="3"/><circle cx="84" cy="216" r="1.5"/><circle cx="631" cy="338" r="2"/></g>
+</svg>
+      <figcaption>ภาพประกอบห้องปฏิบัติการ</figcaption>
+    </figure>
+  </div>
+  <div class="card sensor-card" id="sensorCard" data-link="disconnected">
+    <div class="signal-panel" aria-hidden="true"><span class="radio-icon"><svg viewBox="0 0 24 24"><path d="m6 6 12 12-6 4V2l6 4L6 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="signal-track"><i></i></span><span class="signal-terminal"></span></div>
+    <div class="card-head"><div><h2>Sensor Connection</h2><p class="muted">ESP32-C3 Super Mini · TCS34725</p></div><span id="connection" class="status" role="status">Disconnected</span></div>
+    <dl class="sensor-readouts"><div><dt>Sensor Name</dt><dd id="device">—</dd></div><div><dt>Data Receiving Status</dt><dd id="dataState">รอการเชื่อมต่อ</dd></div><div><dt>Sensor Configuration Status</dt><dd id="settings">Unverified</dd></div></dl>
+    <p class="muted settings-note">ค่าที่ขอจากอุปกรณ์ 4× · 300 ms · External LED ON 100% · 1 วินาทีต่อแพ็กเก็ต ส่วน Averaging 8 ใช้กับตัวอย่างสี</p>
+    <p id="sensorNotice" class="notice" role="status"></p>
+    <div class="sensor-actions">
+      <div class="actions">
+        <button id="connect"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10-5 4V3l5 4L7 17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Connect Bluetooth</button>
+        <button class="secondary" id="disconnect" disabled>Disconnect Bluetooth</button>
+      </div>
+      <button class="secondary" id="continue" disabled>Continue to Analysis</button>
+    </div>
+  </div>
+</section>
+<section id="analysis" aria-labelledby="analysisTitle" hidden>
+  <div class="card-head page-head"><h1 id="analysisTitle" tabindex="-1">RGB &amp; Spectrum Simulation</h1><span class="status" id="analysisStatus" role="status">Disconnected</span></div>
+  <div class="layout">
+    <aside>
+      <div class="card live-card" id="liveCard">
+        <h2>Live RGB Monitor</h2><p class="muted">Sensor Raw Counts</p>
+        <div class="counts"><div><span>R</span><strong id="rawR">—</strong><meter id="levelR" max="65535" value="0" aria-label="สัดส่วน Raw Red ต่อช่วง 16 บิต"></meter></div><div><span>G</span><strong id="rawG">—</strong><meter id="levelG" max="65535" value="0" aria-label="สัดส่วน Raw Green ต่อช่วง 16 บิต"></meter></div><div><span>B</span><strong id="rawB">—</strong><meter id="levelB" max="65535" value="0" aria-label="สัดส่วน Raw Blue ต่อช่วง 16 บิต"></meter></div></div>
+        <p class="muted readout-meta">Last Updated <time id="lastUpdated">—</time></p>
+        <p class="muted readout-meta" id="rawMeta">รอข้อมูลจากอุปกรณ์</p>
+      </div>
+      <div class="card">
+        <h2>Approximate Color Preview</h2>
+        <div class="preview" id="swatch" aria-hidden="true"></div>
+        <div class="preview-meta"><span id="displayRGB">Display RGB (0–255) · —</span><output id="colorHex" aria-label="HEX Color">—</output></div>
+        <p class="muted readout-meta">Color Conversion Status · ยังไม่มีการสอบเทียบสี</p>
+      </div>
+      <div class="card controls">
+        <h2>Select Simulation Database</h2>
+        <label for="database">Database Snapshot</label><select id="database" disabled></select>
+        <label for="substance">Substance</label><select id="substance" disabled></select>
+        <p class="muted readout-meta">Model Type · <span id="modelTypes">—</span></p>
+        <label for="importDb">นำเข้า JSON จากหลังบ้าน</label><input id="importDb" type="file" accept=".json,application/json">
+        <p id="databaseNote" class="notice" role="status">กำลังโหลดฐานข้อมูล…</p>
+        <button id="simulate" disabled>Simulate Spectrum</button>
+        <progress id="measurementProgress" aria-label="ความคืบหน้าการเก็บ RGB" max="3000" value="0" hidden></progress>
+        <p id="measurement" role="status"></p>
+      </div>
+    </aside>
+    <div class="analysis-main">
+      <div class="card chart-card">
+        <div class="card-head spectrum-head"><div><h2>RGB-Predicted Absorption Spectrum</h2><p class="muted">350–800 nm · 1 nm ต่อจุด</p></div>
+          <svg class="analysis-scientist" viewBox="0 0 166 240" aria-hidden="true" focusable="false"><g class="scientist" id="analysisScientist" data-pose="idle"><g class="character-rig">
+  <ellipse class="character-shadow" cx="80" cy="234" rx="42" ry="8" fill="#010813" opacity=".65"/>
+  <g class="character-bob">
+   <g class="character-turn">
+    <use class="leg leg-left" href="#scientist-leg"/>
+    <g transform="translate(22 0)"><use class="leg leg-right" href="#scientist-leg"/></g>
+    <use class="arm arm-left" href="#scientist-sleeve"/>
+    <use href="#scientist-coat"/>
+    <g class="character-head">
+     <use href="#scientist-face"/>
+     <g class="character-eyes" fill="#10233b"><ellipse cx="75" cy="47" rx="2.4" ry="3.1"/><ellipse cx="96" cy="47" rx="2.4" ry="3.1"/></g>
+     <path d="M61 41h47m-30 0v6m14-6v6" stroke="#83ebf8" stroke-width="1.2" fill="none" opacity=".9"/>
+    </g>
+    <g class="arm arm-right">
+     <path d="M103 91q11-2 16 9l5 30 11-10 7 9-16 19q-10 7-17-4l-12-34Z" fill="#c4ddef" stroke="#7fb0cb" stroke-width="1.4"/>
+     <path d="m133 121 8-8q4-3 7 1l-5 8 12-6q4 1 2 4l-15 11Z" fill="#e4a489" stroke="#a56b68" stroke-width="1"/>
+    </g>
+    <g class="character-tablet" transform="translate(89 128) rotate(-14)"><rect width="38" height="29" rx="4" fill="#143751" stroke="#86e2f5" stroke-width="1.5"/><path d="M7 18l6-5 5 3 7-8 6 2M7 22h24" fill="none" stroke="#6be5e7" stroke-width="1.4"/></g>
+   </g>
+  </g>
+ </g></g></svg>
+        </div>
+        <div id="chartEmpty">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 7v33h33M10 31l9-8 8 3 12-15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 4"/></svg>
+          <p>รอผลการวัดและการตรวจสอบโมเดล</p>
+        </div>
+        <canvas id="plot" width="1000" height="520" role="img" aria-label="กราฟ Gaussian Peak 1, Peak 2 และสเปกตรัมรวม" hidden></canvas>
+        <div id="legend" class="legend" hidden><span class="peak1">Gaussian Peak 1</span><span class="peak2">Gaussian Peak 2</span><span class="total">Total Spectrum</span><span class="baseline" id="baselineLegend">Baseline</span></div>
+        <div class="actions export-actions"><button id="png" class="secondary" disabled>Export Graph as PNG</button><button id="csv" class="secondary" disabled>Export Predicted Spectrum as CSV</button></div>
+      </div>
+      <div class="card results-card"><h2>Results Summary</h2><dl id="results"><div><dt>สถานะ</dt><dd>รอการวัด</dd></div></dl></div>
+    </div>
+  </div>
+</section>
+</main>
+</body>
+</html>

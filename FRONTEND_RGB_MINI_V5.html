@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html lang="th"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/><title>Spectral Lab · RGB Mini V5 (5-frame mean &amp; SD)</title><style>
+:root{--navy:#142c4e;--blue:#285baf;--text:#1b2e49;--muted:#60718a;--bg:#f4f7fb;--border:#dfe7f1}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--bg);font:15px/1.5 "Segoe UI",Tahoma,Arial,sans-serif;color:var(--text)}
+header{background:var(--navy);color:white;padding:18px max(20px,calc((100vw - 1200px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
+header h1{margin:0;font-size:20px;letter-spacing:.4px}header small{font-size:12px;color:#c5d5ef}
+main{max-width:1230px;margin:22px auto;padding:0 18px 36px}
+.layout{display:grid;grid-template-columns:minmax(295px,350px) minmax(0,1fr);gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:21px;box-shadow:0 4px 20px #10295108;min-width:0}
+h2{font-size:17px;margin:0 0 14px}p{margin:7px 0 11px}.minor{font-size:12px;color:var(--muted)}
+button,input,select{font:inherit}button{cursor:pointer;padding:11px 13px;border:1px solid #c9d5e6;border-radius:9px;background:white;color:var(--text);font-weight:650}button.primary{background:var(--blue);border-color:var(--blue);color:#fff}button:hover:not(:disabled){filter:brightness(.97)}button:disabled{opacity:.48;cursor:not-allowed}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:9px}.btns button{font-size:13px}
+.status{padding:10px 12px;background:#f2f6fc;border:1px solid #dce8f6;border-radius:9px;font-size:12px;color:#506783;margin:11px 0;overflow-wrap:anywhere}.status.ok{background:#eefaf4;border-color:#c0ead3;color:#176b4a}.status.warn{background:#fff9ed;border-color:#f0d8a1;color:#886011}.status.error{background:#fff0f0;border-color:#f1c6c6;color:#ad2727}
+.live-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:23px 0 11px}.live-top h2{margin:0}.badge{font-size:11px;border-radius:99px;background:#f1f5fa;color:#607089;padding:5px 9px}.badge.ok{background:#e7f7ef;color:#11734c}
+.values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.val{padding:12px 10px;border:1px solid #e3eaf2;background:#f9fbff;border-radius:11px;text-align:center;min-width:0}.val label{display:block;font-weight:800;font-size:15px}.val strong{display:block;font:700 24px/1.4 Consolas,monospace;overflow-wrap:anywhere}.val.r label{color:#d24555}.val.g label{color:#168a62}.val.b label{color:#387cd4}
+hr{border:none;border-top:1px solid var(--border);margin:18px 0}button.analyze{width:100%;margin-top:14px;padding:14px;font-size:16px}
+#waitProgress{height:7px;background:#e6eff9;border-radius:9px;overflow:hidden;margin:13px 0 5px}#waitFill{height:100%;width:0;background:var(--blue)}#countdown,#liveMeta,#sampleRGB{font-size:12px;color:var(--muted);margin-top:8px}
+.data-line{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin-bottom:13px;justify-content:space-between}.filebtn{display:inline-flex;align-items:center;justify-content:center;position:relative;font-size:12px;color:#244d86;border:1px solid #d5e1f1;padding:8px 12px;border-radius:9px;background:#f8fbff;cursor:pointer;font-weight:650}.filebtn input{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer}#dbInfo{font-size:12px;color:var(--muted)}label{font-size:12px;font-weight:650}select{border:1px solid #cfdaea;padding:8px;border-radius:8px;max-width:320px;width:100%;color:var(--text);background:#fff}#modelPicker{margin:10px 0 14px}
+.chart-title{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}#chartSub{font-size:12px;color:var(--muted)}.metrics{display:flex;gap:9px;flex-wrap:wrap;margin:13px 0}.metric{background:#f8faff;border:1px solid #e3ebf6;border-radius:10px;padding:10px 13px;flex:1;min-width:130px}.metric small{display:block;font-size:11px;color:#6d7b90}.metric strong{font-size:19px;color:#16375f}
+.chart{width:100%;height:410px;display:block;border:1px solid #e3ebf4;border-radius:10px}.empty{height:410px;display:grid;place-items:center;color:#8896aa;border:1px dashed #d4deec;border-radius:10px;text-align:center;font-size:13px;padding:20px}.legend{display:flex;gap:15px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:#62738b}.legend i{display:inline-block;width:16px;height:3px;border-radius:4px;vertical-align:middle;margin-right:5px}
+@media(max-width:860px){.layout{grid-template-columns:1fr}.chart,.empty{height:320px}}@media(max-width:440px){.values strong{font-size:19px}.btns{grid-template-columns:1fr}.card{padding:16px}}
+</style></head>
+<body><header><h1>SPECTRAL LAB</h1><small>RGB Sensor · Gaussian Spectrum</small></header>
+<main><div class="layout">
+<section class="card">
+<h2>เชื่อมต่อเซนเซอร์</h2>
+<div class="btns"><button class="primary" id="bridgeOpen" type="button">1. เปิดเว็บเซนเซอร์</button><button id="bridgeCopy" type="button">2. คัดลอก Bridge Code</button></div>
+<p class="minor">เปิดหน้า CM-34725 จากปุ่มแรก → เชื่อม BLE → ไป Chrome DevTools → Console แล้ววางโค้ดที่ตรวจสอบแล้วจากปุ่มที่สอง</p>
+<div aria-live="polite" class="status" id="bridgeStatus">ยังไม่เชื่อม Sensor Bridge</div>
+<div class="live-top"><h2>Raw RGB · Live</h2><span class="badge" id="bleBadge">● รอข้อมูล</span></div>
+<div aria-live="polite" class="values"><div class="val r"><label>R</label><strong id="liveR">—</strong></div><div class="val g"><label>G</label><strong id="liveG">—</strong></div><div class="val b"><label>B</label><strong id="liveB">—</strong></div></div>
+<div id="liveMeta">แสดงค่าดิบจากเว็บเซนเซอร์แบบสด · ค่าเฉลี่ยและ SD จะแสดงเมื่อ Analyze เสร็จ</div>
+<button class="primary analyze" disabled="" id="simulate">Analyze · รอ 5 วินาที + เฉลี่ย 5 ชุด</button>
+<div hidden="" id="waitProgress"><div id="waitFill"></div></div><div aria-live="polite" id="countdown"></div><div id="sampleRGB">ผลวิเคราะห์จะแสดง Mean ± SD จาก Raw RGB ใหม่ 5 ชุด</div>
+<div class="status" id="inputStatus">นำเข้าฐานข้อมูล JSON จากหลังบ้านก่อนวิเคราะห์</div>
+</section>
+<section class="card">
+<div class="data-line"><div><h2 style="margin:0">Gaussian Spectrum</h2><span class="minor" id="dbSource">ยังไม่มีฐานข้อมูล</span></div>
+<label class="filebtn">นำเข้าฐานข้อมูล (.json)<input accept=".json,application/json" aria-label="นำเข้าฐานข้อมูล Gaussian JSON" id="dbFile" type="file"/></label></div>
+<div class="minor" id="dbInfo">ฐานข้อมูลส่งออกจากหลังบ้าน → Export for Frontend (.json)</div>
+<div hidden="" id="modelPicker"><label for="modelSelect">เลือกสาร / โมเดล</label><select id="modelSelect"></select></div>
+<div class="chart-title"><span id="chartSub">Wavelength 350–800 nm · Two-component Gaussian</span><span class="badge" id="resultLabel">รอวิเคราะห์</span></div>
+<div class="metrics"><div class="metric"><small>Predicted λmax (nm)</small><strong id="lambda">—</strong></div><div class="metric"><small>Absorbance at λmax</small><strong id="amax">—</strong></div><div class="metric"><small>Concentration (M) · if calibrated</small><strong id="conc">—</strong></div></div>
+<div class="empty" id="empty">เชื่อมเซนเซอร์และนำเข้าฐานข้อมูล<br/>จากนั้นกด Analyze เพื่อสร้างกราฟ</div><canvas aria-label="กราฟการดูดกลืนที่ทำนายจาก RGB" class="chart" hidden="" id="chart"></canvas>
+<div class="legend"><span><i style="background:#d45766"></i>Gaussian Peak 1</span><span><i style="background:#4188d8"></i>Gaussian Peak 2</span><span><i style="background:#162c4d"></i>Total Spectrum</span></div>
+<div aria-live="polite" class="status" id="resultStatus">กราฟเป็นค่าทำนายจากฐานข้อมูล ไม่ใช่ผลวัด UV-Vis โดยตรง</div>
+</section>
+</div></main>
+<input id="r" type="hidden"/><input id="g" type="hidden"/><input id="b" type="hidden"/>
+<script>const KEY="rgb_uvvis_simulation_database_snapshots_v1";
+const IMPORT_KEY="spectral_lab_frontend_imported_snapshots_v1";
+const $=id=>document.getElementById(id);
+let bridgeReady=false;
+const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+let snapshots=[],entries=[],curve=[],lastParams=null,lastMeta=null,loadedFrom="";
+const nfmt=(n,d=5)=>Number.isFinite(n)?Number(n.toPrecision(d)).toString():"—";
+function setStatus(id,msg,type=""){$(id).textContent=msg;$(id).className="status"+(type?" "+type:"");}
+function fail(msg){setStatus("inputStatus",msg,"error");setStatus("resultStatus",msg,"error");}
+function finite(v){return typeof v==="number"&&Number.isFinite(v);}
+function isValidModel(m){return m&&typeof m==="object"&&["linear","quadratic","exponential","logarithmic","power"].includes(m.type)&&Array.isArray(m.coef)&&Array.isArray(m.means)&&Array.isArray(m.scales)&&m.coef.length===m.means.length+1&&m.coef.length===m.scales.length+1&&m.coef.every(finite)&&m.means.every(finite)&&m.scales.every(x=>finite(x)&&x!==0);}
+function validateSnapshots(list){
+ if(!Array.isArray(list)||!list.length)throw Error("ไฟล์นี้ไม่มีฐานข้อมูล Simulation ที่บันทึกไว้");
+ if(list.length>500)throw Error("มีจำนวนชุดฐานข้อมูลมากเกินไป");
+ const usable=list.filter(s=>s&&typeof s==="object"&&Array.isArray(s.substances)&&s.substances.some(g=>g&&Array.isArray(g.params)&&g.params.some(p=>p.key==="H1")));
+ if(!usable.length)throw Error("ไม่พบชุดข้อมูล H1/μ1/σ1 จากฐานข้อมูลหลังบ้าน");
+ return usable;
+}
+function parseImport(input){
+ let data=input;
+ if(typeof data==="string")data=JSON.parse(data);
+ if(Array.isArray(data))return validateSnapshots(data);
+ if(data?.format==="spectral-lab-simulation-db"&&data.schemaVersion===1)return validateSnapshots(data.snapshots);
+ if(Array.isArray(data?.simulationDatabases))return validateSnapshots(data.simulationDatabases);
+ throw Error("ชนิดไฟล์ไม่ตรงกัน กรุณาใช้ Export for Frontend (.json) ในแท็บ Data base for Simulation ของหลังบ้าน (ไม่ใช่ Project JSON หรือ CSV)");
+}
+function populate(list,source){
+ const next=validateSnapshots(list),old=$('modelSelect').value;
+ const es=[];
+ next.forEach((s,si)=>s.substances.forEach((g,gi)=>{if(g&&Array.isArray(g.params)&&g.params.length)es.push({id:`${si}:${gi}`,snapshot:s,substance:g});}));
+ if(!es.length)throw Error("ไม่พบโมเดลสำหรับคำนวณ");
+ snapshots=next;entries=es;loadedFrom=source;
+ const sel=$('modelSelect');sel.replaceChildren();
+ es.forEach((e,i)=>{const o=document.createElement('option');o.value=e.id;o.textContent=`${e.substance.compound||'Unnamed substance'} · ${e.snapshot.label||`Database ${i+1}`}`;sel.appendChild(o);});
+ if(es.some(e=>e.id===old))sel.value=old; else sel.value=es[0].id;
+ $('modelPicker').hidden=es.length===1;
+ $('dbSource').textContent=source;
+ $('dbInfo').textContent=`เชื่อมแล้ว ${next.length} ชุดฐานข้อมูล · ${es.length} โมเดลสำหรับสาร · ใช้เวอร์ชันที่บันทึกจากหลังบ้าน`;
+ $('simulate').disabled=!bridgeReady;
+ setStatus('inputStatus',`ฐานข้อมูลพร้อมแล้ว: ${es[0].substance.compound||'Unnamed substance'} · เชื่อม BLE แล้วกด Analyze`,'ok');
+ clearResult();
+}
+function readBrowserDb(){
+ try{const s=localStorage.getItem(KEY);return s?validateSnapshots(JSON.parse(s)):null;}catch(_){return null;}
+}
+function readImported(){try{const s=localStorage.getItem(IMPORT_KEY);return s?validateSnapshots(JSON.parse(s)):null;}catch(_){return null;}}
+function clearResult(){curve=[];lastParams=null;lastMeta=null;$('chart').hidden=true;$('empty').hidden=false;$('resultLabel').textContent='รอวิเคราะห์';['lambda','amax','conc'].forEach(k=>$(k).textContent='—');setStatus('resultStatus','ยังไม่มีผลทำนาย');}
+function selected(){return entries.find(e=>e.id===$('modelSelect').value)||null;}
+function features(row,type){const {R,G,B}=row;
+ if(type==='linear'||type==='exponential')return [R,G,B];
+ if(type==='quadratic')return [R,G,B,R*R,G*G,B*B];
+ if(type==='logarithmic'||type==='power')return R>0&&G>0&&B>0?[Math.log(R),Math.log(G),Math.log(B)]:null;
+ return null;
+}
+// Exact transformation stored by the backend: normalized features, full coefficients.
+function predictModel(m,row){if(!isValidModel(m))return NaN;const f=features(row,m.type);if(!f||f.length!==m.coef.length-1)return NaN;
+ const latent=m.coef[0]+f.reduce((s,x,i)=>s+m.coef[i+1]*(x-m.means[i])/m.scales[i],0);
+ const v=(m.type==='exponential'||m.type==='power')?Math.exp(latent):latent;return Number.isFinite(v)?v:NaN;
+}
+// Support historical, linear-only saved databases whose unrounded models are absent.
+function parseLegacy(p,row){const {R,G,B}=row;
+ if(p?.model){return predictModel(p.model,row);}
+ if(p?.method==='Mean'){const s=String(p.expression??'').replace(/[−–]/g,'-').trim();const parsed=Number(s);if(s&&finite(parsed))return parsed;const v=Number(p.mean);return p.mean!==null&&p.mean!==undefined&&p.mean!==''&&finite(v)?v:NaN;}
+ const expr=String(p?.expression??'').replace(/[−–]/g,'-').replace(/ŷ\s*=|y\s*=/gi,'').replace(/\s+/g,'');
+ const tokens=expr.match(/[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?[RGB]?/gi);
+ if(!tokens||tokens.join('')!==expr)return NaN;
+ let out=0;
+ for(const tk of tokens){const m=tk.match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)([RGB])?$/i);if(!m)return NaN;const v=(m[2]||'').toUpperCase();out+=Number(m[1])*(v==='R'?R:v==='G'?G:v==='B'?B:1);}
+ return finite(out)?out:NaN;
+}
+function parameters(substance,row){
+ const byKey=Object.fromEntries(substance.params.map(p=>[p.key,p]));
+ const get=k=>byKey[k]?parseLegacy(byKey[k],row):NaN;
+ const rawBaseline=byKey.baseline?get('baseline'):0;
+ const r={baseline:finite(rawBaseline)?Math.max(0,rawBaseline):0,baselineRaw:rawBaseline,baselineClamped:finite(rawBaseline)&&rawBaseline<0,H1:get('H1'),mu1:get('mu1'),sigma1:get('sigma1'),H2:get('H2'),mu2:get('mu2'),sigma2:get('sigma2'),methods:{}};
+ for(const k of ['baseline','H1','mu1','sigma1','H2','mu2','sigma2'])r.methods[k]=byKey[k]?.method||'Not recorded';
+ r.ok1=[r.H1,r.mu1,r.sigma1].every(finite)&&r.H1>=0&&r.sigma1>0;
+ r.ok2=[r.H2,r.mu2,r.sigma2].every(finite)&&r.H2>=0&&r.sigma2>0;
+ return r;
+}
+function getInputs(){const vals=['r','g','b'].map(id=>$(id).value.trim());if(vals.some(v=>v===''))throw Error('กรุณากรอกค่า R, G และ B ให้ครบ');const q=vals.map(Number);
+ if(!q.every(v=>finite(v)&&v>=0))throw Error('RGB ต้องเป็นตัวเลขตั้งแต่ 0 ขึ้นไป และมีค่าจำกัดทางคณิตศาสตร์');return {R:q[0],G:q[1],B:q[2]};}
+
+function modelRanges(g,row){const a=(g.rows||[]).filter(p=>['R','G','B'].every(k=>p[k]!==null&&p[k]!==''&&Number.isFinite(Number(p[k]))));
+ return ['R','G','B'].filter(k=>a.length&&(row[k]<Math.min(...a.map(x=>Number(x[k])))||row[k]>Math.max(...a.map(x=>Number(x[k])))));
+}
+function gaussian(H,mu,sigma,wl,valid){return valid?H*Math.exp(-0.5*((wl-mu)/sigma)**2):0;}
+function run(){
+ try{
+  const e=selected();if(!e)throw Error('กรุณาเชื่อมฐานข้อมูลก่อน');const rgb=getInputs(),p=parameters(e.substance,rgb);
+  if(!p.ok1&&!p.ok2)throw Error('โมเดลนี้ไม่มี peak ที่คำนวณได้ตามเงื่อนไข H ≥ 0, σ > 0');
+  curve=[];for(let wl=350;wl<=800;wl++){const peak1=gaussian(p.H1,p.mu1,p.sigma1,wl,p.ok1),peak2=gaussian(p.H2,p.mu2,p.sigma2,wl,p.ok2);curve.push({wavelength:wl,peak1,peak2,baseline:p.baseline,combined:peak1+peak2+p.baseline});}
+  const at=wl=>p.baseline+gaussian(p.H1,p.mu1,p.sigma1,wl,p.ok1)+gaussian(p.H2,p.mu2,p.sigma2,wl,p.ok2);
+  let peak=curve.reduce((a,b)=>a.combined>=b.combined?a:b);
+  // Same high-resolution maximum search as the original backend, without changing the output grid.
+  const fineStep=Math.min(0.05,Math.max(450/200000,0.001));
+  for(let x=350;x<=800+1e-7;x+=fineStep){const y=at(x);if(y>peak.combined)peak={wavelength:x,combined:y};}
+  $('lambda').textContent=nfmt(peak.wavelength,7);$('amax').textContent=nfmt(peak.combined,8);
+  const cal=e.substance.calibration;let conc=NaN;
+  if(cal&&Number.isFinite(Number(cal.slope))&&Math.abs(Number(cal.slope))>1e-15&&Number.isFinite(Number(cal.intercept)))conc=(peak.combined-Number(cal.intercept))/Number(cal.slope);
+  $('conc').textContent=finite(conc)?nfmt(conc,8):'N/A';
+  $('chartSub').textContent=`${e.substance.compound||'Substance'} · 350–800 nm · Baseline + Gaussian peaks`;
+  $('resultLabel').textContent='Model estimate';$('empty').hidden=true;$('chart').hidden=false;
+  lastParams=p;lastMeta={e,rgb,peak,conc};
+  const warnings=[];
+  const outside=modelRanges(e.substance,rgb);if(outside.length)warnings.push(`RGB ช่อง ${outside.join(', ')} อยู่นอกช่วงข้อมูลฝึก เป็น Extrapolation`);
+  if(p.baselineClamped)warnings.push(`ค่าที่ทำนายของ Baseline (${nfmt(p.baselineRaw)}) ต่ำกว่า 0 จึงใช้ Baseline 0 ในกราฟ`);
+  if(!p.ok1||!p.ok2)warnings.push(`Peak ${!p.ok1?'1':''}${!p.ok1&&!p.ok2?' และ ':''}${!p.ok2?'2':''} คำนวณไม่ได้และไม่แสดงในกราฟ`);
+  const paramList=(e.substance.params||[]);if(paramList.some(x=>x.method==='Mean'))warnings.push('พารามิเตอร์บางตัวใช้ค่าเฉลี่ย Mean แทนสมการ RGB');
+  if(paramList.some(x=>x.model&&x.modelNote&&/exploratory|สำรวจ|ยังไม่ผ่าน|ไม่พอ/i.test(x.modelNote)))warnings.push('อย่างน้อยหนึ่งโมเดลยังไม่ผ่านการตรวจสอบ LOCO CV ตามที่หลังบ้านรายงาน');
+  setStatus('resultStatus',warnings.length?warnings.join(' · '):'จำลองสำเร็จจากสมการในฐานข้อมูลจริง (ไม่ใช่ UV-Vis ที่วัดจริง)',warnings.length?'warn':'ok');
+  setStatus('inputStatus',`วิเคราะห์ Raw RGB จากเซนเซอร์ (${rgb.R}, ${rgb.G}, ${rgb.B}) แล้ว`,'ok');drawChart();
+ }catch(err){clearResult();fail(err.message);}
+}
+function drawChart(){
+ if(!curve.length||$('chart').hidden)return;const canvas=$('chart');const box=canvas.getBoundingClientRect(),w=Math.max(400,box.width),h=Math.max(300,box.height),dpr=Math.min(2,window.devicePixelRatio||1);
+ canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);const c=canvas.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);
+ const m={left:72,right:22,top:24,bottom:60},pw=w-m.left-m.right,ph=h-m.top-m.bottom;
+ c.fillStyle='#fff';c.fillRect(0,0,w,h);
+ const ymax=Math.max(1e-10,...curve.map(x=>x.combined))*1.12;
+ const X=wl=>m.left+(wl-350)/450*pw,Y=v=>m.top+ph-v/ymax*ph;
+ c.font='12px Segoe UI, Arial';c.textBaseline='middle';
+ for(let i=0;i<=5;i++){const val=ymax*i/5,y=Y(val);c.strokeStyle='#e6edf6';c.lineWidth=1;c.beginPath();c.moveTo(m.left,y);c.lineTo(w-m.right,y);c.stroke();c.fillStyle='#71819a';c.textAlign='right';c.fillText(nfmt(val,3),m.left-9,y);}
+ for(let i=0;i<=5;i++){const wl=350+450*i/5,x=X(wl);c.strokeStyle='#eef2f8';c.beginPath();c.moveTo(x,m.top);c.lineTo(x,m.top+ph);c.stroke();c.fillStyle='#71819a';c.textAlign='center';c.fillText(String(wl),x,h-m.bottom+20);}
+ c.strokeStyle='#8799b1';c.beginPath();c.moveTo(m.left,m.top);c.lineTo(m.left,m.top+ph);c.lineTo(w-m.right,m.top+ph);c.stroke();
+ [['peak1','#d45766',1.6],['peak2','#4188d8',1.6],['combined','#162c4d',2.7]].forEach(([key,col,thick])=>{c.beginPath();c.strokeStyle=col;c.lineWidth=thick;curve.forEach((v,i)=>{const x=X(v.wavelength),y=Y(v[key]);if(i===0)c.moveTo(x,y);else c.lineTo(x,y);});c.stroke();});
+ c.textAlign='center';c.fillStyle='#405875';c.font='13px Segoe UI,Arial';c.fillText('Wavelength (nm)',m.left+pw/2,h-16);
+ c.save();c.translate(19,m.top+ph/2);c.rotate(-Math.PI/2);c.fillText('Absorbance (a.u.)',0,0);c.restore();
+}
+
+
+$('dbFile').addEventListener('change',async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ try{if(file.size>20*1024*1024)throw Error('ไฟล์ใหญ่เกิน 20 MB');const parsed=parseImport(await file.text());populate(parsed,'Imported JSON');
+   try{localStorage.setItem(IMPORT_KEY,JSON.stringify(parsed));}catch(_){setStatus('inputStatus','นำเข้าฐานข้อมูลได้แล้ว แต่ Chrome ไม่สามารถจำไว้หลังปิดหน้าเว็บ','warn');}
+ }catch(err){setStatus('inputStatus','นำเข้าฐานข้อมูลไม่ได้: '+err.message,'error');}finally{e.target.value='';}
+});
+$('modelSelect').addEventListener('change',()=>{clearResult();setStatus('inputStatus','เลือกโมเดลแล้ว · กด Analyze เพื่อวัดจริง','ok');});
+window.addEventListener('resize',()=>{if(curve.length)drawChart();});
+try{const shared=readBrowserDb(),imported=readImported();if(shared)populate(shared,'Chrome local database');else if(imported)populate(imported,'Saved JSON import');}catch(err){setStatus('inputStatus','ไม่สามารถอ่านฐานข้อมูล: '+err.message,'error');}
+</script>
+<script>
+
+'use strict';
+// Cross-origin browser bridge uses real data already displayed by the working CM-34725 site.
+// It never reads mock data or assumes an unverified BLE UUID.
+const SENSOR_BRIDGE_TAG='SPECTRAL_LAB_CM34725_BRIDGE_V1';
+const SENSOR_ORIGIN='https://kittipat-rot.github.io';
+let sensorTab=null,bridgeMeasurements=[],bridgeCounter=0,bridgeCollector=null,bridgeBusy=false,bridgeSession=null,lastBridgeSeq=0,lastCapture=null;
+const bridgeScript="(() => {\n  'use strict';\n  const TAG='SPECTRAL_LAB_CM34725_BRIDGE_V1';\n  const SITE='https://kittipat-rot.github.io';\n  if(location.origin!==SITE || !location.pathname.includes('ESP32-C3-supermini_TCS34725')){\n    alert('กรุณารันบนหน้า CM-34725 ของ kittipat-rot.github.io เท่านั้น');return;\n  }\n  const target=window.opener;\n  if(!target || target.closed){\n    alert('เปิดหน้าเซนเซอร์จากปุ่ม Open CM-34725 Sensor ใน Spectral Lab รุ่น V3 ก่อน แล้วจึงรันโค้ด Bridge');return;\n  }\n  if(window.__spectralBridge?.stop)window.__spectralBridge.stop();\n  let observer=null, timer=null, flushTimer=null, seq=0, lastKey=null, lastRawAt=0, ackSeq=0, nextStatus=0, awaitingAck=false;\n  const bridgeSession=(typeof crypto!=='undefined'&&crypto.randomUUID)?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2);\n  const label=['R','G','B','C'];\n  const badgeId='spectral-bridge-badge';\n  let badge=document.getElementById(badgeId);\n  if(!badge){badge=document.createElement('div');badge.id=badgeId;\n    badge.style.cssText='position:fixed;z-index:2147483646;bottom:12px;left:12px;background:#22354b;color:#fff;border:1px solid #83b1ed;padding:10px 12px;border-radius:8px;font:12px/1.6 Segoe UI,Arial,sans-serif;max-width:450px;white-space:pre-wrap;';\n    document.body.appendChild(badge);\n  }\n  const message=(kind,payload={})=>{try{target.postMessage({tag:TAG,kind,payload},'*');return true;}catch(_){return false;}};\n  const show=t=>{if(badge)badge.textContent='SPECTRAL BRIDGE · '+t;};\n  function linkCheck(){\n    // Read the visible status strip before the CHANNELS panel. Some firmware\n    // layouts insert separators or hidden DOM nodes; never assume 2,300 chars.\n    const page=(document.body?.innerText||'').replace(/\\u00a0/g,' ');\n    const panelAt=page.search(/(?:02\\s*)?CHANNELS\\s*[·.\\-:]?\\s*RAW\\s+COUNTS/i);\n    const header=(panelAt>=0?page.slice(0,panelAt):page.slice(0,12000));\n    const flat=header.replace(/\\s+/g,' ').trim();\n    const demo=/\\bLINK\\s*DEMO\\b/i.test(flat);\n    const ble=/\\bLINK\\s*BLE\\b/i.test(flat);\n    const device=/RGBMeter/i.test(flat);\n    // Keep a short excerpt for honest diagnostics, never use status as sample data.\n    const evidence=(flat.match(/LINK.{0,110}/i)||[])[0]||'(no LINK label)';\n    return {ok:ble&&device&&!demo,ble,demo,device,evidence};\n  }\n  function sourceText(){\n    const t=document.body?.innerText||'';\n    const begin=/CHANNELS\\s*[·.\\-:]?\\s*RAW\\s+COUNTS/i.exec(t);\n    if(!begin)return '';\n    let segment=t.slice(begin.index+begin[0].length,begin.index+begin[0].length+3000);\n    const stop=/\\b(?:02B\\s+PHOTOMETRY|PHOTOMETRY|CONTROLS)\\b/i.exec(segment);\n    if(stop)segment=segment.slice(0,stop.index);\n    return segment;\n  }\n  function rawFromText(text){\n    // Identify the four *channel rows*, never the derived sRGB preview.\n    if(!text)return null;\n    const lines=text.split(/\\r?\\n/).map(t=>t.trim()).filter(Boolean);\n    let positions=[];\n    for(const ch of label){const i=lines.findIndex((x,j)=>(positions.length===0||j>positions.at(-1))&&x===ch);if(i<0)return null;positions.push(i);}\n    const out={};\n    for(let i=0;i<4;i++){\n      const region=lines.slice(positions[i]+1,positions[i+1]??lines.length);\n      // Prefer a line that consists only of a 0–65,535 integer, like '4,297'.\n      const pure=region.filter(x=>/^(?:\\d{1,3}(?:,\\d{3})+|\\d{1,5})$/.test(x)).map(x=>Number(x.replaceAll(',',''))).filter(v=>v<=65535);\n      if(pure.length){out[label[i]]=pure.at(-1);continue;}\n      // Some layouts put the channel number on the same line as its metadata.\n      const tokens=[...region.join(' ').matchAll(/(?<![\\d.,])(?:\\d{1,3}(?:,\\d{3})+|\\d{1,5})(?![\\d.,])/g)]\n        .map(m=>Number(m[0].replaceAll(',',''))).filter(v=>v>=0&&v<=65535);\n      if(!tokens.length)return null;out[label[i]]=tokens.at(-1);\n    }\n    return valid(out)?out:null;\n  }\n  function valid(o){return !!o&&label.every(k=>Number.isInteger(o[k])&&o[k]>=0&&o[k]<=65535);}\n  function rawFromDOM(){\n    const title=[...document.querySelectorAll('*')].find(el=>el.children.length===0&&/CHANNELS\\s*[·.\\-:]?\\s*RAW\\s+COUNTS/i.test(el.textContent||''));\n    if(!title)return null;\n    let region=title.parentElement;\n    for(let k=0;region&&k<8;k++,region=region.parentElement){\n      const leaves=[...region.querySelectorAll('*')].filter(el=>el.children.length===0);\n      if(!label.every(ch=>leaves.some(el=>(el.textContent||'').trim()===ch)))continue;\n      // Find the closest ancestor containing a channel's label and the count only;\n      // never select percentage, lux, or the converted sRGB from other panels.\n      const result={};\n      for(const ch of label){\n        const markers=leaves.filter(el=>(el.textContent||'').trim()===ch);\n        for(const marker of markers){\n          let row=marker.parentElement;\n          for(let j=0;row&&j<6;j++,row=row.parentElement){\n            const rowLeaves=[...row.querySelectorAll('*')].filter(el=>el.children.length===0);\n            if(rowLeaves.some(el=>label.some(other=>other!==ch&&(el.textContent||'').trim()===other)))break;\n            const numbers=rowLeaves.map((el,i)=>({\n              text:(el.textContent||'').trim(),i,font:parseFloat(getComputedStyle(el).fontSize)||0\n            })).filter(o=>/^(?:\\d{1,3}(?:,\\d{3})+|\\d{1,5})$/.test(o.text))\n              .map(o=>({...o,value:Number(o.text.replaceAll(',',''))}))\n              .filter(o=>o.value>=0&&o.value<=65535);\n            if(numbers.length){numbers.sort((a,b)=>b.font-a.font||b.i-a.i);\n              result[ch]=numbers[0].value;break;}\n          }\n          if(Number.isInteger(result[ch]))break;\n        }\n      }\n      if(valid(result))return result;\n      const parsed=rawFromText(region.innerText||'');\n      if(parsed)return parsed;\n    }\n    return null;\n  }\n  const parseRaw=()=>rawFromDOM()||rawFromText(sourceText());\n  // A new displayed sample can have the same numeric counts as the previous sample.\n  // Polling a static DOM is NOT evidence of a fresh sensor sample.\n  let seenCountUpdates=0, sentCountUpdates=0;\n  let lastEmittedAt=0;\n  function findCountNodes(){\n    const title=[...document.querySelectorAll('*')].find(el=>el.children.length===0&&/CHANNELS\\s*[·.\\-:]?\\s*RAW\\s+COUNTS/i.test(el.textContent||''));\n    if(!title)return [];\n    let scope=title.parentElement;\n    for(let i=0;scope&&i<8;i++,scope=scope.parentElement){\n      const leaves=[...scope.querySelectorAll('*')].filter(el=>el.children.length===0);\n      if(!label.every(ch=>leaves.some(el=>(el.textContent||'').trim()===ch)))continue;\n      const result=[];\n      for(const ch of label){\n        const markers=leaves.filter(el=>(el.textContent||'').trim()===ch);\n        let found=null;\n        for(const marker of markers){\n          let row=marker.parentElement;\n          for(let j=0;row&&j<6;j++,row=row.parentElement){\n            const rowLeaves=[...row.querySelectorAll('*')].filter(el=>el.children.length===0);\n            if(rowLeaves.some(el=>label.some(other=>other!==ch&&(el.textContent||'').trim()===other)))break;\n            const numbers=rowLeaves.filter(el=>/^(?:\\d{1,3}(?:,\\d{3})+|\\d{1,5})$/.test((el.textContent||'').trim()))\n              .map(el=>({el,font:parseFloat(getComputedStyle(el).fontSize)||0}));\n            if(numbers.length){numbers.sort((a,b)=>b.font-a.font);found=numbers[0].el;break;}\n          }\n          if(found)break;\n        }\n        if(!found)return [];\n        result.push(found);\n      }\n      return result;\n    }\n    return [];\n  }\n  function countRowChanged(m){\n    const target=m.target.nodeType===3?m.target.parentElement:m.target;\n    if(!target||target===badge||badge?.contains(target))return false;\n    const nodes=findCountNodes();\n    // Restrict evidence to RAW COUNTS numeric readouts, not status, color, lux, or timers.\n    return nodes.some(n=>n===target||n.contains(target)||n.parentElement===target);\n  }\n  function run(){\n    const link=linkCheck();\n    if(!link.ok){\n      show(`ยังไม่ยืนยัน LINK BLE · ${link.evidence}`);\n      if(Date.now()>nextStatus){message('status',{message:`ยังไม่ยืนยัน LINK BLE: ${link.evidence}`});nextStatus=Date.now()+3000;}return;\n    }\n    const raw=parseRaw();\n    if(!raw){\n      show('พบ LINK BLE แล้ว แต่ยังอ่าน CHANNELS · RAW COUNTS ไม่ได้');\n      if(Date.now()>nextStatus){message('status',{message:'พบ LINK BLE แล้ว แต่ยังอ่านตัวเลข RAW COUNTS ไม่ได้'});nextStatus=Date.now()+3000;}return;\n    }\n    const key=label.map(k=>raw[k]).join(',');\n    const initial=lastKey===null;\n    const changed=!initial&&key!==lastKey;\n    const panelUpdated=seenCountUpdates>sentCountUpdates;\n    const fresh=changed||panelUpdated;\n    const now=Date.now();\n    // Debounce each sensor display update; prevent one multi-node redraw from\n    // being counted as several independent observations.\n    if((initial||fresh)&&(!awaitingAck)&&(initial||now-lastEmittedAt>=650)){\n      lastKey=key;lastRawAt=now;lastEmittedAt=now;\n      sentCountUpdates=seenCountUpdates;\n      seq++;awaitingAck=true;\n      message('raw',{...raw,sequence:seq,bridgeSession,fresh:!initial,\n        evidence:initial?'initial-displayed-counts':(panelUpdated?'raw-count-dom-update':'raw-count-value-change'),\n        capturedAt:new Date().toISOString(),source:'CM-34725 displayed RAW COUNTS',verifiedBLE:true});\n    }\n    const ack=ackSeq===seq&&seq>0;\n    const rawLine=`R ${raw.R.toLocaleString()} · G ${raw.G.toLocaleString()} · B ${raw.B.toLocaleString()} · C ${raw.C.toLocaleString()}`;\n    show(`${rawLine}\\n${ack?'✓ หน้าบ้านตอบรับแล้ว':'รอหน้าบ้านตอบรับ'} · display update #${seq}`);\n    if(Date.now()-lastRawAt>5000&&Date.now()>nextStatus){\n      message('status',{message:'ไม่พบการอัปเดต RAW COUNTS ชุดใหม่กว่า 5 วินาที · ตรวจ STREAM'});nextStatus=Date.now()+4000;\n    }\n  }\n  const receive=e=>{\n    if(e.source!==target||e.data?.tag!==TAG||e.data.kind!=='ack')return;\n    if(e.data.payload?.sequence===seq){ackSeq=seq;awaitingAck=false;run();}\n  };\n  window.addEventListener('message',receive);\n  observer=new MutationObserver(records=>{\n    if(!records.some(countRowChanged))return;\n    seenCountUpdates++;\n    // Wait for all four channel labels/readouts to settle on the same displayed update.\n    if(flushTimer)clearTimeout(flushTimer);\n    flushTimer=setTimeout(run,100);\n  });\n  const title=[...document.querySelectorAll('*')].find(el=>el.children.length===0&&/CHANNELS\\s*[·.\\-:]?\\s*RAW\\s+COUNTS/i.test(el.textContent||''));\n  const scope=title?.parentElement?.parentElement?.parentElement||document.body;\n  observer.observe(scope,{subtree:true,childList:true,characterData:true});\n  // Polling detects changed displayed numbers, but NEVER emits an unchanged stale sample.\n  timer=setInterval(run,250);\n  window.__spectralBridge={stop(){clearInterval(timer);clearTimeout(flushTimer);observer.disconnect();window.removeEventListener('message',receive);message('status',{message:'Bridge หยุดแล้ว'});badge?.remove();}};\n  message('ready',{message:'Bridge V5 ready · รอ RAW COUNTS ที่อัปเดตจาก BLE'});\n  run();\n})();";
+function bridgeState(message,kind=''){setStatus('bridgeStatus',message,kind);}
+function bridgeOpen(){
+ sensorTab=window.open('https://kittipat-rot.github.io/ESP32-C3-supermini_TCS34725/','_blank');
+ bridgeReady=false;bridgeSession=null;lastBridgeSeq=0;$('simulate').disabled=true;bridgeState(sensorTab?'เปิดแท็บเซนเซอร์ใหม่แล้ว · กด BLE ในแท็บใหม่นี้ แล้ววาง Copy Bridge Code ใน Chrome DevTools → Console':'เบราว์เซอร์บล็อกหน้าต่างใหม่ กรุณาอนุญาต Pop-ups แล้วกดอีกครั้ง',sensorTab?'warn':'error');
+}
+async function bridgeCopy(){
+ try {await navigator.clipboard.writeText(bridgeScript);bridgeState('คัดลอก Bridge Mini แล้ว · ไปแท็บเซนเซอร์ที่เพิ่งเปิดจากหน้าบ้าน กด F12 → Console → Ctrl+V → Enter','ok');}
+ catch(err){const box=document.createElement('textarea');box.value=bridgeScript;box.style.cssText='width:100%;height:90px';$('bridgeStatus').after(box);box.focus();box.select();bridgeState('Clipboard ถูกบล็อก ใช้ Ctrl+C จากช่องโค้ดที่เลือกไว้ แล้ววางใน Console','warn');}
+}
+$('bridgeOpen').addEventListener('click',bridgeOpen);
+$('bridgeCopy').addEventListener('click',bridgeCopy);
+window.addEventListener('message',event=>{
+ if(event.origin!==SENSOR_ORIGIN)return;
+ const data=event.data;if(!data||data.tag!==SENSOR_BRIDGE_TAG)return;
+ if(!sensorTab||sensorTab!==event.source)sensorTab=event.source;
+ if(data.kind==='raw')try{event.source.postMessage({tag:SENSOR_BRIDGE_TAG,kind:'ack',payload:{sequence:data.payload?.sequence}},SENSOR_ORIGIN)}catch(_){}
+ if(data.kind==='ready'){bridgeState(data.payload?.message||'Bridge พร้อม · รอการอัปเดต Raw RGB','ok');return;}
+ if(data.kind==='status'){bridgeState(data.payload?.message||'รอ Raw RGB','warn');return;}
+ if(data.kind!=='raw')return;
+ const d=data.payload||{};
+ if(![d.R,d.G,d.B,d.C].every(v=>Number.isInteger(v)&&v>=0&&v<=65535)){
+   bridgeState('ข้อมูล RAW COUNTS ไม่ถูกต้อง','error');return;
+ }
+ if(typeof d.bridgeSession!=='string'||!d.bridgeSession||!Number.isSafeInteger(d.sequence)||d.sequence<1){
+   bridgeState('Bridge Code เป็นรุ่นเก่า กรุณาคัดลอกโค้ด V5 แล้วรันใหม่ในแท็บเซนเซอร์','warn');return;
+ }
+ if(bridgeSession!==d.bridgeSession){
+   if(bridgeCollector){const old=bridgeCollector;bridgeCollector=null;clearTimeout(old.timer);old.reject(Error('Bridge เริ่มเซสชันใหม่ระหว่างเก็บ 5 เฟรม กรุณากด Analyze อีกครั้ง'));}
+   bridgeSession=d.bridgeSession;lastBridgeSeq=0;
+ }
+ if(d.sequence<=lastBridgeSeq)return; // Strictly once per source display update, not per frontend poll.
+ lastBridgeSeq=d.sequence;
+ const receivedAt=performance.now();bridgeCounter++;bridgeReady=true;
+ const m={R:d.R,G:d.G,B:d.B,C:d.C,packet:bridgeCounter,sequence:d.sequence,session:d.bridgeSession,
+   fresh:d.fresh===true,evidence:d.evidence||'',time:new Date().toISOString(),receivedAt,source:'CM-34725 website RAW COUNTS'};
+ bridgeMeasurements.push(m);if(bridgeMeasurements.length>100)bridgeMeasurements.shift();
+ $('liveR').textContent=m.R.toLocaleString('en-US');$('liveG').textContent=m.G.toLocaleString('en-US');$('liveB').textContent=m.B.toLocaleString('en-US');
+ $('liveMeta').textContent=`CM-34725 RAW COUNTS · update #${m.sequence} · ${new Date(m.time).toLocaleTimeString()} · C=${m.C}`;
+ $('bleBadge').textContent='● รับข้อมูลแล้ว';$('bleBadge').classList.add('ok');
+ bridgeState(`✓ รับค่า Raw RGB จากเว็บเซนเซอร์แล้ว · R=${m.R} G=${m.G} B=${m.B}`,'ok');
+ $('simulate').disabled=bridgeBusy||!selected();
+ const c=bridgeCollector;
+ if(c&&m.fresh&&m.session===c.session&&m.sequence>c.lastSequence&&m.receivedAt>c.cutoff){
+   c.lastSequence=m.sequence;
+   c.frames.push(m);
+   $('countdown').textContent=`กำลังเก็บข้อมูลใหม่ ${c.frames.length}/5 ชุด · R=${m.R} G=${m.G} B=${m.B}`;
+   if(c.frames.length===5){bridgeCollector=null;clearTimeout(c.timer);c.resolve(c.frames.slice());}
+ }
+});
+function collectFiveNew(cutoff,timeoutMs=18000){
+ return new Promise((resolve,reject)=>{
+  const session=bridgeSession;
+  const lastSequence=lastBridgeSeq;
+  const c={session,lastSequence,cutoff,frames:[],resolve,reject,timer:null};
+  c.timer=setTimeout(()=>{
+    if(bridgeCollector===c)bridgeCollector=null;
+    reject(Error(`รับ RAW COUNTS ใหม่ได้เพียง ${c.frames.length}/5 ชุดหลังรอ 5 วินาที · ต้องมีการอัปเดตใหม่จาก STREAM จริง ไม่ใช้ค่าเก่าซ้ำ`));
+  },timeoutMs);
+  bridgeCollector=c;
+ });
+}
+function meanSampleSd(frames){
+ const mean={},sd={};
+ for(const channel of ['R','G','B']){
+  const values=frames.map(f=>f[channel]);
+  mean[channel]=values.reduce((sum,v)=>sum+v,0)/values.length;
+  sd[channel]=Math.sqrt(values.reduce((sum,v)=>sum+(v-mean[channel])**2,0)/(values.length-1));
+ }
+ return {mean,sd,n:frames.length};
+}
+async function bridgeAnalyze(){
+ if(bridgeBusy)return;
+ if(!bridgeReady){bridgeState('ยังไม่ได้รับ Raw RGB จากเซนเซอร์','warn');return;}
+ if(!selected()){fail('กรุณานำเข้าฐานข้อมูล Gaussian JSON ก่อนวิเคราะห์');return;}
+ bridgeBusy=true;$('simulate').disabled=true;$('waitProgress').hidden=false;clearResult();
+ lastCapture=null;
+ try{
+   const started=performance.now();
+   while(performance.now()-started<5000){
+     if(!sensorTab||sensorTab.closed)throw Error('แท็บเซนเซอร์ถูกปิด');
+     const elapsed=performance.now()-started;
+     $('waitFill').style.width=`${Math.min(100,elapsed/50)}%`;
+     $('countdown').textContent=`รอให้การวัดนิ่ง 5 วินาที · เหลือ ${Math.ceil((5000-elapsed)/1000)} วินาที`;
+     await delay(Math.min(200,Math.max(1,5000-elapsed)));
+   }
+   const cutoff=performance.now();$('waitFill').style.width='100%';
+   $('countdown').textContent='ครบ 5 วินาทีแล้ว · กำลังรับ Raw RGB ชุดใหม่ 0/5';
+   const frames=await collectFiveNew(cutoff);
+   const stats=meanSampleSd(frames);
+   lastCapture={capturedAt:new Date().toISOString(),waitMs:5000,frames:frames.map(x=>({...x})),mean:stats.mean,sd:stats.sd,n:5,
+     method:'five distinct CM34725 RAW COUNTS display-update sequences, after 5 second settling delay'};
+   for(const [id,k] of [['r','R'],['g','G'],['b','B']])$(id).value=String(stats.mean[k]);
+   const f=(k)=>`${stats.mean[k].toFixed(2)} ± ${stats.sd[k].toFixed(2)}`;
+   $('sampleRGB').textContent=`Mean ± SD (5 ชุดใหม่): R ${f('R')} · G ${f('G')} · B ${f('B')}`;
+   $('countdown').textContent=`เก็บครบ 5/5 ชุดหลังครบ 5 วินาที · update #${frames.map(x=>x.sequence).join(', #')}`;
+   run();
+   if(curve.length!==451)throw Error('ไม่สามารถสร้าง Gaussian Spectrum จากโมเดลที่เลือกได้');
+ }catch(err){bridgeState('วิเคราะห์ไม่สำเร็จ: '+err.message,'error');fail(err.message);}
+ finally{bridgeBusy=false;$('simulate').disabled=!selected()||!bridgeReady;$('waitProgress').hidden=true;}
+}
+$('simulate').addEventListener('click',bridgeAnalyze);
+</script></body></html>

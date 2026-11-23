@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Spectral Lab — BLE RGB Sensor & Spectrum Simulator</title>
+<style>
+:root{--navy:#112b50;--deep:#0c2344;--blue:#275cb6;--muted:#667892;--bg:#f4f7fc;--stroke:#dce5f0;--text:#1b2c44;--white:#fff}
+*{box-sizing:border-box}[hidden]{display:none!important}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);font:15px/1.55 "Segoe UI",Arial,sans-serif;color:var(--text)}
+.topbar{background:linear-gradient(115deg,#0b2446,#1a4270);color:#fff;padding:18px max(22px,calc((100vw - 1180px)/2));display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:13px}.brandicon{background:#ffffff18;border:1px solid #ffffff38;border-radius:12px;padding:10px;font-size:22px}.brand h1{font-size:20px;line-height:1.25;margin:0;font-weight:750}.brand small{color:#d8e6fa;font-size:12px}.headpill{border:1px solid #ffffff44;border-radius:22px;padding:6px 12px;color:#e0efff;font-size:12px}
+main{max-width:1200px;margin:26px auto;padding:0 20px 50px}.intro{margin-bottom:22px}.intro h2{margin:0;font-size:25px;letter-spacing:-.5px}.intro p{margin:5px 0;color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(265px,350px) minmax(0,1fr);gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--stroke);border-radius:16px;box-shadow:0 3px 16px #10295108;padding:23px;min-width:0}.card + .card{margin-top:16px}.sectiontitle{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.sectiontitle h3{font-size:16px;margin:0}.kicker{color:var(--blue);font-size:11px;font-weight:760;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:9px}
+label{display:block;font-size:13px;font-weight:650;margin-bottom:5px}input,select,button{font:inherit}input,select{width:100%;background:#fff;border:1px solid #cbd6e5;border-radius:10px;padding:12px 13px;color:var(--text);outline:none}input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #dbeafe}input::placeholder{color:#9daac0}.fields{display:grid;gap:12px}.rgbfield{position:relative}.rgbfield input{padding-left:43px;font-size:18px;font-weight:650}.letter{position:absolute;left:13px;bottom:11px;font-weight:760;border-radius:6px;width:24px;text-align:center;background:#edf1f8;color:#243d60}.letter.red{color:#dc334f;background:#feeef1}.letter.green{color:#17836c;background:#e8f7f0}.letter.blue{color:#2662ca;background:#ebf2ff}
+button{border:1px solid #cbd6e5;padding:10px 13px;border-radius:10px;cursor:pointer;background:#fff;color:var(--text);font-weight:650}button:hover{border-color:#96afd5}button.primary{background:var(--blue);border-color:var(--blue);color:white}button.primary:hover{background:#204c99}button:disabled{opacity:.47;cursor:not-allowed}.full{width:100%}.small{font-size:12px;color:var(--muted)}.helper{padding:11px 12px;border-radius:9px;background:#f4f7fe;font-size:12px;color:#637691;margin-top:13px}.subrow{margin-bottom:15px}.softline{border:0;border-top:1px solid var(--stroke);margin:19px 0}.labelrow{display:flex;align-items:center;justify-content:space-between;gap:8px}.source{font-size:11px;color:#596d88;padding:4px 9px;border:1px solid #d2deec;border-radius:20px;background:#f5f8fd}.rgb-preview{display:flex;align-items:center;gap:10px;margin-top:14px}.swatch{width:41px;height:41px;border-radius:9px;border:1px solid var(--stroke);background:#f0f1f5;flex-shrink:0}.status{border-radius:10px;padding:12px 13px;font-size:13px;background:#f4f7fd;border:1px solid #d9e5f5;color:#4e6281;margin-top:14px;overflow-wrap:anywhere}.status.ok{background:#f1fbf8;border-color:#bde8d8;color:#17694e}.status.warn{background:#fff9ec;border-color:#f0dba8;color:#8b6014}.status.error{background:#fff1f1;border-color:#f4cece;color:#b22525}
+.dropzone{position:relative;display:block;text-align:center;border:1.5px dashed #bacce6;border-radius:11px;background:#f9fbff;padding:16px 12px;cursor:pointer;font-size:13px;font-weight:650;color:#315b96}.dropzone:hover{background:#eff5ff}.dropzone input{position:absolute;opacity:0;inset:0;cursor:pointer}.importmeta{font-size:11px;color:#6b7d95;margin:9px 0 0}
+.headline{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}.headline h3{font-size:18px;margin:0}.headline p{margin:4px 0 0;color:var(--muted);font-size:13px}.chart{width:100%;height:370px;display:block;border:1px solid #e1e9f4;border-radius:12px;background:#fff}.legend{display:flex;gap:16px;flex-wrap:wrap;margin:11px 0;color:#526783;font-size:12px}.legend i{display:inline-block;width:19px;height:3px;vertical-align:middle;margin-right:6px;border-radius:4px}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:17px 0}.metric{background:#f7faff;border:1px solid #e3ebf6;border-radius:12px;padding:14px;min-width:0}.metric small{display:block;font-size:11px;color:#6e8199}.metric strong{display:block;font-size:22px;margin-top:2px;color:#142f55;overflow-wrap:anywhere}.actions{display:flex;flex-wrap:wrap;gap:8px}.actions button{font-size:13px}.muted{color:var(--muted)}details{margin-top:15px;border-top:1px solid var(--stroke);padding-top:11px}summary{cursor:pointer;color:#3d5779;font-size:13px;font-weight:650}.params{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}.params th,.params td{padding:8px 7px;border-bottom:1px solid #edf1f7;text-align:left;overflow-wrap:anywhere}.params th{color:#72839c}.empty{min-height:270px;display:grid;place-items:center;text-align:center;color:#7d90a9;font-size:14px}.faint{margin-top:15px;color:#8494aa;font-size:11px}
+.preview-info{display:flex;flex-direction:column;gap:3px;min-width:0}.preview-values{font:12px/1.5 ui-monospace,Consolas,monospace;color:#506581;overflow-wrap:anywhere}.white-calibration{background:#f8faff;border:1px solid #dce6f6;border-radius:11px;padding:13px;margin-top:14px}.cal-title{font-weight:750;font-size:13px;color:#23466e}.cal-caption{font-weight:450;font-size:11px;color:#687d99}.cal-actions{display:flex;gap:7px;flex-wrap:wrap}.cal-actions button{font-size:12px;padding:8px 10px}.cal-actions button:first-child{background:#edf4ff;border-color:#afc7f3;color:#244f8d}.cal-status{margin-top:8px;overflow-wrap:anywhere}
+@media(max-width:840px){.layout{grid-template-columns:1fr}.intro h2{font-size:22px}.card{padding:19px}.chart{height:330px}}@media(max-width:500px){.metrics{grid-template-columns:1fr 1fr}.metric:last-child{grid-column:1/-1}.metric strong{font-size:18px}.topbar{padding:16px 20px}}
+
+.ble-card{background:linear-gradient(180deg,#fff,#f8fbff)}.ble-card .sectiontitle{margin-bottom:8px}
+.ble-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ble-row button{flex:1;min-width:105px}
+.ble-dot{display:inline-block;width:9px;height:9px;background:#a5afbf;border-radius:50%;margin-right:5px}.ble-dot.online{background:#08a56a}
+.ble-target{border:1px solid #d6e4f3;background:#f3f8ff;border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.75;margin:13px 0 10px}
+.ble-target strong{color:#183e71}.ble-tiny{font-size:11px;color:#697f9b}.ble-progress{height:8px;border-radius:10px;background:#e5edf9;overflow:hidden;margin:12px 0 4px}.ble-progress div{height:100%;width:0;background:var(--blue);transition:width .2s}
+.ble-details{border:1px solid #dce5f0;border-radius:10px;padding:10px 11px;margin-top:13px;background:white}.ble-details summary{font-size:12px}.ble-details label{font-size:12px;margin:9px 0 4px}.ble-details input,.ble-details select,.ble-details textarea{font:12px/1.5 ui-monospace,Consolas,monospace;width:100%;border:1px solid #cbd6e5;border-radius:7px;padding:7px;color:var(--text);background:white}.ble-details textarea{min-height:72px;resize:vertical}.ble-details .actions{margin-top:9px}
+input[readonly]{background:#f5f8fc;color:#274360}.ble-no-source{color:#ac5127}
+.live-rgb-wrap{border:1px solid #dae6f4;background:#f7faff;border-radius:11px;padding:12px;margin-top:13px}
+.live-rgb-wrap .live-heading{font-size:12px;font-weight:750;margin-bottom:8px;color:#163a65}
+.live-rgb-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.live-channel{background:white;border:1px solid #dce5f0;border-radius:9px;padding:9px;min-width:0}
+.live-channel small{font-size:11px;display:block;color:#6d7e96}
+.live-channel strong{font:700 19px/1.5 Consolas,ui-monospace,monospace;color:#1b3454;overflow-wrap:anywhere}
+.live-rgb-wrap .ble-tiny{margin-top:8px}
+
+.bridge-box{border:1px solid #b9d3ed;background:#f0f7ff;padding:13px;border-radius:12px;margin:13px 0}.bridge-box strong{font-size:13px;color:#173d6c}.bridge-box .actions button{flex:1}.bridge-box a{color:#2459a9;word-break:break-word}.bridge-box .status{margin-top:9px;background:#fff}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="brand"><div class="brandicon" aria-hidden="true">◈</div><div><h1>SPECTRAL LAB</h1><small>RGB-Based Absorption Spectrum Simulator</small></div></div><span class="headpill">BLE SENSOR · Bridge V3</span></header>
+<main>
+ <div class="intro"><h2>Spectrum Simulation</h2><p>เชื่อมต่อ ESP32-C3 / TCS34725 ผ่าน Bluetooth · กด Analyze · รอ 5 วินาที · อ่านค่า Raw RGB จริง แล้วทำนายสเปกตรัม</p></div>
+ <div class="layout">
+  <aside>
+
+   <section class="card ble-card" id="bleSection">
+    <div class="kicker">01 · Live instrument</div>
+    <div class="sectiontitle"><h3>Bluetooth RGB Sensor</h3><span id="bleBadge" class="source"><span class="ble-dot"></span> Disconnected</span></div>
+    <p class="small">รับ Raw R / G / B จากเว็บ CM-34725 ที่เชื่อม ESP32-C3 ได้แล้ว หรือใช้ Direct BLE เมื่อมี UUID จริง (ค่าดิบ 0–65,535)</p>
+    <div class="bridge-box">
+      <strong>Connect via CM-34725 website · Bridge V3</strong>
+      <p class="small" style="margin:5px 0 10px">ใช้ BLE ที่ทำงานแล้วในเว็บเซนเซอร์จริง แล้วส่งเฉพาะค่า <b>RAW COUNTS</b> มาหน้าบ้านผ่าน Browser Bridge — ไม่ใช้ sRGB</p>
+      <div class="actions"><button id="bridgeOpen" class="primary" type="button">1. Open CM-34725 Sensor</button><button id="bridgeCopy" type="button">2. Copy Bridge Code</button></div>
+      <p class="small">ในเว็บเซนเซอร์: เชื่อม BLE และตั้งค่าเหมือนเดิม จากนั้นกด <b>F12 → Console</b> วางโค้ดที่คัดลอกแล้วกด Enter เพียงครั้งเดียวต่อการเปิดหน้าเว็บ หรือใช้ Bookmarklet ด้านล่าง</p>
+      <p class="small"><a id="bridgeBookmarklet" href="#" draggable="true">Sensor Bridge V3 bookmarklet · ลากไปแถบบุ๊กมาร์ก</a></p>
+      <div id="bridgeStatus" class="status" aria-live="polite">ยังไม่เชื่อม Sensor Bridge · กดข้อ 1 แล้วข้อ 2</div>
+    </div>
+    <details class="ble-details"><summary>Direct BLE (advanced) · ใช้เมื่อมี UUID ของอุปกรณ์แล้ว</summary>
+    <p class="small">ช่องเชื่อมเดิมอาจไม่รับ Raw RGB หาก UUID ไม่ตรงกับเฟิร์มแวร์</p>
+    <div class="ble-row"><button id="connectBLE" type="button">Direct BLE Connect</button><button id="disconnectBLE" type="button" disabled>Disconnect</button></div>
+    </details>
+    <div class="ble-target"><strong>ค่าที่ต้องการตามหน้าเว็บเซนเซอร์</strong><br>Gain 4× · Integration 300 ms · Sensor LED OFF<br>External LED ON 100% · Averaging 8 samples · Stream 1 s</div>
+    <div id="bleSettingsStatus" class="small ble-no-source">ยังไม่ยืนยันค่าตั้งค่าจากเฟิร์มแวร์ (ต้องใช้คำสั่ง BLE ที่ตรงกับอุปกรณ์)</div>
+    <div id="bleStatus" class="status" role="status" aria-live="polite">ใช้ Connect via CM-34725 website ด้านบน · รอข้อมูล Raw R/G/B จริง</div>
+    <div id="waitProgress" class="ble-progress" hidden><div id="waitFill"></div></div>
+    <div id="countdown" class="small" aria-live="polite"></div>
+    <div id="rawPacketStatus" class="ble-tiny" style="margin-top:10px;overflow-wrap:anywhere">Raw packet: ยังไม่มีข้อมูล · จะรับเฉพาะข้อมูลที่มาหลังครบ 5 วินาที</div>
+    <div id="liveRawCard" class="live-rgb-wrap" aria-live="polite">
+      <div class="live-heading">Live Raw RGB · ข้อมูลสดจากเซนเซอร์ (ยังไม่ใช่ผลวิเคราะห์)</div>
+      <div class="live-rgb-grid"><div class="live-channel"><small>R · Raw counts</small><strong id="liveR">—</strong></div><div class="live-channel"><small>G · Raw counts</small><strong id="liveG">—</strong></div><div class="live-channel"><small>B · Raw counts</small><strong id="liveB">—</strong></div></div>
+      <div class="ble-tiny" id="liveMeta">รอแพ็กเก็ตจากเซนเซอร์ · ค่าในช่อง R/G/B สำหรับ Simulation จะอัปเดตหลัง Analyze + 5 วินาที</div>
+    </div>
+    <div id="bleTip" class="helper">สำคัญ: Nordic UART และ FFE0/FFE1 เป็นเพียงตัวอย่าง UUID ไม่ใช่โปรโตคอลที่ยืนยันสำหรับ RGBMeter-F5C8 หากขึ้น Service not found ให้ใช้ UUID จากซอร์สเว็บ CM-34725</div>
+
+    <details class="ble-details" id="bleProtocolDetails">
+      <summary>Advanced · ตั้งค่า BLE protocol (UUID / ข้อมูลดิบ)</summary>
+      <p class="ble-tiny">UUID และคำสั่งของเว็บ CM-34725 ยังไม่ได้รับการยืนยัน พรีเซ็ตด้านล่างเป็นตัวเลือกทั่วไป ไม่ใช่การยืนยันว่าใช้กับเฟิร์มแวร์ของคุณได้</p>
+      <label for="blePreset">BLE protocol preset</label><select id="blePreset"><option value="nordic">Nordic UART (generic)</option><option value="hm10">FFE0/FFE1 (generic)</option><option value="custom">Custom UUIDs</option></select>
+      <label for="bleService">Service UUID</label><input id="bleService" spellcheck="false" autocomplete="off">
+      <label for="bleNotify">Notification / sensor-data characteristic UUID</label><input id="bleNotify" spellcheck="false" autocomplete="off">
+      <label for="bleWrite">Write / control characteristic UUID (optional)</label><input id="bleWrite" spellcheck="false" autocomplete="off">
+      <label for="bleFormat">Sensor packet format</label><select id="bleFormat"><option value="text">JSON / labelled text with raw R G B</option><option value="rgbc16">Binary 8 bytes, LE: R G B C</option><option value="crgb16">Binary 8 bytes, LE: C R G B</option></select>
+      <label for="bleCommands">คำสั่งตั้งค่า BLE ที่ยืนยันจากเฟิร์มแวร์แล้ว (1 คำสั่งต่อบรรทัด)</label><textarea id="bleCommands" spellcheck="false" placeholder="ไม่ใส่คำสั่งที่เดาไว้ เช่น ต้องใช้คำสั่งจริงจากซอร์สเว็บเซนเซอร์"></textarea>
+      <p class="ble-tiny">หากมีคำสั่งที่ถูกต้อง โปรแกรมจะส่งทุกครั้งหลังเชื่อมต่อและก่อนวิเคราะห์ แต่จะระบุว่า Requested เท่านั้นจนกว่าจะได้สถานะยืนยันกลับจากเฟิร์มแวร์</p>
+      <div class="actions"><button id="saveBLEProtocol" type="button">Save protocol locally</button><button id="exportBLELog" type="button">Export diagnostic JSON</button></div>
+    </details>
+   </section>
+   <section class="card">
+    <div class="kicker">02 · Measurement</div><div class="sectiontitle"><h3>Raw RGB values</h3><span class="source" id="rgbSource">Awaiting sensor</span></div>
+    <div id="modelPicker" class="subrow" hidden><label for="modelSelect">สารและฐานข้อมูล (Substance / Model)</label><select id="modelSelect"></select></div>
+    <div class="fields">
+     <div class="rgbfield"><label for="r">Red</label><span class="letter red">R</span><input id="r" type="number" min="0" step="any" inputmode="decimal" placeholder="From Bluetooth" readonly></div>
+     <div class="rgbfield"><label for="g">Green</label><span class="letter green">G</span><input id="g" type="number" min="0" step="any" inputmode="decimal" placeholder="From Bluetooth" readonly></div>
+     <div class="rgbfield"><label for="b">Blue</label><span class="letter blue">B</span><input id="b" type="number" min="0" step="any" inputmode="decimal" placeholder="From Bluetooth" readonly></div>
+    </div>
+    <div class="rgb-preview"><div id="swatch" class="swatch" aria-label="ตัวอย่างสี"></div><div class="preview-info"><span class="small" id="swatchCaption">กรอกค่า RGB เพื่อแสดงตัวอย่างสี</span><span class="preview-values" id="previewValues">Display RGB: —</span></div></div>
+    <div class="white-calibration" aria-label="White reference for color preview">
+      <div class="cal-title">White Reference <span class="cal-caption">เฉพาะการแสดงสี</span></div>
+      <p class="small" style="margin:5px 0 11px">วัดสีขาวจริงด้วยเซนเซอร์ แล้วกรอกค่า R, G, B ที่วัดได้ ก่อนกดบันทึก ระบบจะปรับสีตัวอย่างให้ขาวตามค่าอ้างอิง โดยไม่แก้ Raw RGB หรือสเปกตรัม</p>
+      <div class="cal-actions"><button id="setWhite" type="button">Set current RGB as white</button><button id="clearWhite" type="button" disabled>Clear reference</button></div>
+      <div id="whiteStatus" class="small cal-status" role="status" aria-live="polite">ยังไม่ตั้ง White Reference</div>
+    </div>
+    <button id="simulate" class="primary full" style="margin-top:18px" disabled>Analyze · wait 5 s · predict</button>
+    <details><summary>Manual input (สำหรับทดสอบสมการโดยไม่ใช้เซนเซอร์)</summary><label style="margin-top:9px"><input type="checkbox" id="manualMode" style="width:auto"> เปิดช่องกรอก RGB ด้วยตนเอง</label></details>
+    <p class="small">ใช้ Raw RGB จากเซนเซอร์โดยไม่จำกัดที่ 255; ค่าที่วัดได้จะส่งเข้าสมการทำนายโดยไม่ปัดหรือตัดค่า</p>
+    <div id="inputStatus" class="status" role="status" aria-live="polite">ยังไม่มีฐานข้อมูล กรุณานำเข้าไฟล์ JSON จากโปรแกรมหลังบ้าน</div>
+   </section>
+   <section class="card">
+    <div class="kicker">Database · Connection</div><div class="sectiontitle"><h3>เชื่อมฐานข้อมูล</h3><span id="dbSource" class="source">Not connected</span></div>
+    <label class="dropzone">⤒ &nbsp;Import database (.json)<input id="dbFile" type="file" accept=".json,application/json" aria-label="นำเข้าฐานข้อมูล JSON จากหลังบ้าน"></label>
+    <p class="importmeta" id="dbInfo">ในหลังบ้าน Tab 3 กด Build new database แล้วกด Export for Frontend (.json)</p>
+    <div class="helper">เมื่อเปิดจากไฟล์ HTML โดยตรง ฐานข้อมูลของอีกไฟล์อาจอ่านร่วมกันไม่ได้ จึงใช้การนำเข้า JSON เป็นวิธีที่แน่นอนกว่า หากเปิดสองหน้าใน <b>localhost</b> เดียวกัน ระบบจะลองอ่านฐานข้อมูลอัตโนมัติด้วย</div>
+    <div style="margin-top:12px"><button id="refreshDb" class="full">↻ &nbsp;Read database from browser</button></div>
+   </section>
+  </aside>
+  <div>
+   <section class="card">
+    <div class="headline"><div><div class="kicker">02 · Result</div><h3>Predicted Absorption Spectrum</h3><p id="chartSub">Wavelength 350–800 nm · Two-component Gaussian model</p></div><span class="source" id="resultLabel">Awaiting input</span></div>
+    <div class="metrics"><div class="metric"><small>Predicted λmax (nm)</small><strong id="lambda">—</strong></div><div class="metric"><small>Absorbance at λmax</small><strong id="amax">—</strong></div><div class="metric"><small>Estimated concentration (M)</small><strong id="conc">—</strong></div></div>
+    <div id="empty" class="empty">นำเข้าฐานข้อมูลและกรอก R, G, B<br>จากนั้นกด Generate Spectrum</div>
+    <canvas id="chart" class="chart" aria-label="กราฟสเปกตรัมจำลอง" hidden></canvas>
+    <div class="legend"><span><i style="background:#d45766"></i>Peak 1</span><span><i style="background:#4188d8"></i>Peak 2</span><span><i style="background:#162c4d"></i>Total Spectrum</span></div>
+    <div class="actions"><button id="exportCSV" disabled>↓ Export data (.csv)</button><button id="exportPNG" disabled>↓ Export graph (.png)</button></div>
+    <div id="resultStatus" class="status" role="status" aria-live="polite">ผลลัพธ์จะแสดงเมื่อคำนวณจากฐานข้อมูลที่เชื่อมแล้วเท่านั้น ไม่มีการสร้างข้อมูลทดลองสมมติ</div>
+    <details id="paramDetails"><summary>ดูพารามิเตอร์ Gaussian และวิธีคำนวณ</summary><div id="paramContent" class="small">ยังไม่มีผล</div></details>
+   </section>
+   <p class="faint">Scientific note: ผลลัพธ์เป็นสเปกตรัมที่ประมาณจากโมเดล ไม่ใช่ข้อมูล UV-Vis ที่เครื่องวัดได้จริง ความแม่นยำขึ้นกับข้อมูลฝึกและการตรวจสอบของแต่ละสาร</p>
+  </div>
+ </div>
+</main>
+<script>
+"use strict";
+const KEY="rgb_uvvis_simulation_database_snapshots_v1";
+const IMPORT_KEY="spectral_lab_frontend_imported_snapshots_v1";
+const WHITE_KEY="spectral_lab_frontend_white_preview_reference_v1";
+const $=id=>document.getElementById(id);
+let whiteReference=null; // Display calibration only; never applied to regression input.
+let snapshots=[],entries=[],curve=[],lastParams=null,lastMeta=null,loadedFrom="";
+const nfmt=(n,d=5)=>Number.isFinite(n)?Number(n.toPrecision(d)).toString():"—";
+function setStatus(id,msg,type=""){$(id).textContent=msg;$(id).className="status"+(type?" "+type:"");}
+function fail(msg){setStatus("inputStatus",msg,"error");setStatus("resultStatus",msg,"error");}
+function finite(v){return typeof v==="number"&&Number.isFinite(v);}
+function isValidModel(m){return m&&typeof m==="object"&&["linear","quadratic","exponential","logarithmic","power"].includes(m.type)&&Array.isArray(m.coef)&&Array.isArray(m.means)&&Array.isArray(m.scales)&&m.coef.length===m.means.length+1&&m.coef.length===m.scales.length+1&&m.coef.every(finite)&&m.means.every(finite)&&m.scales.every(x=>finite(x)&&x!==0);}
+function validateSnapshots(list){
+ if(!Array.isArray(list)||!list.length)throw Error("ไฟล์นี้ไม่มีฐานข้อมูล Simulation ที่บันทึกไว้");
+ if(list.length>500)throw Error("มีจำนวนชุดฐานข้อมูลมากเกินไป");
+ const usable=list.filter(s=>s&&typeof s==="object"&&Array.isArray(s.substances)&&s.substances.some(g=>g&&Array.isArray(g.params)&&g.params.some(p=>p.key==="H1")));
+ if(!usable.length)throw Error("ไม่พบชุดข้อมูล H1/μ1/σ1 จากฐานข้อมูลหลังบ้าน");
+ return usable;
+}
+function parseImport(input){
+ let data=input;
+ if(typeof data==="string")data=JSON.parse(data);
+ if(Array.isArray(data))return validateSnapshots(data);
+ if(data?.format==="spectral-lab-simulation-db"&&data.schemaVersion===1)return validateSnapshots(data.snapshots);
+ if(Array.isArray(data?.simulationDatabases))return validateSnapshots(data.simulationDatabases);
+ throw Error("ชนิดไฟล์ไม่ตรงกัน กรุณาใช้ Export for Frontend (.json) ในแท็บ Data base for Simulation ของหลังบ้าน (ไม่ใช่ Project JSON หรือ CSV)");
+}
+function populate(list,source){
+ const next=validateSnapshots(list),old=$('modelSelect').value;
+ const es=[];
+ next.forEach((s,si)=>s.substances.forEach((g,gi)=>{if(g&&Array.isArray(g.params)&&g.params.length)es.push({id:`${si}:${gi}`,snapshot:s,substance:g});}));
+ if(!es.length)throw Error("ไม่พบโมเดลสำหรับคำนวณ");
+ snapshots=next;entries=es;loadedFrom=source;
+ const sel=$('modelSelect');sel.replaceChildren();
+ es.forEach((e,i)=>{const o=document.createElement('option');o.value=e.id;o.textContent=`${e.substance.compound||'Unnamed substance'} · ${e.snapshot.label||`Database ${i+1}`}`;sel.appendChild(o);});
+ if(es.some(e=>e.id===old))sel.value=old; else sel.value=es[0].id;
+ $('modelPicker').hidden=es.length===1;
+ $('dbSource').textContent=source;
+ $('dbInfo').textContent=`เชื่อมแล้ว ${next.length} ชุดฐานข้อมูล · ${es.length} โมเดลสำหรับสาร · ใช้เวอร์ชันที่บันทึกจากหลังบ้าน`;
+ $('simulate').disabled=false;
+ setStatus('inputStatus',`ฐานข้อมูลพร้อมแล้ว: ${es[0].substance.compound||'Unnamed substance'} · เชื่อม BLE แล้วกด Analyze`,'ok');
+ clearResult();
+}
+function readBrowserDb(){
+ try{const s=localStorage.getItem(KEY);return s?validateSnapshots(JSON.parse(s)):null;}catch(_){return null;}
+}
+function readImported(){try{const s=localStorage.getItem(IMPORT_KEY);return s?validateSnapshots(JSON.parse(s)):null;}catch(_){return null;}}
+function clearResult(){curve=[];lastParams=null;lastMeta=null;$('chart').hidden=true;$('empty').hidden=false;$('resultLabel').textContent='Awaiting input';['lambda','amax','conc'].forEach(k=>$(k).textContent='—');$('exportCSV').disabled=true;$('exportPNG').disabled=true;$('paramContent').textContent='ยังไม่มีผล';setStatus('resultStatus','เชื่อมเซนเซอร์ กด Analyze และรับ Raw RGB หลังครบ 5 วินาที เพื่อสร้างสเปกตรัม');}
+function selected(){return entries.find(e=>e.id===$('modelSelect').value)||null;}
+function features(row,type){const {R,G,B}=row;
+ if(type==='linear'||type==='exponential')return [R,G,B];
+ if(type==='quadratic')return [R,G,B,R*R,G*G,B*B];
+ if(type==='logarithmic'||type==='power')return R>0&&G>0&&B>0?[Math.log(R),Math.log(G),Math.log(B)]:null;
+ return null;
+}
+// Exact transformation stored by the backend: normalized features, full coefficients.
+function predictModel(m,row){if(!isValidModel(m))return NaN;const f=features(row,m.type);if(!f||f.length!==m.coef.length-1)return NaN;
+ const latent=m.coef[0]+f.reduce((s,x,i)=>s+m.coef[i+1]*(x-m.means[i])/m.scales[i],0);
+ const v=(m.type==='exponential'||m.type==='power')?Math.exp(latent):latent;return Number.isFinite(v)?v:NaN;
+}
+// Support historical, linear-only saved databases whose unrounded models are absent.
+function parseLegacy(p,row){const {R,G,B}=row;
+ if(p?.model){return predictModel(p.model,row);}
+ if(p?.method==='Mean'){const s=String(p.expression??'').replace(/[−–]/g,'-').trim();const parsed=Number(s);if(s&&finite(parsed))return parsed;const v=Number(p.mean);return p.mean!==null&&p.mean!==undefined&&p.mean!==''&&finite(v)?v:NaN;}
+ const expr=String(p?.expression??'').replace(/[−–]/g,'-').replace(/ŷ\s*=|y\s*=/gi,'').replace(/\s+/g,'');
+ const tokens=expr.match(/[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?[RGB]?/gi);
+ if(!tokens||tokens.join('')!==expr)return NaN;
+ let out=0;
+ for(const tk of tokens){const m=tk.match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)([RGB])?$/i);if(!m)return NaN;const v=(m[2]||'').toUpperCase();out+=Number(m[1])*(v==='R'?R:v==='G'?G:v==='B'?B:1);}
+ return finite(out)?out:NaN;
+}
+function parameters(substance,row){
+ const byKey=Object.fromEntries(substance.params.map(p=>[p.key,p]));
+ const get=k=>byKey[k]?parseLegacy(byKey[k],row):NaN;
+ const rawBaseline=byKey.baseline?get('baseline'):0;
+ const r={baseline:finite(rawBaseline)?Math.max(0,rawBaseline):0,baselineRaw:rawBaseline,baselineClamped:finite(rawBaseline)&&rawBaseline<0,H1:get('H1'),mu1:get('mu1'),sigma1:get('sigma1'),H2:get('H2'),mu2:get('mu2'),sigma2:get('sigma2'),methods:{}};
+ for(const k of ['baseline','H1','mu1','sigma1','H2','mu2','sigma2'])r.methods[k]=byKey[k]?.method||'Not recorded';
+ r.ok1=[r.H1,r.mu1,r.sigma1].every(finite)&&r.H1>=0&&r.sigma1>0;
+ r.ok2=[r.H2,r.mu2,r.sigma2].every(finite)&&r.H2>=0&&r.sigma2>0;
+ return r;
+}
+function getInputs(){const vals=['r','g','b'].map(id=>$(id).value.trim());if(vals.some(v=>v===''))throw Error('กรุณากรอกค่า R, G และ B ให้ครบ');const q=vals.map(Number);
+ if(!q.every(v=>finite(v)&&v>=0))throw Error('RGB ต้องเป็นตัวเลขตั้งแต่ 0 ขึ้นไป และมีค่าจำกัดทางคณิตศาสตร์');return {R:q[0],G:q[1],B:q[2]};}
+function readRGBFields(){
+ const words=['r','g','b'].map(id=>$(id).value.trim());
+ if(words.some(v=>v===''))return null;
+ const values=words.map(Number);
+ return values.every(v=>finite(v)&&v>=0)?values:null;
+}
+function clampByte(value){return Math.max(0,Math.min(255,Math.round(value)));}
+function updateWhiteStatus(){
+ $('clearWhite').disabled=!whiteReference;
+ $('whiteStatus').textContent=whiteReference
+  ?`White Reference (raw): R=${whiteReference.R}, G=${whiteReference.G}, B=${whiteReference.B} · ใช้ปรับสีตัวอย่างเท่านั้น`
+  :'ยังไม่ตั้ง White Reference · สีตัวอย่างที่เห็นอาจคลาดเคลื่อน โดยเฉพาะถ้าค่า RGB เกิน 255';
+}
+function updateSwatch(){
+ const vals=readRGBFields(),caption=$('swatchCaption'),preview=$('previewValues');
+ if(!vals){
+  caption.textContent='กรอก RGB เป็นตัวเลข 0 ขึ้นไปให้ครบ';
+  preview.textContent='Display RGB: —';
+  $('swatch').style.background='#f0f1f5';return;
+ }
+ // White calibration adjusts ONLY the 8-bit CSS color swatch.
+ // Raw values in #r, #g, #b remain unchanged for regression and simulation.
+ const display=whiteReference
+  ?vals.map((v,i)=>clampByte(255*v/[whiteReference.R,whiteReference.G,whiteReference.B][i]))
+  :vals.map(clampByte);
+ $('swatch').style.background=`rgb(${display.join(',')})`;
+ const hex='#'+display.map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase();
+ preview.textContent=`Display RGB: (${display.join(', ')}) · ${hex}`;
+ caption.textContent=whiteReference
+  ?'Preview ปรับเทียบกับ White Reference (Raw RGB ไม่เปลี่ยน)'
+  :vals.some(v=>v>255)?'Preview ยังไม่ Calibrate; ค่าเกิน 255 ถูกจำกัดเฉพาะสีที่แสดง':'Preview RGB 8-bit (ยังไม่ Calibrate)';
+ $('swatch').setAttribute('aria-label',caption.textContent);
+}
+function saveWhiteReference(){
+ const v=readRGBFields();
+ if(!v||v.some(x=>x<=0)){
+  setStatus('inputStatus','ต้องกรอกค่า R, G, B ที่วัดจากสีขาวจริงและทุกช่องต้องมากกว่า 0 ก่อนตั้ง White Reference','error');
+  return;
+ }
+ whiteReference={R:v[0],G:v[1],B:v[2]};
+ try{localStorage.setItem(WHITE_KEY,JSON.stringify(whiteReference));}
+ catch(_){setStatus('inputStatus','บันทึก White Reference ในหน้าเว็บแล้ว แต่เบราว์เซอร์ไม่อนุญาตให้จำหลังปิดหน้า','warn');}
+ updateWhiteStatus();updateSwatch();
+}
+function clearWhiteReference(){
+ whiteReference=null;
+ try{localStorage.removeItem(WHITE_KEY);}catch(_){}
+ updateWhiteStatus();updateSwatch();
+}
+function loadWhiteReference(){
+ try{
+  const data=JSON.parse(localStorage.getItem(WHITE_KEY)||'null');
+  if(data&&[data.R,data.G,data.B].every(v=>finite(v)&&v>0))whiteReference=data;
+ }catch(_){whiteReference=null;}
+ updateWhiteStatus();updateSwatch();
+}
+function modelRanges(g,row){const a=(g.rows||[]).filter(p=>['R','G','B'].every(k=>p[k]!==null&&p[k]!==''&&Number.isFinite(Number(p[k]))));
+ return ['R','G','B'].filter(k=>a.length&&(row[k]<Math.min(...a.map(x=>Number(x[k])))||row[k]>Math.max(...a.map(x=>Number(x[k])))));
+}
+function gaussian(H,mu,sigma,wl,valid){return valid?H*Math.exp(-0.5*((wl-mu)/sigma)**2):0;}
+function run(){
+ try{
+  const e=selected();if(!e)throw Error('กรุณาเชื่อมฐานข้อมูลก่อน');const rgb=getInputs(),p=parameters(e.substance,rgb);
+  if(!p.ok1&&!p.ok2)throw Error('โมเดลนี้ไม่มี peak ที่คำนวณได้ตามเงื่อนไข H ≥ 0, σ > 0');
+  curve=[];for(let wl=350;wl<=800;wl++){const peak1=gaussian(p.H1,p.mu1,p.sigma1,wl,p.ok1),peak2=gaussian(p.H2,p.mu2,p.sigma2,wl,p.ok2);curve.push({wavelength:wl,peak1,peak2,baseline:p.baseline,combined:peak1+peak2+p.baseline});}
+  const at=wl=>p.baseline+gaussian(p.H1,p.mu1,p.sigma1,wl,p.ok1)+gaussian(p.H2,p.mu2,p.sigma2,wl,p.ok2);
+  let peak=curve.reduce((a,b)=>a.combined>=b.combined?a:b);
+  // Same high-resolution maximum search as the original backend, without changing the output grid.
+  const fineStep=Math.min(0.05,Math.max(450/200000,0.001));
+  for(let x=350;x<=800+1e-7;x+=fineStep){const y=at(x);if(y>peak.combined)peak={wavelength:x,combined:y};}
+  $('lambda').textContent=nfmt(peak.wavelength,7);$('amax').textContent=nfmt(peak.combined,8);
+  const cal=e.substance.calibration;let conc=NaN;
+  if(cal&&Number.isFinite(Number(cal.slope))&&Math.abs(Number(cal.slope))>1e-15&&Number.isFinite(Number(cal.intercept)))conc=(peak.combined-Number(cal.intercept))/Number(cal.slope);
+  $('conc').textContent=finite(conc)?nfmt(conc,8):'N/A';
+  $('chartSub').textContent=`${e.substance.compound||'Substance'} · 350–800 nm · Baseline + Gaussian peaks`;
+  $('resultLabel').textContent='Model estimate';$('empty').hidden=true;$('chart').hidden=false;
+  $('exportCSV').disabled=false;$('exportPNG').disabled=false;
+  lastParams=p;lastMeta={e,rgb,peak,conc};
+  renderParameters(p,e.substance);
+  const warnings=[];
+  const outside=modelRanges(e.substance,rgb);if(outside.length)warnings.push(`RGB ช่อง ${outside.join(', ')} อยู่นอกช่วงข้อมูลฝึก เป็น Extrapolation`);
+  if(p.baselineClamped)warnings.push(`ค่าที่ทำนายของ Baseline (${nfmt(p.baselineRaw)}) ต่ำกว่า 0 จึงใช้ Baseline 0 ในกราฟ`);
+  if(!p.ok1||!p.ok2)warnings.push(`Peak ${!p.ok1?'1':''}${!p.ok1&&!p.ok2?' และ ':''}${!p.ok2?'2':''} คำนวณไม่ได้และไม่แสดงในกราฟ`);
+  const paramList=(e.substance.params||[]);if(paramList.some(x=>x.method==='Mean'))warnings.push('พารามิเตอร์บางตัวใช้ค่าเฉลี่ย Mean แทนสมการ RGB');
+  if(paramList.some(x=>x.model&&x.modelNote&&/exploratory|สำรวจ|ยังไม่ผ่าน|ไม่พอ/i.test(x.modelNote)))warnings.push('อย่างน้อยหนึ่งโมเดลยังไม่ผ่านการตรวจสอบ LOCO CV ตามที่หลังบ้านรายงาน');
+  setStatus('resultStatus',warnings.length?warnings.join(' · '):'จำลองสำเร็จจากสมการในฐานข้อมูลจริง (ไม่ใช่ UV-Vis ที่วัดจริง)',warnings.length?'warn':'ok');
+  setStatus('inputStatus',`คำนวณแล้วด้วย RGB = (${rgb.R}, ${rgb.G}, ${rgb.B})`,'ok');drawChart();
+ }catch(err){clearResult();fail(err.message);}
+}
+function renderParameters(p,s){
+ const cont=$('paramContent');cont.replaceChildren();const t=document.createElement('table');t.className='params';
+ const h=document.createElement('tr');['Parameter','Value used','Method'].forEach(z=>{const th=document.createElement('th');th.textContent=z;h.appendChild(th);});t.appendChild(h);
+ [['Baseline','baseline'],['H1','H1'],['μ1','mu1'],['σ1','sigma1'],['H2','H2'],['μ2','mu2'],['σ2','sigma2']].forEach(([title,k])=>{const tr=document.createElement('tr');[title,nfmt(p[k],10),p.methods[k]].forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td);});t.appendChild(tr);});cont.appendChild(t);
+ const t2=document.createElement('p');t2.textContent='สมการจากฐานข้อมูล: '+String(s.equation||'ไม่มีสมการที่บันทึกไว้');t2.style.overflowWrap='anywhere';cont.appendChild(t2);
+}
+function drawChart(){
+ if(!curve.length||$('chart').hidden)return;const canvas=$('chart');const box=canvas.getBoundingClientRect(),w=Math.max(400,box.width),h=Math.max(300,box.height),dpr=Math.min(2,window.devicePixelRatio||1);
+ canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);const c=canvas.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);
+ const m={left:72,right:22,top:24,bottom:60},pw=w-m.left-m.right,ph=h-m.top-m.bottom;
+ c.fillStyle='#fff';c.fillRect(0,0,w,h);
+ const ymax=Math.max(1e-10,...curve.map(x=>x.combined))*1.12;
+ const X=wl=>m.left+(wl-350)/450*pw,Y=v=>m.top+ph-v/ymax*ph;
+ c.font='12px Segoe UI, Arial';c.textBaseline='middle';
+ for(let i=0;i<=5;i++){const val=ymax*i/5,y=Y(val);c.strokeStyle='#e6edf6';c.lineWidth=1;c.beginPath();c.moveTo(m.left,y);c.lineTo(w-m.right,y);c.stroke();c.fillStyle='#71819a';c.textAlign='right';c.fillText(nfmt(val,3),m.left-9,y);}
+ for(let i=0;i<=5;i++){const wl=350+450*i/5,x=X(wl);c.strokeStyle='#eef2f8';c.beginPath();c.moveTo(x,m.top);c.lineTo(x,m.top+ph);c.stroke();c.fillStyle='#71819a';c.textAlign='center';c.fillText(String(wl),x,h-m.bottom+20);}
+ c.strokeStyle='#8799b1';c.beginPath();c.moveTo(m.left,m.top);c.lineTo(m.left,m.top+ph);c.lineTo(w-m.right,m.top+ph);c.stroke();
+ [['peak1','#d45766',1.6],['peak2','#4188d8',1.6],['combined','#162c4d',2.7]].forEach(([key,col,thick])=>{c.beginPath();c.strokeStyle=col;c.lineWidth=thick;curve.forEach((v,i)=>{const x=X(v.wavelength),y=Y(v[key]);if(i===0)c.moveTo(x,y);else c.lineTo(x,y);});c.stroke();});
+ c.textAlign='center';c.fillStyle='#405875';c.font='13px Segoe UI,Arial';c.fillText('Wavelength (nm)',m.left+pw/2,h-16);
+ c.save();c.translate(19,m.top+ph/2);c.rotate(-Math.PI/2);c.fillText('Absorbance (a.u.)',0,0);c.restore();
+}
+function download(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1500);}
+function exportCSV(){if(!curve.length)return;const lines=['Wavelength_nm,Peak1,Peak2,Baseline,Predicted_Total_Absorbance',...curve.map(d=>[d.wavelength,d.peak1,d.peak2,d.baseline,d.combined].join(','))];download(new Blob([lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),'Predicted_RGB_Spectrum.csv');}
+function exportPNG(){if(!curve.length)return;drawChart();$('chart').toBlob(b=>{if(b)download(b,'Predicted_RGB_Spectrum.png');else setStatus('resultStatus','ไม่สามารถสร้างภาพ PNG ได้','error');},'image/png');}
+$('dbFile').addEventListener('change',async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ try{if(file.size>20*1024*1024)throw Error('ไฟล์มีขนาดเกิน 20 MB');const parsed=parseImport(await file.text());populate(parsed,'Imported JSON');
+  try{localStorage.setItem(IMPORT_KEY,JSON.stringify(parsed));}catch(_){setStatus('inputStatus','นำเข้าฐานข้อมูลสำเร็จ แต่เบราว์เซอร์ไม่อนุญาตให้จำไว้หลังปิดหน้าเว็บ','warn');}
+ }catch(err){setStatus('inputStatus','นำเข้าไม่ได้: '+err.message,'error');}finally{e.target.value='';}
+});
+$('refreshDb').addEventListener('click',()=>{const data=readBrowserDb();if(!data){setStatus('inputStatus','ไม่พบฐานข้อมูลจากหลังบ้านในพื้นที่จัดเก็บเดียวกัน โปรดนำเข้า JSON','warn');return;}populate(data,'Same-origin browser storage');});
+$('simulate').addEventListener('click',analyzeFromSensor);
+$('setWhite').addEventListener('click',saveWhiteReference);
+$('clearWhite').addEventListener('click',clearWhiteReference);
+loadWhiteReference();
+$('modelSelect').addEventListener('change',()=>{clearResult();const e=selected();if(e)setStatus('inputStatus',`เลือกสาร ${e.substance.compound||'Unnamed'} แล้ว กรุณากด Generate Spectrum`,'ok');});
+['r','g','b'].forEach(k=>{$(k).addEventListener('input',()=>{updateSwatch();if(curve.length)clearResult();});$(k).addEventListener('keydown',e=>{if(e.key==='Enter'&&$('manualMode').checked)analyzeFromSensor();});});
+$('exportCSV').addEventListener('click',exportCSV);$('exportPNG').addEventListener('click',exportPNG);
+window.addEventListener('resize',()=>{if(curve.length)drawChart();});
+try{const shared=readBrowserDb(),imported=readImported();if(shared)populate(shared,'Same-origin browser storage');else if(imported)populate(imported,'Previous JSON import');}catch(err){setStatus('inputStatus','อ่านฐานข้อมูลไม่ได้: '+err.message,'error');}
+
+// BLE adapter: NO simulated measurements, NO guessed firmware commands.
+const BLE_STORAGE='spectral_lab_ble_protocol_v1';
+const BLE_PRESETS={
+ nordic:{service:'6e400001-b5a3-f393-e0a9-e50e24dcca9e',notify:'6e400003-b5a3-f393-e0a9-e50e24dcca9e',write:'6e400002-b5a3-f393-e0a9-e50e24dcca9e'},
+ hm10:{service:'0000ffe0-0000-1000-8000-00805f9b34fb',notify:'0000ffe1-0000-1000-8000-00805f9b34fb',write:'0000ffe1-0000-1000-8000-00805f9b34fb'}
+};
+let bleDevice=null,bleServer=null,bleNotifyChar=null,bleWriteChar=null;
+let bleMeasurements=[],bleDiagnostics=[],bleWaiter=null,bleConnecting=false,bleBusy=false,blePacketNumber=0;
+let lastSensorRaw=null,bleTextBuffer='';
+let bleReadTimer=null,bleReading=false;
+
+const textEncoder=new TextEncoder(),textDecoder=new TextDecoder();
+const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+function diagnostic(type,data){bleDiagnostics.push({time:new Date().toISOString(),type,data});if(bleDiagnostics.length>250)bleDiagnostics.shift();}
+function bleConnected(){return !!(bleDevice?.gatt?.connected&&bleServer?.connected&&bleNotifyChar);}
+function bleInterface(){const yes=bleConnected();$('connectBLE').disabled=yes||bleConnecting||bleBusy;$('disconnectBLE').disabled=!yes||bleBusy;
+ $('bleBadge').innerHTML=`<span class="ble-dot ${yes?'online':''}"></span> ${yes?'Connected':'Disconnected'}`;
+ $('rgbSource').textContent=$('manualMode').checked?'Manual (QA)':yes?'Bluetooth · raw':'Awaiting sensor';}
+function standardUuid(raw){const s=String(raw||'').trim().toLowerCase();if(!s)return '';
+ if(/^[0-9a-f]{4}$/.test(s))return `0000${s}-0000-1000-8000-00805f9b34fb`;
+ if(/^[0-9a-f]{8}$/.test(s))return `${s}-0000-1000-8000-00805f9b34fb`;
+ if(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(s))return s;
+ throw Error('UUID ไม่ถูกต้อง: ต้องเป็น 4/8 หลัก hex หรือ UUID 128-bit');
+}
+function protocol(){return {preset:$('blePreset').value,service:standardUuid($('bleService').value),notify:standardUuid($('bleNotify').value),write:standardUuid($('bleWrite').value),format:$('bleFormat').value,commands:$('bleCommands').value.trim()};}
+function applyBLEPreset(name){if(name==='custom')return;const p=BLE_PRESETS[name];if(!p)return;for(const [k,v] of Object.entries(p))$('ble'+k[0].toUpperCase()+k.slice(1)).value=v;}
+function saveBLEProtocol(){try{localStorage.setItem(BLE_STORAGE,JSON.stringify(protocol()));setStatus('bleStatus','บันทึกโปรโตคอลแล้ว (ยังไม่ได้ยืนยันว่า UUID/คำสั่งตรงกับเฟิร์มแวร์)','warn');}catch(err){setStatus('bleStatus','บันทึกโปรโตคอลไม่ได้: '+err.message,'error');}}
+function restoreBLEProtocol(){applyBLEPreset('nordic');try{const saved=JSON.parse(localStorage.getItem(BLE_STORAGE)||'null');if(!saved)return;
+ if(['nordic','hm10','custom'].includes(saved.preset))$('blePreset').value=saved.preset;
+ for(const k of ['service','notify','write','format','commands'])if(typeof saved[k]==='string')$('ble'+k[0].toUpperCase()+k.slice(1)).value=saved[k];
+ }catch(_){}}
+function bleDisconnection(){if(bleReadTimer){clearInterval(bleReadTimer);bleReadTimer=null;}bleNotifyChar=null;bleWriteChar=null;bleServer=null;lastSensorRaw=null;
+ if(bleWaiter){bleWaiter.reject(Error('Bluetooth หลุดระหว่างรอข้อมูล'));bleWaiter=null;}
+ if(bleBusy){bleBusy=false;$('waitProgress').hidden=true;$('countdown').textContent='';}
+ bleInterface();setStatus('bleStatus','Bluetooth disconnected · ต้องเชื่อมใหม่ก่อนวิเคราะห์','warn');diagnostic('disconnect',bleDevice?.name||'unknown');}
+async function connectBluetooth(){
+ if(!navigator.bluetooth){setStatus('bleStatus','Chrome ไม่รองรับ Web Bluetooth ในบริบทนี้: เปิดผ่าน http://localhost:8000 หรือ HTTPS บน Chrome แล้วลองใหม่','error');return;}
+ if(bleConnecting||bleConnected())return;
+ let p;try{p=protocol();if(!p.service||!p.notify)throw Error('ต้องมี Service UUID และ Notification UUID');}catch(err){setStatus('bleStatus',err.message,'error');$('bleProtocolDetails').open=true;return;}
+ bleConnecting=true;bleInterface();setStatus('bleStatus','เลือกอุปกรณ์ Bluetooth ESP32-C3 ในหน้าต่างของ Chrome','');
+ try{
+  // Call requestDevice synchronously from the click handler before another await.
+  const device=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:[p.service]});
+  bleDevice=device;device.addEventListener('gattserverdisconnected',bleDisconnection);
+  const server=await device.gatt.connect(),service=await server.getPrimaryService(p.service);
+  const notify=await service.getCharacteristic(p.notify);
+  let write=null;if(p.write){try{write=await service.getCharacteristic(p.write);}catch(err){diagnostic('write_characteristic_missing',err.message);}}
+  if(!notify.properties.notify&&!notify.properties.indicate&&!notify.properties.read)throw Error('Characteristic นี้ไม่มี notify/indicate/read จึงไม่สามารถเก็บ Raw RGB');
+  if(notify.properties.notify||notify.properties.indicate){await notify.startNotifications();notify.addEventListener('characteristicvaluechanged',onBLENotification);}
+  else if(notify.properties.read){diagnostic('read_only','No notifications; polling readValue every 1.2 s; data freshness cannot be guaranteed');}
+
+  bleServer=server;bleNotifyChar=notify;bleWriteChar=write;
+  if(!notify.properties.notify&&!notify.properties.indicate&&notify.properties.read){
+    // Diagnostic-only fallback; this may read a cached characteristic value.
+    bleReadTimer=setInterval(async()=>{
+      if(!bleConnected()||bleReading)return;
+      bleReading=true;
+      try{const v=await notify.readValue();consumePacket(v,'read-poll-cached-possible');}
+      catch(err){diagnostic('read_error',err.message);}
+      finally{bleReading=false;}
+    },1200);
+  }
+
+  diagnostic('connect',{name:device.name||'',id:device.id,service:p.service,notify:p.notify,write:p.write,properties:{notify:notify.properties.notify,read:notify.properties.read,write:write?.properties.write||false}});
+  setStatus('bleStatus',`เชื่อม GATT กับ ${device.name||'BLE sensor'} แล้ว · ยังต้องรอ Raw RGB จาก characteristic ที่ตรงกับเฟิร์มแวร์`, 'ok');
+  if(p.commands){await writeConfiguration(p);}
+  else $('bleSettingsStatus').textContent='เชื่อมแล้ว แต่ไม่ได้ส่งคำสั่งตั้งค่าฮาร์ดแวร์ · ต้องตรวจว่า Gain 4× / 300 ms / LED 100% / AVG 8 ตรงกับอุปกรณ์';
+ }catch(err){
+  diagnostic('connection_error',{message:err.message,name:err.name,attemptedService:p.service,attemptedCharacteristic:p.notify});
+  let reason=err.message;
+  if(/service|characteristic|not found|not supported/i.test(reason))reason+=' · มีแนวโน้มว่า UUID ใน Advanced ไม่ตรงกับเซนเซอร์ RGBMeter-F5C8 (ค่าเริ่มต้นเป็น generic ไม่ใช่ค่าที่ตรวจยืนยัน)';
+  setStatus('bleStatus','รับข้อมูลไม่ได้: '+reason+' · ดาวน์โหลด Diagnostic เพื่อตรวจต่อ','error');
+  $('bleProtocolDetails').open=true;
+  if(bleDevice?.gatt?.connected)bleDevice.gatt.disconnect();
+ }
+ finally{bleConnecting=false;bleInterface();}
+}
+async function writeConfiguration(p){
+ if(!p.commands){$('bleSettingsStatus').textContent='ไม่มีคำสั่งตั้งค่าจริงที่ยืนยันจากเฟิร์มแวร์';return;}
+ if(!bleWriteChar)throw Error('มีคำสั่งตั้งค่า แต่ไม่พบ Write characteristic ของอุปกรณ์');
+ const lines=p.commands.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+ for(const line of lines){if(line.length>256)throw Error('คำสั่ง BLE ยาวเกินกำหนด');
+  const bytes=textEncoder.encode(line+'\n');if(bleWriteChar.properties.write)await bleWriteChar.writeValueWithResponse(bytes);
+  else if(bleWriteChar.properties.writeWithoutResponse)await bleWriteChar.writeValueWithoutResponse(bytes);
+  else throw Error('Write characteristic ไม่รองรับการเขียน');
+  diagnostic('setting_command_sent',line);
+ }
+ $('bleSettingsStatus').textContent=`ส่งคำสั่งที่กำหนด ${lines.length} คำสั่งแล้ว · ยังไม่ได้รับหลักฐานยืนยันค่าตั้งจากอุปกรณ์`;
+}
+function disconnectBluetooth(){if(bleDevice?.gatt?.connected)bleDevice.gatt.disconnect();else bleDisconnection();}
+function parseSafeRGB(data){let obj=data;if(typeof obj!=='object'||!obj)return null;
+ // A field explicitly named sRGB is a transformed display value; never treat as sensor counts.
+ const candidates=[obj.raw,obj.rawRGB,obj.rawRgb,obj.rgbRaw,obj.counts,obj.sensor?.raw,obj.sample?.raw,obj.data?.raw,obj.data,obj.measurement,obj];
+ for(const v of candidates){if(!v||typeof v!=='object')continue;
+  const get=keys=>{for(const k of keys){if(Object.prototype.hasOwnProperty.call(v,k)&&v[k]!==''&&v[k]!=null)return Number(v[k]);}return NaN;};
+  const r=get(['r','R','red','rawR','raw_r','rawRed']),g=get(['g','G','green','rawG','raw_g','rawGreen']),b=get(['b','B','blue','rawB','raw_b','rawBlue']);
+  if([r,g,b].every(x=>Number.isFinite(x)&&x>=0&&x<=65535)){
+   const clear=get(['c','C','clear','rawC','raw_c']);return {R:r,G:g,B:b,C:Number.isFinite(clear)?clear:null};
+  }
+ }
+ return null;
+}
+function parseTextRaw(t){
+ let data=null;try{data=JSON.parse(t);}catch(_){}
+ if(data){const parsed=parseSafeRGB(data);if(parsed)return parsed;}
+ // Support only explicitly labelled sensor channels, never unlabelled numeric tuples.
+ const vals={};for(const m of t.matchAll(/(?:^|[\s,{;])(?:raw[_ -]?)?(red|green|blue|clear|[rgbc])\s*[:=]\s*(\d+(?:\.\d+)?)/gi)){
+  const ch=m[1].toLowerCase(),key=ch==='red'?'R':ch==='green'?'G':ch==='blue'?'B':ch==='clear'?'C':ch.toUpperCase();vals[key]=Number(m[2]);
+ }
+ return ['R','G','B'].every(k=>Number.isFinite(vals[k])&&vals[k]>=0&&vals[k]<=65535)?{R:vals.R,G:vals.G,B:vals.B,C:vals.C??null}:null;
+}
+function parseBLEData(view,p){
+ if(p.format==='rgbc16'||p.format==='crgb16'){
+  if(view.byteLength!==8)throw Error('Binary RGBC packet ต้องยาว 8 bytes; ได้ '+view.byteLength);
+  const q=[0,2,4,6].map(n=>view.getUint16(n,true));return p.format==='rgbc16'?{R:q[0],G:q[1],B:q[2],C:q[3]}:{R:q[1],G:q[2],B:q[3],C:q[0]};
+ }
+ const txt=textDecoder.decode(new Uint8Array(view.buffer,view.byteOffset,view.byteLength));
+ // Parse complete packets as-is, then newline-delimited multi-packet text.
+ let sample=parseTextRaw(txt.trim());if(sample)return sample;
+ bleTextBuffer=(bleTextBuffer+txt).slice(-4096);
+ const lines=bleTextBuffer.split(/[\r\n]+/);bleTextBuffer=lines.pop()||'';
+ for(const line of lines){sample=parseTextRaw(line.trim());if(sample)return sample;}
+ return null;
+}
+function consumePacket(view,origin){
+ blePacketNumber++;const byteView=new Uint8Array(view.buffer,view.byteOffset,view.byteLength);
+ diagnostic('packet',{origin,n:blePacketNumber,bytes:view.byteLength,text:textDecoder.decode(byteView).slice(0,400),hex:Array.from(byteView.slice(0,64),b=>b.toString(16).padStart(2,'0')).join('')});
+ $('rawPacketStatus').textContent=`Received #${blePacketNumber} (${view.byteLength} bytes) at ${new Date().toLocaleTimeString()} · ดูรายละเอียดได้จาก Diagnostic`;
+ let raw;try{raw=parseBLEData(view,protocol());}catch(err){diagnostic('packet_parse_error',err.message);$('rawPacketStatus').textContent='Packet received but format mismatch: '+err.message;return;}
+ if(!raw){$('rawPacketStatus').textContent=`รับ Packet #${blePacketNumber} แล้ว แต่ข้อมูลไม่ตรงตัวอ่าน Raw RGB · กด Download BLE Diagnostic เพื่อดู text/hex ที่ได้รับจริง`;return;}
+ // Never normalize, clamp to 255 or replace values. Sensor ADC has 16-bit counts.
+ const measurement={...raw,time:new Date().toISOString(),receivedAt:performance.now(),packet:blePacketNumber,source:'BLE raw'};
+ lastSensorRaw=measurement;bleMeasurements.push(measurement);if(bleMeasurements.length>100)bleMeasurements.shift();
+ $('liveR').textContent=raw.R.toLocaleString('en-US');
+ $('liveG').textContent=raw.G.toLocaleString('en-US');
+ $('liveB').textContent=raw.B.toLocaleString('en-US');
+ $('liveMeta').textContent=`Sample #${blePacketNumber} • ${new Date(measurement.time).toLocaleTimeString()} • ${origin==='notify'?'BLE notification':'BLE read (freshness not assured)'} • แสดงค่าดิบจริง ไม่ปัดให้เหลือ 255`;
+
+ $('rawPacketStatus').textContent=`Raw sensor #${blePacketNumber}: R=${raw.R}, G=${raw.G}, B=${raw.B}, C=${raw.C??'—'} · ${new Date().toLocaleTimeString()}`;
+ if(bleWaiter&&measurement.receivedAt>=bleWaiter.after){const pending=bleWaiter;bleWaiter=null;pending.resolve(measurement);}
+}
+function onBLENotification(event){try{const view=event.target?.value;if(view)consumePacket(view,'notify');}catch(err){diagnostic('notify_error',err.message);}}
+async function awaitFreshMeasurement(after,timeoutMs=5500){
+ if(!bleConnected())throw Error('Bluetooth ไม่ได้เชื่อม');
+ if(bleWaiter)throw Error('มีการรอรับข้อมูลอยู่แล้ว');
+ // Register before read so no notification is lost between steps.
+ return new Promise((resolve,reject)=>{
+  let timer;
+  const cleanup=fn=>x=>{clearTimeout(timer);fn(x);};
+  bleWaiter={after,resolve:cleanup(resolve),reject:cleanup(reject)};
+  timer=setTimeout(()=>{if(bleWaiter){const w=bleWaiter;bleWaiter=null;w.reject(Error('ไม่มี Raw RGB ใหม่ภายใน 5.5 วินาทีหลังครบเวลารอ · ตรวจ Stream 1 s / รูปแบบ BLE packet'));}},timeoutMs);
+  if(!bleNotifyChar?.properties.notify&&!bleNotifyChar?.properties.indicate&&bleNotifyChar?.properties.read){
+   diagnostic('read_warning','Characteristic does not notify; readValue may return cached data; freshness cannot be verified');
+   bleNotifyChar.readValue().then(v=>{if(bleWaiter)consumePacket(v,'read-possibly-cached');}).catch(e=>diagnostic('read_error',e.message));
+  }
+ });
+}
+async function analyzeFromSensor(){
+ if(bleBusy)return;
+ if(!selected()){fail('ยังไม่ได้ Import database JSON จากหลังบ้าน');return;}
+ if($('manualMode').checked){run();return;}
+ if(!bleConnected()){setStatus('bleStatus','เชื่อม Bluetooth ก่อนกด Analyze · หากต่ออยู่กับเว็บเซนเซอร์ ให้ Disconnect ที่เว็บนั้นก่อน','warn');return;}
+ bleBusy=true;bleInterface();$('simulate').disabled=true;clearResult();
+ try{
+  const p=protocol();if(p.commands)await writeConfiguration(p);
+  const started=performance.now();$('waitProgress').hidden=false;
+  while(performance.now()-started<5000){
+   if(!bleConnected())throw Error('Bluetooth ขาดการเชื่อมต่อ');
+   const elapsed=performance.now()-started;const left=Math.max(0,Math.ceil((5000-elapsed)/1000));
+   $('waitFill').style.width=`${Math.min(100,elapsed/50)}%`;
+   $('countdown').textContent=`รอให้เซนเซอร์เข้าสู่สภาวะนิ่ง ${left} วินาที · ยังไม่ใช้ค่า RGB ก่อนครบเวลา`;
+   await delay(Math.min(200,Math.max(1,5000-elapsed)));
+  }
+  const cutoff=performance.now();$('waitFill').style.width='100%';$('countdown').textContent='ครบ 5 วินาทีแล้ว · รอ Raw RGB เฟรมใหม่จากเซนเซอร์…';
+  const data=await awaitFreshMeasurement(cutoff);
+  if(!bleNotifyChar.properties.notify&&!bleNotifyChar.properties.indicate){setStatus('bleStatus','ข้อมูล Read อาจเป็นค่าที่แคชไว้ ไม่สามารถยืนยันความใหม่ของเฟรมได้ · ควรใช้ characteristic แบบ Notification','warn');}
+  ['r','g','b'].forEach((k,i)=>{$(k).value=[data.R,data.G,data.B][i];});
+  $('rgbSource').textContent='BLE · raw ADC';updateSwatch();run();
+  diagnostic('analysis',{raw:data,dbModel:selected()?.substance?.compound||null});
+  $('countdown').textContent=`ใช้ Raw RGB เฟรม #${data.packet} ที่รับหลังรอครบ 5 วินาที · ${new Date(data.time).toLocaleTimeString()}`;
+ }catch(err){diagnostic('analysis_error',err.message);setStatus('bleStatus','วิเคราะห์ไม่สำเร็จ: '+err.message,'error');fail(err.message);}
+ finally{bleBusy=false;$('waitProgress').hidden=true;$('simulate').disabled=!selected();bleInterface();}
+}
+function exportBLEDiagnostics(){const out={exportedAt:new Date().toISOString(),deviceName:bleDevice?.name||null,
+ desiredSettings:{gain:4,integrationMs:300,sensorLED:'OFF',externalLED:'ON 100%',averaging:8,streamSeconds:1},
+ settingsVerified:false,protocol:protocol(),liveRaw:lastSensorRaw,packetsSeen:blePacketNumber,measurements:bleMeasurements,logs:bleDiagnostics};
+ download(new Blob([JSON.stringify(out,null,2)],{type:'application/json'}),'SpectralLab_BLE_Diagnostics.json');}
+$('connectBLE').addEventListener('click',connectBluetooth);
+$('disconnectBLE').addEventListener('click',disconnectBluetooth);
+$('blePreset').addEventListener('change',e=>applyBLEPreset(e.target.value));
+$('saveBLEProtocol').addEventListener('click',saveBLEProtocol);
+$('exportBLELog').addEventListener('click',exportBLEDiagnostics);
+$('manualMode').addEventListener('change',e=>{['r','g','b'].forEach(k=>{$(k).readOnly=!e.target.checked;});
+ $('simulate').textContent=e.target.checked?'Generate Spectrum · manual RGB':'Analyze · wait 5 s · predict';
+ if(!e.target.checked)['r','g','b'].forEach(k=>{$(k).value='';});
+ updateSwatch();clearResult();bleInterface();});
+restoreBLEProtocol();bleInterface();
+
+</script>
+<script>
+
+'use strict';
+// Cross-origin browser bridge uses real data already displayed by the working CM-34725 site.
+// It never reads mock data or assumes an unverified BLE UUID.
+const SENSOR_BRIDGE_TAG='SPECTRAL_LAB_CM34725_BRIDGE_V1';
+const SENSOR_ORIGIN='https://kittipat-rot.github.io';
+let sensorTab=null,bridgeReady=false,bridgeMeasurements=[],bridgeCounter=0,bridgeWaiter=null,bridgeBusy=false;
+const bridgeScript="(() => {\n  'use strict';\n  const TAG='SPECTRAL_LAB_CM34725_BRIDGE_V1';\n  const SITE='https://kittipat-rot.github.io';\n  if(location.origin!==SITE || !location.pathname.includes('ESP32-C3-supermini_TCS34725')){\n    alert('กรุณารันบนหน้า CM-34725 ของ kittipat-rot.github.io เท่านั้น');return;\n  }\n  const target=window.opener;\n  if(!target || target.closed){\n    alert('เปิดหน้าเซนเซอร์จากปุ่ม Open CM-34725 Sensor ใน Spectral Lab รุ่น V3 ก่อน แล้วจึงรันโค้ด Bridge');return;\n  }\n  if(window.__spectralBridge?.stop)window.__spectralBridge.stop();\n  let observer=null, timer=null, seq=0, lastKey='', lastRawAt=0, ackSeq=0, nextStatus=0, lastError='', awaitingAck=false;\n  const label=['R','G','B','C'];\n  const badgeId='spectral-bridge-badge';\n  let badge=document.getElementById(badgeId);\n  if(!badge){badge=document.createElement('div');badge.id=badgeId;\n    badge.style.cssText='position:fixed;z-index:2147483646;bottom:12px;left:12px;background:#22354b;color:#fff;border:1px solid #83b1ed;padding:10px 12px;border-radius:8px;font:12px/1.6 Segoe UI,Arial,sans-serif;max-width:450px;white-space:pre-wrap;';\n    document.body.appendChild(badge);\n  }\n  const message=(kind,payload={})=>{try{target.postMessage({tag:TAG,kind,payload},'*');return true;}catch(_){return false;}};\n  const show=t=>{if(badge)badge.textContent='SPECTRAL BRIDGE · '+t;};\n  function linkCheck(){\n    // Read the visible status strip before the CHANNELS panel. Some firmware\n    // layouts insert separators or hidden DOM nodes; never assume 2,300 chars.\n    const page=(document.body?.innerText||'').replace(/\\u00a0/g,' ');\n    const panelAt=page.search(/(?:02\\s*)?CHANNELS\\s*[·.\\-:]?\\s*RAW\\s+COUNTS/i);\n    const header=(panelAt>=0?page.slice(0,panelAt):page.slice(0,12000));\n    const flat=header.replace(/\\s+/g,' ').trim();\n    const demo=/\\bLINK\\s*DEMO\\b/i.test(flat);\n    const ble=/\\bLINK\\s*BLE\\b/i.test(flat);\n    const device=/RGBMeter/i.test(flat);\n    // Keep a short excerpt for honest diagnostics, never use status as sample data.\n    const evidence=(flat.match(/LINK.{0,110}/i)||[])[0]||'(no LINK label)';\n    return {ok:ble&&device&&!demo,ble,demo,device,evidence};\n  }\n  function sourceText(){\n    const t=document.body?.innerText||'';\n    const begin=/CHANNELS\\s*[·.\\-:]?\\s*RAW\\s+COUNTS/i.exec(t);\n    if(!begin)return '';\n    let segment=t.slice(begin.index+begin[0].length,begin.index+begin[0].length+3000);\n    const stop=/\\b(?:02B\\s+PHOTOMETRY|PHOTOMETRY|CONTROLS)\\b/i.exec(segment);\n    if(stop)segment=segment.slice(0,stop.index);\n    return segment;\n  }\n  function rawFromText(text){\n    // Identify the four *channel rows*, never the derived sRGB preview.\n    if(!text)return null;\n    const lines=text.split(/\\r?\\n/).map(t=>t.trim()).filter(Boolean);\n    let positions=[];\n    for(const ch of label){const i=lines.findIndex((x,j)=>(positions.length===0||j>positions.at(-1))&&x===ch);if(i<0)return null;positions.push(i);}\n    const out={};\n    for(let i=0;i<4;i++){\n      const region=lines.slice(positions[i]+1,positions[i+1]??lines.length);\n      // Prefer a line that consists only of a 0–65,535 integer, like '4,297'.\n      const pure=region.filter(x=>/^(?:\\d{1,3}(?:,\\d{3})+|\\d{1,5})$/.test(x)).map(x=>Number(x.replaceAll(',',''))).filter(v=>v<=65535);\n      if(pure.length){out[label[i]]=pure.at(-1);continue;}\n      // Some layouts put the channel number on the same line as its metadata.\n      const tokens=[...region.join(' ').matchAll(/(?<![\\d.,])(?:\\d{1,3}(?:,\\d{3})+|\\d{1,5})(?![\\d.,])/g)]\n        .map(m=>Number(m[0].replaceAll(',',''))).filter(v=>v>=0&&v<=65535);\n      if(!tokens.length)return null;out[label[i]]=tokens.at(-1);\n    }\n    return valid(out)?out:null;\n  }\n  function valid(o){return !!o&&label.every(k=>Number.isInteger(o[k])&&o[k]>=0&&o[k]<=65535);}\n  function rawFromDOM(){\n    const title=[...document.querySelectorAll('*')].find(el=>el.children.length===0&&/CHANNELS\\s*[·.\\-:]?\\s*RAW\\s+COUNTS/i.test(el.textContent||''));\n    if(!title)return null;\n    let region=title.parentElement;\n    for(let k=0;region&&k<8;k++,region=region.parentElement){\n      const leaves=[...region.querySelectorAll('*')].filter(el=>el.children.length===0);\n      if(!label.every(ch=>leaves.some(el=>(el.textContent||'').trim()===ch)))continue;\n      // Find the closest ancestor containing a channel's label and the count only;\n      // never select percentage, lux, or the converted sRGB from other panels.\n      const result={};\n      for(const ch of label){\n        const markers=leaves.filter(el=>(el.textContent||'').trim()===ch);\n        for(const marker of markers){\n          let row=marker.parentElement;\n          for(let j=0;row&&j<6;j++,row=row.parentElement){\n            const rowLeaves=[...row.querySelectorAll('*')].filter(el=>el.children.length===0);\n            if(rowLeaves.some(el=>label.some(other=>other!==ch&&(el.textContent||'').trim()===other)))break;\n            const numbers=rowLeaves.map((el,i)=>({\n              text:(el.textContent||'').trim(),i,font:parseFloat(getComputedStyle(el).fontSize)||0\n            })).filter(o=>/^(?:\\d{1,3}(?:,\\d{3})+|\\d{1,5})$/.test(o.text))\n              .map(o=>({...o,value:Number(o.text.replaceAll(',',''))}))\n              .filter(o=>o.value>=0&&o.value<=65535);\n            if(numbers.length){numbers.sort((a,b)=>b.font-a.font||b.i-a.i);\n              result[ch]=numbers[0].value;break;}\n          }\n          if(Number.isInteger(result[ch]))break;\n        }\n      }\n      if(valid(result))return result;\n      const parsed=rawFromText(region.innerText||'');\n      if(parsed)return parsed;\n    }\n    return null;\n  }\n  const parseRaw=()=>rawFromDOM()||rawFromText(sourceText());\n  // A new displayed packet can have the same RGB values as the last packet.\n  // A change in the RAW COUNTS panel DOM is evidence of a fresh screen update.\n  let seenPanelUpdates=0, sentPanelUpdates=-1;\n  function run(){\n    const link=linkCheck();\n    if(!link.ok){\n      show(`ยังไม่ยืนยัน LINK BLE · ${link.evidence}`);\n      if(Date.now()>nextStatus){message('status',{message:`ยังไม่ยืนยัน LINK BLE: ${link.evidence}`});nextStatus=Date.now()+3000;}return;\n    }\n    const raw=parseRaw();\n    if(!raw){\n      show('พบ LINK BLE แล้ว แต่ยังอ่าน CHANNELS · RAW COUNTS ไม่ได้');\n      if(Date.now()>nextStatus){message('status',{message:'พบ LINK BLE แล้ว แต่ยังอ่านตัวเลข RAW COUNTS ไม่ได้'});nextStatus=Date.now()+3000;}return;\n    }\n    const key=label.map(k=>raw[k]).join(',');\n    const changed=key!==lastKey;\n    const freshlyUpdated=seenPanelUpdates>sentPanelUpdates;\n    if(changed || (freshlyUpdated&&Date.now()-lastRawAt>=300)){\n      lastKey=key;lastRawAt=Date.now();sentPanelUpdates=seenPanelUpdates;\n      seq++;awaitingAck=true;\n      message('raw',{...raw,sequence:seq,capturedAt:new Date().toISOString(),source:'CM-34725 displayed RAW COUNTS',verifiedBLE:true});\n    }\n    const ack=ackSeq===seq&&seq>0;\n    const rawLine=`R ${raw.R.toLocaleString()} · G ${raw.G.toLocaleString()} · B ${raw.B.toLocaleString()} · C ${raw.C.toLocaleString()}`;\n    show(`${rawLine}\\n${ack?'✓ หน้าบ้านตอบรับแล้ว':'รอหน้าบ้านตอบรับ · ต้องเปิดแท็บเซนเซอร์จากหน้าบ้าน V3'} · sample #${seq}`);\n    if(Date.now()-lastRawAt>5000&&Date.now()>nextStatus){message('status',{message:'ไม่มีหลักฐานการอัปเดต RAW COUNTS ใหม่กว่า 5 วินาที · ตรวจ STREAM และการเชื่อมต่อ'});nextStatus=Date.now()+4000;}\n  }\n  const receive=e=>{\n    if(e.source!==target||e.data?.tag!==TAG||e.data.kind!=='ack')return;\n    if(e.data.payload?.sequence===seq){ackSeq=seq;awaitingAck=false;run();}\n  };\n  window.addEventListener('message',receive);\n  observer=new MutationObserver(records=>{\n    const relevant=records.some(m=>m.target!==badge&&!badge?.contains(m.target));\n    if(!relevant)return;\n    seenPanelUpdates++;\n    if(!awaitingAck)run();\n  });\n  const title=[...document.querySelectorAll('*')].find(el=>el.children.length===0&&/CHANNELS\\s*[·.\\-:]?\\s*RAW\\s+COUNTS/i.test(el.textContent||''));\n  let scope=title?.parentElement?.parentElement?.parentElement||document.body;\n  // If a small ancestor is chosen, polling also covers rerendered panels.\n  observer.observe(scope,{subtree:true,childList:true,characterData:true});\n  timer=setInterval(run,1000);\n  window.__spectralBridge={stop(){clearInterval(timer);observer.disconnect();window.removeEventListener('message',receive);message('status',{message:'Bridge หยุดแล้ว'});badge?.remove();}};\n  message('ready',{message:'Bridge V3 started; รอรับ Raw RGB และการตอบรับจากหน้าบ้าน'});\n  run();\n})();";
+function bridgeState(message,kind=''){setStatus('bridgeStatus',message,kind);}
+function bridgeOpen(){
+ sensorTab=window.open('https://kittipat-rot.github.io/ESP32-C3-supermini_TCS34725/','_blank');
+ bridgeReady=false;bridgeState(sensorTab?'เปิดแท็บเซนเซอร์ใหม่แล้ว · กด BLE ในแท็บใหม่นี้ แล้ววาง Copy Bridge Code ใน Chrome DevTools → Console':'เบราว์เซอร์บล็อกหน้าต่างใหม่ กรุณาอนุญาต Pop-ups แล้วกดอีกครั้ง',sensorTab?'warn':'error');
+}
+async function bridgeCopy(){
+ try {await navigator.clipboard.writeText(bridgeScript);bridgeState('คัดลอก Bridge V3 แล้ว · ไปแท็บเซนเซอร์ที่เพิ่งเปิดจากหน้าบ้าน กด F12 → Console → Ctrl+V → Enter','ok');}
+ catch(err){const box=document.createElement('textarea');box.value=bridgeScript;box.style.cssText='width:100%;height:90px';$('bridgeStatus').after(box);box.focus();box.select();bridgeState('Clipboard ถูกบล็อก ใช้ Ctrl+C จากช่องโค้ดที่เลือกไว้ แล้ววางใน Console','warn');}
+}
+$('bridgeOpen').addEventListener('click',bridgeOpen);
+$('bridgeCopy').addEventListener('click',bridgeCopy);
+$('bridgeBookmarklet').href='javascript:'+encodeURIComponent(bridgeScript);
+window.addEventListener('message',event=>{
+ if(event.origin!==SENSOR_ORIGIN)return;
+ const data=event.data;if(!data||data.tag!==SENSOR_BRIDGE_TAG)return;
+ // Named browser tabs can be reused with a different WindowProxy from an earlier session.
+ // Only accept the sensor origin and Bridge tag, and link the actual sender after handshake.
+ if(!sensorTab || sensorTab!==event.source){sensorTab=event.source;}
+ if(data.kind==='raw')try{event.source.postMessage({tag:SENSOR_BRIDGE_TAG,kind:'ack',payload:{sequence:data.payload?.sequence}},SENSOR_ORIGIN)}catch(_){}
+ if(data.kind==='ready'){bridgeState(data.payload?.message||'Bridge ทำงาน · กำลังรอ Raw RGB และการตอบรับ','ok');return;}
+ if(data.kind==='status'){bridgeState(data.payload?.message||'กำลังรอ Raw RGB', 'warn');return;}
+ if(data.kind!=='raw')return;
+ const d=data.payload||{};
+ if(![d.R,d.G,d.B,d.C].every(v=>Number.isInteger(v)&&v>=0&&v<=65535)){
+   bridgeState('พบข้อความจากเว็บเซนเซอร์ แต่ Raw RGB ไม่ใช่ตัวเลขที่ถูกต้อง','error');return;
+ }
+  const receivedAt=performance.now();bridgeCounter++;bridgeReady=true;
+ const m={R:d.R,G:d.G,B:d.B,C:d.C,packet:bridgeCounter,time:new Date().toISOString(),receivedAt,source:'CM-34725 website RAW COUNTS'};
+ bridgeMeasurements.push(m);if(bridgeMeasurements.length>50)bridgeMeasurements.shift();
+ $('liveR').textContent=m.R.toLocaleString('en-US');$('liveG').textContent=m.G.toLocaleString('en-US');$('liveB').textContent=m.B.toLocaleString('en-US');
+ $('liveMeta').textContent=`CM-34725 RAW COUNTS · #${m.packet} · ${new Date(m.time).toLocaleTimeString()} · C=${m.C}`;
+ $('rawPacketStatus').textContent=`Sensor website data #${m.packet}: R=${m.R}, G=${m.G}, B=${m.B}, C=${m.C}`;
+ $('bleBadge').innerHTML='<span class="ble-dot online"></span> Sensor Bridge active';
+ $('rgbSource').textContent='CM-34725 · raw counts';
+ bridgeState('✓ หน้าบ้านรับ Raw RGB จริงแล้ว · R='+m.R+' G='+m.G+' B='+m.B+' · กด Analyze เพื่อรอ 5 วินาที','ok');
+ $('simulate').disabled=false;
+ if(bridgeWaiter&&receivedAt>bridgeWaiter.cutoff){const w=bridgeWaiter;bridgeWaiter=null;clearTimeout(w.timer);w.resolve(m);}
+});
+function waitBridgeNew(cutoff,timeoutMs=8000){
+ return new Promise((resolve,reject)=>{
+  const timer=setTimeout(()=>{bridgeWaiter=null;reject(Error('ครบ 5 วินาทีแล้ว แต่ไม่มีข้อมูล Raw RGB ชุดใหม่จากเว็บเซนเซอร์ · ตรวจว่าเว็บไซต์ยัง Stream อยู่'))},timeoutMs);
+  bridgeWaiter={cutoff,resolve,reject,timer};
+ });
+}
+async function bridgeAnalyze(){
+ if(bridgeBusy)return;
+ if(!bridgeReady){bridgeState('ยังไม่มีค่า Raw RGB · เปิดเว็บเซนเซอร์ เชื่อม BLE และเปิด Bridge ก่อน','warn');return;}
+ bridgeBusy=true;$('simulate').disabled=true;$('waitProgress').hidden=false;clearResult();
+ try{
+   const started=performance.now();
+   while(performance.now()-started<5000){
+     if(!sensorTab||sensorTab.closed)throw Error('แท็บเซนเซอร์ถูกปิด');
+     const elapsed=performance.now()-started;
+     $('waitFill').style.width=`${Math.min(100,elapsed/50)}%`;
+     $('countdown').textContent=`รอ 5 วินาทีก่อนอ่านค่าจริง · เหลือ ${Math.ceil((5000-elapsed)/1000)} วินาที`;
+     await delay(Math.min(200,Math.max(1,5000-elapsed)));
+   }
+   const cutoff=performance.now();$('waitFill').style.width='100%';$('countdown').textContent='ครบ 5 วินาทีแล้ว · รอ RAW COUNTS ที่อัปเดตใหม่…';
+   const sample=await waitBridgeNew(cutoff);
+   $('r').value=sample.R;$('g').value=sample.G;$('b').value=sample.B;
+   $('rgbSource').textContent='CM-34725 RAW · 5s';updateSwatch();
+   $('countdown').textContent=`ใช้ตัวอย่างใหม่ #${sample.packet} หลังครบเวลา · Raw (${sample.R}, ${sample.G}, ${sample.B})`;
+   if(selected())run();else setStatus('inputStatus','ได้รับ RGB จริงแล้ว · หากต้องการกราฟ โปรด Import database JSON จากหลังบ้าน','warn');
+ }catch(err){bridgeState('วิเคราะห์ไม่สำเร็จ: '+err.message,'error');fail(err.message);}
+ finally{bridgeBusy=false;$('simulate').disabled=false;$('waitProgress').hidden=true;}
+}
+// Replace pre-existing generic BLE Analyze listener, retaining it for advanced Direct BLE.
+$('simulate').removeEventListener('click',analyzeFromSensor);
+$('simulate').addEventListener('click',()=>{
+ if($('manualMode').checked) {analyzeFromSensor();return;}
+ if(bridgeReady||sensorTab) bridgeAnalyze();
+ else analyzeFromSensor();
+});
+$('manualMode').addEventListener('change',()=>{if(bridgeReady)$('simulate').disabled=false;});
+
+</script>
+</body>
+</html>

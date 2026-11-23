@@ -1,0 +1,1853 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RGB–UVVis Gaussian Lab v28</title>
+<style>
+:root{--navy:#17345f;--blue:#2459a9;--bg:#f3f6fb;--line:#dce3ee;--text:#1c2738}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+header{background:var(--navy);color:white;padding:22px 5%}
+header h1{margin:0;font-size:25px}
+header p{margin:4px 0 0;color:#dce8f9}
+main{max-width:1200px;margin:22px auto;padding:0 15px 40px}
+nav,.actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+section.panel{background:white;border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+h2{font-size:19px;margin:0 0 14px}
+h3{font-size:15px;margin:16px 0 8px}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px}
+.field{grid-column:span 3;min-width:0}
+.field.half{grid-column:span 6}
+.field.full{grid-column:1/-1}
+label{display:block;font-weight:650;font-size:13px;margin-bottom:5px}
+input,select,textarea,button{font:inherit}
+input,select,textarea{width:100%;padding:9px;border:1px solid #c8d2e1;border-radius:8px;background:white;color:var(--text)}
+textarea{min-height:155px;resize:vertical;font:13px monospace}
+button{cursor:pointer;border:1px solid var(--line);border-radius:8px;padding:9px 13px;background:white;color:var(--text);font-weight:650}
+button.primary{background:var(--blue);color:white;border-color:var(--blue)}
+button:disabled{opacity:.5;cursor:not-allowed}
+#saveFit:not(:disabled){background:#087f5b;color:#fff;border-color:#087f5b;box-shadow:0 0 0 2px #b7f7d8}
+#saveToRGB:not(:disabled){background:#b45309;color:#fff;border-color:#b45309;box-shadow:0 0 0 2px #fed7aa}
+.fit-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:10px 0 16px;align-items:start}
+.settings-card{min-width:0;border:1px solid #cbd5e1;border-radius:11px;padding:14px;background:#f8fafc}
+.settings-card h3{margin:0 0 12px;font-size:15px;color:#17345f;padding-bottom:8px;border-bottom:1px solid #dce3ee}
+.settings-general{grid-column:1/-1;background:#f3f7ff;border-color:#b7cdf3}
+.settings-card .grid{gap:10px}
+.settings-card .field{grid-column:span 6}
+@media(max-width:760px){.fit-settings-grid{grid-template-columns:1fr}.settings-general{grid-column:auto}}
+@media(max-width:430px){.settings-card .field{grid-column:1/-1}}
+nav button.active{background:var(--blue);color:white}
+.note,.status{color:#667085;font-size:12px}
+.status{margin-top:10px;font-size:13px}
+.lambda-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.lambda-card{padding:12px;border:1px solid #b7d4f8;border-radius:9px;background:#eff6ff;min-width:0}
+.lambda-card span{display:block;color:#475569;font-size:12px}
+.lambda-card strong{display:block;font-size:20px;color:#1d4ed8;overflow-wrap:anywhere}
+@media(max-width:430px){.lambda-summary{grid-template-columns:1fr}}
+.status.error{color:#b42318}
+.status.ok{color:#067647}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
+.metric{padding:12px;border:1px solid var(--line);border-radius:9px;background:#fbfcff;min-width:0}
+.metric span{display:block;color:#667085;font-size:12px}
+.metric strong{display:block;font-size:20px;overflow-wrap:anywhere}
+.metric.good{background:#ecfdf3;border-color:#86d7a6;color:#166534}
+.metric.good span,.metric.good small{color:#187344!important}
+.metric.good strong{color:#166534}
+.metric.medium{background:#fefce8;border-color:#facc15;color:#854d0e}
+.metric.medium span,.metric.medium small{color:#a16207!important}
+.metric.medium strong{color:#854d0e}
+.metric.bad{background:#fef2f2;border-color:#fca5a5;color:#991b1b}
+.metric.bad span,.metric.bad small{color:#b91c1c!important}
+.metric.bad strong{color:#991b1b}
+.validation-summary{display:flex;gap:14px;align-items:flex-start;border:2px solid var(--line);border-radius:12px;padding:16px;margin:14px 0;background:#f8fafc}
+.validation-summary .summary-level{font-size:24px;font-weight:800;line-height:1.35}
+.validation-summary .summary-title{font-weight:750;margin-bottom:4px}
+.validation-summary.good{background:#ecfdf3;border-color:#22c55e;color:#166534}
+.validation-summary.medium{background:#fefce8;border-color:#eab308;color:#854d0e}
+.validation-summary.bad{background:#fef2f2;border-color:#ef4444;color:#991b1b}
+.validation-summary.neutral{background:#f8fafc;border-color:var(--line);color:var(--text)}
+.validation-summary .summary-detail{font-size:13px;line-height:1.55}
+canvas{display:block;width:100%;height:350px;border:1px solid var(--line);border-radius:8px}
+.tablewrap{overflow:auto;max-height:360px;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;white-space:nowrap}
+th{background:#f5f7fb;position:sticky;top:0}
+#equationTable tr.rgb-suitable > td{background:#bbf7d0 !important;color:#14532d !important;font-weight:700 !important}#equationTable tr.rgb-suitable > td:first-child{border-left:8px solid #16a34a !important}#equationTable tr.rgb-suitable{outline:2px solid #22c55e;outline-offset:-2px}
+
+/* Correlation Analysis: visually grouped subsections */
+#rgbPanel .analysis-section{border:1px solid #d8e2ef;border-radius:12px;padding:15px 16px 16px;margin:14px 0;background:linear-gradient(180deg,#fbfdff 0%,#ffffff 100%);box-shadow:0 2px 7px rgba(30,64,100,.045)}
+#rgbPanel .analysis-section h3{margin:0 0 13px;padding:0 0 9px;border-bottom:2px solid #dce8f6;color:#24466d;font-size:15px;display:flex;align-items:center;gap:8px}
+#rgbPanel .analysis-section h3:before{content:"";display:inline-block;width:5px;height:19px;border-radius:4px;background:#4f86c6;flex:0 0 5px}
+#rgbPanel .analysis-section .grid{padding:2px 1px}
+#simulateSpectraPanel .analysis-section{border:1px solid #d8e2ef;border-radius:12px;padding:15px 16px 16px;margin:14px 0;background:linear-gradient(180deg,#fbfdff 0%,#ffffff 100%);box-shadow:0 2px 7px rgba(30,64,100,.045)}
+#simulateSpectraPanel .analysis-section h3{margin:0 0 13px;padding:0 0 9px;border-bottom:2px solid #dce8f6;color:#24466d;font-size:15px;display:flex;align-items:center;gap:8px}
+#simulateSpectraPanel .analysis-section h3:before{content:"";display:inline-block;width:5px;height:19px;border-radius:4px;background:#4f86c6;flex:0 0 5px}
+#simulateSpectraPanel .analysis-section .grid{padding:2px 1px}
+#rgbPanel .analysis-section .metrics{margin-top:12px}
+#rgbPanel .analysis-section #correlationPlot{display:block;width:100%;max-width:100%;margin-top:14px;border:1px solid #e1e8f0;border-radius:8px}
+#rgbPanel .analysis-section .tablewrap{margin-top:10px}
+#rgbPanel .save-footer h2{margin-bottom:12px}
+#rgbPanel .calibration-plot-wrap canvas{width:100%;height:380px;border:1px solid #e1e8f0;border-radius:8px}
+@media(max-width:760px){#rgbPanel .analysis-section{padding:12px}.calibration-plot-wrap canvas{height:320px}}
+ .calibration-layout{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(220px,1fr);gap:14px;align-items:stretch;margin-top:10px}.calibration-plot-wrap{min-width:0}.calibration-plot-wrap canvas{height:350px}.calibration-results{display:flex;flex-direction:column;gap:12px}.calibration-result-card{border:1px solid var(--line);border-radius:10px;padding:16px;background:#fbfcff;min-width:0}.calibration-result-card span{display:block;color:#667085;font-size:12px;margin-bottom:8px}.calibration-result-card strong{display:block;font-size:19px;overflow-wrap:anywhere;line-height:1.5}.calibration-result-card small{display:block;color:#667085;margin-top:8px;font-size:12px;line-height:1.5}@media(max-width:760px){.calibration-layout{grid-template-columns:1fr}.calibration-plot-wrap canvas{height:300px}}
+.hidden{display:none!important}
+.warning{background:#fff8e7;border:1px solid #f0d69c;border-radius:8px;padding:12px;font-size:13px}
+@media(max-width:760px){.field{grid-column:span 6}.field.half{grid-column:1/-1}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:430px){.field{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header>
+<h1>RGB–UVVis Gaussian Lab</h1>
+<p>Offline spectral analysis · Gaussian fitting · RGB correlation</p>
+</header>
+<main>
+<nav>
+<button class="active" data-tab="fitPanel">1. Gaussian Fitting</button>
+<button data-tab="rgbPanel">2. Correlation Analysis</button>
+<button data-tab="simulationPanel">3. Data base for Simulation</button>
+<button data-tab="simulateSpectraPanel">4. Simulate Spectra</button>
+<button data-tab="validateSimulationPanel">5. Simulation Accuracy Validation</button>
+<button data-tab="historyPanel">6. History</button>
+</nav>
+
+
+<section id="fitPanel" class="panel">
+<h2>1. Substance information | ข้อมูลสาร</h2>
+<p class="note">ระบุข้อมูลสารและตัวอย่างที่กำลังนำสเปกตรัมมา Fit ข้อมูลส่วนนี้จะถูกส่งต่อไปยังแท็บ RGB Analysis เมื่อเลือก Transfer parameters to RGB</p>
+<div class="grid">
+<div class="field"><label for="fitCompoundName">ชื่อสาร (Substance name)</label><input id="fitCompoundName" placeholder="เช่น Methyl orange"></div>
+<div class="field"><label for="fitConcentration">ความเข้มข้น (Concentration, Molar)</label><input id="fitConcentration" type="number" step="any" placeholder="เช่น 0.20"></div>
+<div class="field"><label for="fitSampleName">Sample name</label><input id="fitSampleName" placeholder="เช่น MO-1"></div>
+</div>
+<h2 style="margin-top:22px">2. RGB color data | ข้อมูลค่าสี RGB</h2>
+<p class="note">กรอกค่า R, G, B ของตัวอย่างเดียวกับสเปกตรัมที่กำลัง Fit (รับค่าตั้งแต่ 0 ขึ้นไป รวมทั้งมากกว่า 255 สำหรับการคำนวณ; ค่าเกิน 255 ไม่ใช่ค่า RGB 8-bit จากกล้องโดยตรง)</p>
+<div class="grid">
+<div class="field"><label for="fitRed">R (≥ 0, ไม่จำกัดค่าสูงสุด)</label><input id="fitRed" type="number" min="0" step="any" placeholder="R value"></div>
+<div class="field"><label for="fitGreen">G (≥ 0, ไม่จำกัดค่าสูงสุด)</label><input id="fitGreen" type="number" min="0" step="any" placeholder="G value"></div>
+<div class="field"><label for="fitBlue">B (≥ 0, ไม่จำกัดค่าสูงสุด)</label><input id="fitBlue" type="number" min="0" step="any" placeholder="B value"></div>
+</div>
+<h2 style="margin-top:22px">3. UV–Vis Data Import | นำเข้าข้อมูล UV–Vis</h2>
+<p class="note">ใส่ข้อมูล 2 คอลัมน์ ได้แก่ Wavelength (nm) และ Absorbance โดยวางจาก Excel หรือเปิดไฟล์ CSV</p>
+<div class="grid">
+<div class="field half">
+<label for="csvFile">ไฟล์ข้อมูล CSV / TXT</label>
+<input id="csvFile" type="file" accept=".csv,.txt,.tsv">
+</div>
+<div class="field">
+<label for="xColumn">คอลัมน์ Wavelength</label>
+<select id="xColumn"><option value="0">Column 1</option></select>
+</div>
+<div class="field">
+<label for="yColumn">คอลัมน์ Absorbance</label>
+<select id="yColumn"><option value="1">Column 2</option></select>
+</div>
+<div class="field full">
+<label for="rawData">ข้อมูลสเปกตรัม (CSV, TSV หรือคัดลอกจาก Excel)</label>
+<textarea id="rawData" placeholder="Wavelength,Absorbance&#10;350,0.02&#10;352,0.03"></textarea>
+</div>
+</div>
+<div class="actions">
+<button id="loadData" class="primary" type="button">Load data</button>
+<button id="exampleData" type="button">Load example data</button>
+<button id="clearData" type="button">Clear</button>
+</div>
+<div id="dataStatus" class="status">ยังไม่ได้โหลดข้อมูล</div>
+<div id="lambdaMaxSummary" class="lambda-summary" style="display:none" aria-live="polite">
+ <div class="lambda-card"><span>λmax (nm) — Wavelength at maximum absorbance</span><strong id="lambdaMaxValue">—</strong></div>
+ <div class="lambda-card"><span>Absorbance at λmax</span><strong id="lambdaMaxAbsValue">—</strong></div>
+</div>
+
+<h2 style="margin-top:22px">4. Gaussian Fitting Settings | การตั้งค่าการ Fit แบบ Gaussian</h2>
+<div class="fit-settings-grid">
+  <div class="settings-card settings-general">
+    <h3>General settings | การตั้งค่าทั่วไป</h3>
+    <div class="grid">
+      <div class="field"><label for="peakCount">Number of peaks | จำนวนพีก</label><select id="peakCount"><option value="1">1 peak</option><option value="2" selected>2 peaks</option></select></div>
+      <div class="field"><label for="baselineMode">Baseline | เส้นฐาน</label><select id="baselineMode"><option value="zero">Fixed at zero</option><option value="fit" selected>Fit constant baseline</option></select></div>
+      <div class="field"><label for="fitMin">Fitting range: minimum λ (nm)</label><input id="fitMin" type="number" step="any" placeholder="Auto: minimum wavelength"></div>
+      <div class="field"><label for="fitMax">Fitting range: maximum λ (nm)</label><input id="fitMax" type="number" step="any" placeholder="Auto: maximum wavelength"></div>
+      <div class="field"><label for="maxIter">Maximum iterations</label><input id="maxIter" type="number" value="500" min="10" max="2000"></div>
+      <div class="field"><label for="minSigma">Minimum σ (nm)</label><input id="minSigma" type="number" value="1" min="0.01" step="0.1"></div>
+    </div>
+  </div>
+  <div class="settings-card peak-settings" id="peak1Settings">
+    <h3>Peak 1 settings | การตั้งค่า Peak 1</h3>
+    <div class="grid">
+      <div class="field"><label for="mu1">Initial μ1 (nm)</label><input id="mu1" type="number" value="417" step="1"></div>
+      <div class="field"><label for="sigma1">Initial σ1 (nm)</label><input id="sigma1" type="number" value="17" min="0.1" step="1"></div>
+    </div>
+  </div>
+  <div class="settings-card peak-settings" id="peak2Settings">
+    <h3>Peak 2 settings | การตั้งค่า Peak 2</h3>
+    <div class="grid">
+      <div class="field"><label for="mu2">Initial μ2 (nm)</label><input id="mu2" type="number" value="475" step="1"></div>
+      <div class="field"><label for="sigma2">Initial σ2 (nm)</label><input id="sigma2" type="number" value="23" min="0.1" step="1"></div>
+    </div>
+  </div>
+</div>
+<div class="actions">
+<button id="fitButton" class="primary" type="button">Run Gaussian Fit</button>
+<button id="saveFit" type="button" disabled>Save to History</button>
+<button id="saveToRGB" type="button" disabled>Transfer parameters to Correlation Analysis</button>
+</div>
+<div id="fitStatus" class="status">โหลดข้อมูลก่อนเริ่ม Fit</div>
+<div class="metrics">
+<div class="metric"><span>R²</span><strong id="r2">—</strong></div>
+<div class="metric"><span>RMSE</span><strong id="rmse">—</strong></div>
+<div class="metric"><span>SSE</span><strong id="sse">—</strong></div>
+<div class="metric"><span>Data points</span><strong id="pointCount">0</strong></div>
+</div>
+<h3>Measured spectrum and fitted components</h3>
+<div style="display:flex;flex-wrap:wrap;gap:12px;margin:8px 0 12px;align-items:center">
+  <label style="display:flex;align-items:center;gap:6px;margin:0;font-weight:500"><input id="showMeasured" type="checkbox" checked style="width:auto"> Measured</label>
+  <label style="display:flex;align-items:center;gap:6px;margin:0;font-weight:500"><input id="showTotalFit" type="checkbox" checked style="width:auto"> Total Fit</label>
+  <label style="display:flex;align-items:center;gap:6px;margin:0;font-weight:500"><input id="showPeak1" type="checkbox" checked style="width:auto"> Peak 1</label>
+  <label id="showPeak2Label" style="display:flex;align-items:center;gap:6px;margin:0;font-weight:500"><input id="showPeak2" type="checkbox" checked style="width:auto"> Peak 2</label>
+  <label style="display:flex;align-items:center;gap:6px;margin:0;font-weight:500"><input id="showBaseline" type="checkbox" style="width:auto"> Baseline</label>
+</div>
+<canvas id="spectrumPlot" width="1000" height="400"></canvas>
+<h3>Fitting parameters</h3>
+<div class="tablewrap">
+<table><thead><tr><th>Parameter</th><th>Value</th><th>Description</th></tr></thead>
+<tbody id="parameterTable"><tr><td colspan="3">ยังไม่มีผล Fit</td></tr></tbody></table>
+</div>
+<h3>ตรวจสอบความสอดคล้องของ Gaussian Fit กับข้อมูลจริง</h3>
+<p class="note">เปรียบเทียบจุดสูงสุดของข้อมูลที่วัดจริงกับจุดสูงสุดของเส้น Gaussian รวม ภายในช่วง fitting เดียวกัน หากต่างกันมาก ควรตรวจสอบการ Fit ก่อนนำ H, μ, σ ไปสร้างฐานข้อมูลจำลอง</p>
+<div class="tablewrap"><table><thead><tr><th>รายการ</th><th>λmax (nm)</th><th>Absorbance at λmax</th></tr></thead><tbody id="fitPeakComparison"><tr><td colspan="3">ยังไม่มีผล Fit</td></tr></tbody></table></div>
+<div id="fitPeakComparisonStatus" class="status">รอผล Gaussian Fit</div>
+<div class="warning" style="margin-top:14px">
+<strong>ข้อควรระวัง:</strong> การ Fit สอง peaks ที่ซ้อนทับกันอาจมีคำตอบได้หลายชุด ผลลัพธ์ขึ้นกับค่าเริ่มต้นและคุณภาพข้อมูล ควรตรวจสอบกราฟ residual และความสมเหตุสมผลของพารามิเตอร์ก่อนนำไปใช้ในงานวิจัย
+</div>
+</div>
+
+<div class="save-footer" style="margin-top:24px;padding-top:18px;border-top:2px solid var(--line)">
+<h2>Save Data | บันทึกข้อมูล Gaussian Fitting</h2>
+<p class="note">บันทึกโปรเจกต์เพื่อกลับมาทำงานต่อ หรือส่งออกผล Fit เป็นไฟล์ CSV แยกตามวัตถุประสงค์ โดยไฟล์สเปกตรัมจะมีข้อมูลแต่ละ peak และผลรวมของทุก peak</p>
+<div class="actions">
+<button id="saveProject" class="primary" type="button">Save Data / Project (.json)</button>
+<button id="loadProject" type="button">Load Project (.json)</button>
+<input id="projectFile" type="file" accept=".json,application/json" class="hidden">
+<button id="exportFit" type="button" disabled>Export fitted spectrum (.csv)</button>
+<button id="exportFitForRGB" type="button" disabled>Export fit parameters for Correlation Analysis (.csv)</button>
+</div>
+<div id="projectStatus" class="status" aria-live="polite">บันทึกโปรเจกต์จะดาวน์โหลดไฟล์ JSON ลงอุปกรณ์</div>
+</div>
+</section>
+
+<section id="rgbPanel" class="panel hidden">
+<h2>Correlation Analysis | RGB–Gaussian parameter analysis</h2>
+<p class="note">กรอกข้อมูลตัวอย่าง ค่าสี RGB และพารามิเตอร์ Gaussian เพื่อศึกษาความสัมพันธ์เชิงเส้น</p>
+<div class="analysis-section"><h3>1. Substance information | ข้อมูลสาร</h3>
+<div class="grid">
+<div class="field"><label for="compoundName">ชื่อสาร (Substance name)</label><input id="compoundName" placeholder="เช่น Methyl orange"></div>
+<div class="field"><label for="concentration">ความเข้มข้น (Concentration, Molar)</label><input id="concentration" type="number" step="any" placeholder="เช่น 0.20"></div>
+<div class="field"><label for="sampleName">Sample name</label><input id="sampleName" placeholder="เช่น MO-1"></div>
+<div class="field"><label for="rgbLambdaMax">λmax (nm)</label><input id="rgbLambdaMax" type="number" step="any" placeholder="จาก UV–Vis" readonly></div>
+<div class="field"><label for="rgbAbsAtLambdaMax">Absorbance at λmax</label><input id="rgbAbsAtLambdaMax" type="number" step="any" placeholder="จาก UV–Vis" readonly></div>
+<div class="field"><label for="rgbBaseline">Baseline B</label><input id="rgbBaseline" type="number" step="any" placeholder="จาก Gaussian fit" readonly></div>
+</div></div>
+<div class="analysis-section"><h3>2. RGB color data | ข้อมูลค่าสี RGB</h3>
+<div class="grid">
+<div class="field"><label for="red">R (≥ 0, ไม่จำกัดค่าสูงสุด)</label><input id="red" type="number" min="0" step="any" value="120"></div>
+<div class="field"><label for="green">G (≥ 0, ไม่จำกัดค่าสูงสุด)</label><input id="green" type="number" min="0" step="any" value="80"></div>
+<div class="field"><label for="blue">B (≥ 0, ไม่จำกัดค่าสูงสุด)</label><input id="blue" type="number" min="0" step="any" value="150"></div>
+</div></div>
+<div class="analysis-section"><h3>3. Gaussian fitting parameters | ข้อมูล Gaussian fit parameter</h3>
+<div class="grid">
+<div class="field"><label for="rgbH1">H1</label><input id="rgbH1" type="number" step="any"></div>
+<div class="field"><label for="rgbMu1">μ1 (nm)</label><input id="rgbMu1" type="number" step="any"></div>
+<div class="field"><label for="rgbS1">σ1 (nm)</label><input id="rgbS1" type="number" step="any"></div>
+<div class="field"><label for="rgbH2">H2</label><input id="rgbH2" type="number" step="any"></div>
+<div class="field"><label for="rgbMu2">μ2 (nm)</label><input id="rgbMu2" type="number" step="any"></div>
+<div class="field"><label for="rgbS2">σ2 (nm)</label><input id="rgbS2" type="number" step="any"></div>
+</div></div>
+<div class="analysis-section">
+<div class="actions">
+<button id="addRGB" class="primary" type="button">Add sample</button>
+<button id="importRGB" type="button">Import RGB CSV</button>
+<input id="rgbFile" type="file" accept=".csv,.txt" class="hidden">
+<button id="downloadRGBTemplate" type="button">Download CSV template</button>
+<button id="clearRGB" type="button">Clear RGB table</button>
+</div>
+<div id="rgbStatus" class="status">กรอกข้อมูลเพื่อเริ่มวิเคราะห์</div>
+<h3>RGB and Gaussian parameter data table</h3>
+<div class="tablewrap" id="rgbTable">ยังไม่มีข้อมูล RGB</div>
+</div>
+<div class="analysis-section"><h3>Correlation settings</h3>
+<div class="grid">
+<div class="field"><label for="rgbAnalysisSubstance">Substance (analyze separately)</label><select id="rgbAnalysisSubstance"><option value="">เพิ่มข้อมูลสารก่อน</option></select></div>
+<div class="field"><label for="rgbX">X variable</label>
+<select id="rgbX"><option value="R">R</option><option value="G">G</option><option value="B">B</option><option value="concentration">ความเข้มข้น (Concentration, Molar)</option></select></div>
+<div class="field"><label for="rgbY">Y variable</label>
+<select id="rgbY"><option value="baseline">Baseline B</option><option value="H1">H1</option><option value="mu1">μ1</option><option value="sigma1">σ1</option><option value="H2">H2</option><option value="mu2">μ2</option><option value="sigma2">σ2</option></select></div>
+<div class="field"><label for="rgbModelFamily">Relationship model</label><select id="rgbModelFamily"><option value="auto">Auto — compare using cross-validation</option><option value="linear">Linear</option><option value="quadratic">Quadratic (degree 2)</option><option value="exponential">Exponential</option><option value="logarithmic">Logarithmic</option><option value="power">Power</option></select></div>
+<div class="field" style="align-self:end"><button id="runCorrelation" class="primary" type="button">Calculate correlation</button></div>
+</div>
+<div class="metrics">
+<div class="metric"><span>Valid pairs (N)</span><strong id="corrN">0</strong></div>
+<div class="metric"><span>Pearson r</span><strong id="pearsonR">—</strong></div>
+<div class="metric"><span>R² (selected fit)</span><strong id="corrR2">—</strong></div>
+<div class="metric"><span>Slope (linear only)</span><strong id="corrSlope">—</strong></div>
+</div>
+<canvas id="correlationPlot" width="1000" height="400"></canvas>
+<div id="corrModelStatus" class="note" style="margin-top:8px">รอกด Calculate correlation เพื่อเปรียบเทียบสมการ</div>
+</div>
+<div class="analysis-section"><h3>Correlation equation | สมการความสัมพันธ์</h3><p class="note">กด Calculate correlation หลังเพิ่ม ลบ นำเข้าข้อมูล หรือเปลี่ยนตัวแปร เพื่อคำนวณใหม่จากข้อมูลจริง</p>
+<p class="note">เปรียบเทียบ Linear, Quadratic, Exponential, Logarithmic และ Power ด้วย Leave-One-Concentration-Out CV เมื่อจำนวนระดับอิสระและเงื่อนไขข้อมูลเพียงพอ Pearson r แสดงเฉพาะความสัมพันธ์เชิงเส้น ไม่ใช่ตัววัดคุณภาพของสมการโค้ง สีเขียวแสดงความสัมพันธ์ที่มีความแปรผันและผ่านเกณฑ์ CV เทียบกับการทำนายค่าเฉลี่ย; เนื่องจาก Auto ใช้ CV ชุดเดียวกันในการเลือกชนิดโมเดล ผล CV ของโมเดลที่เลือกอาจมีอคติในทางดี ต้องใช้ nested CV หรือชุดทดสอบอิสระเพื่อยืนยันความแม่นยำ</p>
+<div class="tablewrap" id="equationTable">ยังไม่มีข้อมูลเพียงพอสำหรับคำนวณสมการ</div>
+</div>
+<div class="analysis-section"><h3>RGB combined prediction equations | สมการประมาณค่าด้วย RGB ร่วมกัน</h3>
+<p class="note">ทดสอบโมเดลที่ใช้ R, G, B ร่วมกัน ได้แก่ Linear, Quadratic, Exponential, Logarithmic และ Power เฉพาะที่จำนวนข้อมูลและเงื่อนไขทางคณิตศาสตร์รองรับ โดยประเมินผลด้วยการกันหนึ่งระดับความเข้มข้นออกจากชุดฝึกทั้งกลุ่ม (LOCO)</p><p class="note" style="color:#9a3412">โมเดลที่ซับซ้อนต้องมีจำนวนความเข้มข้นอิสระมากกว่าโมเดลเส้นตรง การฟิตได้ไม่ใช่หลักฐานว่าทำนายสารตัวอย่างใหม่แม่นยำ เมื่อไม่มีโมเดลผ่านเกณฑ์ให้รายงานข้อจำกัดและใช้ Mean เฉพาะพารามิเตอร์ที่ไม่ได้สร้างสมการ</p>
+<div class="tablewrap" id="combinedEquationTable">ยังไม่มีข้อมูลเพียงพอสำหรับคำนวณสมการ</div>
+</div>
+<div class="analysis-section"><h3>Gaussian parameter summary | ค่าเฉลี่ยและ SD</h3>
+<p class="note">คำนวณค่าเฉลี่ย (Mean) และส่วนเบี่ยงเบนมาตรฐาน (SD; sample SD, n−1) สำหรับพารามิเตอร์ที่สมการ RGB ไม่สามารถนำไปใช้ทำนายได้ตามเกณฑ์ตรวจสอบ LOOCV</p>
+<div class="tablewrap" id="rgbSummaryTable">ยังไม่มีข้อมูล RGB</div>
+</div>
+<div class="analysis-section"><h3>Calibration curve of absorbance vs. concentration</h3>
+<p class="note">กราฟแสดงความสัมพันธ์ระหว่างความเข้มข้น (Molar) บนแกน x และ Absorbance at λmax บนแกน y โดยใช้ข้อมูลจากตารางด้านบน และประมาณความสัมพันธ์ด้วย linear regression</p>
+<div class="calibration-layout">
+ <div class="calibration-plot-wrap"><canvas id="calibrationPlot" width="1000" height="420" aria-label="Calibration curve of absorbance versus concentration"></canvas></div>
+ <div class="calibration-results">
+  <div class="calibration-result-card"><span>Linear regression equation</span><strong id="calibrationEquation">—</strong><small id="calibrationEquationDetail">ต้องมีข้อมูลที่มีความเข้มข้นและ Absorbance at λmax อย่างน้อย 2 จุด</small></div>
+  <div class="calibration-result-card"><span>R² (coefficient of determination)</span><strong id="calibrationR2">—</strong><small id="calibrationN">Valid data points: 0</small></div>
+ </div>
+</div>
+</div>
+
+<div class="save-footer" style="margin-top:24px;padding-top:18px;border-top:2px solid var(--line)">
+<h2>Save Analysis Results | บันทึกผลการวิเคราะห์</h2>
+<p class="note">ส่งออกตารางข้อมูล RGB และ Gaussian parameters เป็น CSV สำหรับ Excel หรือบันทึกโปรเจกต์ทั้งหมดเป็น JSON เพื่อเปิดทำงานต่อภายหลัง</p>
+<div class="actions">
+<button id="exportRGB" class="primary" type="button">Save Analysis Results (.csv)</button>
+<button id="saveRGBProject" type="button">Save Project (.json)</button>
+</div>
+<div id="rgbExportStatus" class="status" aria-live="polite">ไฟล์ CSV จะรวมตัวอย่างที่อยู่ในตาราง RGB Analysis</div>
+</section>
+
+<section id="simulationPanel" class="panel hidden">
+<h2>3. Data base for Simulation</h2>
+<p class="note">กด Build new database เพื่อสร้างฐานข้อมูลชุดใหม่จากข้อมูลปัจจุบันในแท็บ 2. RGB Analysis โดยจะบันทึกเป็นรายการแยกและเก็บฐานข้อมูลชุดเดิมไว้ สามารถสร้างสะสมหลายเวอร์ชัน ส่งออกข้อมูล หรือ ลบเฉพาะชุดที่ไม่ต้องการได้</p>
+<div class="warning"><strong>ข้อจำกัดของข้อมูลปัจจุบัน:</strong> แท็บ RGB Analysis รองรับพารามิเตอร์ได้สูงสุด 2 peaks (H1, μ1, σ1 และ H2, μ2, σ2) ดังนั้นฐานข้อมูลจะแสดงครบทุกพารามิเตอร์ที่มีอยู่ในตารางปัจจุบัน หากต้องการ 3 peaks ขึ้นไป ต้องขยายโครงสร้างข้อมูลในแท็บ 2 เพิ่มเติมก่อน</div>
+<div class="actions" style="margin-top:14px">
+<button id="refreshSimulationDB" class="primary" type="button">Build new database</button>
+<button id="exportSimulationDB" type="button">Export saved databases (.csv)</button>
+<button id="exportSimulationDBJSON" type="button">Export for Frontend (.json)</button>
+<button id="clearSimulationDB" type="button">Delete all saved databases</button>
+</div>
+<div id="simulationDBStatus" class="status" aria-live="polite">กด Build new database เพื่อสร้างและบันทึกฐานข้อมูลชุดใหม่</div>
+<div id="simulationDBContent"><p>ยังไม่มีฐานข้อมูลที่บันทึกไว้</p></div>
+</section>
+
+
+<section id="simulateSpectraPanel" class="panel hidden">
+<h2>4. Simulate Spectra</h2>
+<p class="note">จำลองสเปกตรัมจากค่าสี RGB ที่ผู้ใช้กรอก โดยเลือกชุดพารามิเตอร์จากฐานข้อมูลที่สร้างไว้ใน Tab 3 สมการที่ใช้คือ A(λ) = Σ Hᵢ exp[−(λ − μᵢ)²/(2σᵢ²)] และกำหนด baseline = 0</p>
+<div class="analysis-section">
+ <h3>1. RGB Input and Color Preview | ข้อมูลนำเข้า RGB และตัวอย่างสี</h3>
+ <div class="grid">
+  <div class="field"><label for="simR">Red (R), ≥ 0 ไม่จำกัดค่าสูงสุด</label><input id="simR" type="number" min="0" step="any" value="128"></div>
+  <div class="field"><label for="simG">Green (G), ≥ 0 ไม่จำกัดค่าสูงสุด</label><input id="simG" type="number" min="0" step="any" value="128"></div>
+  <div class="field"><label for="simB">Blue (B), ≥ 0 ไม่จำกัดค่าสูงสุด</label><input id="simB" type="number" min="0" step="any" value="128"></div>
+  <div class="rgb-preview-card" style="grid-column:1 / -1;width:100%;box-sizing:border-box;display:flex;align-items:center;gap:14px;padding:12px;border:1px solid var(--border,#d0d5dd);border-radius:10px;flex-wrap:wrap;min-width:0">
+   <div id="simRGBSwatch" role="img" aria-label="สีตัวอย่างจากค่า RGB" style="width:92px;height:64px;border:1px solid #98a2b3;border-radius:8px;background:rgb(128,128,128);flex-shrink:0"></div>
+   <div style="min-width:140px;flex:1"><strong>RGB color preview</strong><div id="simRGBColorValue" style="margin-top:4px">RGB (128, 128, 128) · HEX #808080</div><div class="note" style="margin-top:4px">สีตัวอย่างแสดงได้เฉพาะช่วง 0–255; ค่าอินพุตที่มากกว่า 255 จะถูกใช้คำนวณตามจริง แต่จำกัดเฉพาะสีในช่อง Preview เท่านั้น</div></div>
+  </div>
+ </div>
+</div>
+<div class="analysis-section">
+ <h3>2. Simulation Setting | การตั้งค่าการจำลอง</h3>
+ <div class="grid">
+  <div class="field"><label for="simLambdaMin">Wavelength start (nm)</label><input id="simLambdaMin" type="number" step="any" value="350"></div>
+  <div class="field"><label for="simLambdaMax">Wavelength end (nm)</label><input id="simLambdaMax" type="number" step="any" value="800"></div>
+  <div class="field"><label for="simLambdaStep">Wavelength interval (nm)</label><input id="simLambdaStep" type="number" min="0.01" step="any" value="1"></div>
+  <div class="field"><label for="simDatabaseSelect">Parameter for simulation | Model</label><select id="simDatabaseSelect"><option value="">— เลือกฐานข้อมูล —</option></select></div>
+ </div>
+</div>
+<h3>Database parameters used</h3><div id="simParameterInfo"><p>ยังไม่ได้เลือกฐานข้อมูล</p></div>
+<div class="actions" style="margin-top:14px"><button id="runSimulation" class="primary" type="button">Simulate spectrum</button><button id="exportSimSpectrum" type="button">Export simulated data (.csv)</button></div>
+<div id="simStatus" class="status" aria-live="polite">เลือกฐานข้อมูลจากรายการ แล้วกรอก RGB และช่วงความยาวคลื่น</div>
+<h3>Simulated spectrum</h3>
+<div class="calibration-layout" style="grid-template-columns:minmax(0,2.2fr) minmax(220px,1fr);align-items:start">
+ <div><div class="actions" style="align-items:center">
+<label style="display:flex;gap:6px;align-items:center;font-weight:500"><input id="simShowPeak1" type="checkbox" checked style="width:auto"> Peak 1</label>
+<label style="display:flex;gap:6px;align-items:center;font-weight:500"><input id="simShowPeak2" type="checkbox" checked style="width:auto"> Peak 2</label>
+<label style="display:flex;gap:6px;align-items:center;font-weight:500"><input id="simShowTotal" type="checkbox" checked style="width:auto"> Combined spectrum</label>
+</div>
+<canvas id="simSpectrumCanvas" width="1000" height="420" aria-label="Simulated absorption spectrum graph"></canvas></div>
+ <div id="simulatedSummary" class="calibration-results"><div class="calibration-result-card"><span>λmax (nm)</span><strong id="simLambdaMaxResult">—</strong><small>ตำแหน่งที่ Combined spectrum มีค่า Absorbance สูงสุด</small></div><div class="calibration-result-card"><span>Absorbance at λmax</span><strong id="simAbsAtMaxResult">—</strong><small>ค่าจากสเปกตรัมจำลอง</small></div><div class="calibration-result-card"><span>Concentration (M)</span><strong id="simConcentrationResult">—</strong><small id="simConcentrationEquationResult">คำนวณจากสมการ Calibration curve ในฐานข้อมูล</small></div></div>
+</div>
+<h3>Simulated data preview</h3><div id="simDataTable" class="tablewrap">ยังไม่มีข้อมูลจำลอง</div>
+</section>
+
+<section id="validateSimulationPanel" class="panel hidden">
+<h2>5. Simulation Accuracy Validation</h2>
+<p class="note">เปรียบเทียบสเปกตรัมที่จำลองจาก Tab 4 กับสเปกตรัมจริงที่นำเข้าเป็น CSV/TXT โดยจะจับคู่ข้อมูลตามช่วงความยาวคลื่นที่ซ้อนทับกัน และ interpolate ค่าจำลองไปยัง wavelength ของข้อมูลจริงก่อนคำนวณสถิติ</p>
+<div class="actions" style="margin:12px 0">
+ <div style="display:flex;flex-direction:column;align-items:flex-start;gap:7px">
+ <button id="useLatestSimulation" class="primary" type="button">Use latest simulation data</button>
+ <span id="validationSimInfo" class="note" aria-live="polite">ยังไม่ได้รับข้อมูลจำลองจาก Tab 4</span>
+ </div>
+</div>
+<div class="card" style="border:1px solid var(--border,#d0d5dd);border-radius:10px;padding:14px;margin:12px 0">
+ <h3>Upload measured spectrum</h3>
+ <p class="note">ไฟล์ควรมีอย่างน้อย 2 คอลัมน์ ได้แก่ wavelength (nm) และ absorbance; ยอมรับ CSV, TXT หรือ TSV</p>
+ <div class="grid">
+  <div class="field"><label for="validationFile">Measured spectrum file</label><input id="validationFile" type="file" accept=".csv,.txt,.tsv"></div>
+  <div class="field"><label for="validationXColumn">Wavelength column</label><select id="validationXColumn" disabled><option value="0">Upload file first</option></select></div>
+  <div class="field"><label for="validationYColumn">Absorbance column</label><select id="validationYColumn" disabled><option value="1">Upload file first</option></select></div>
+ </div>
+ <div id="validationSelectedFilePreview" class="card hidden" style="margin:10px 0;padding:12px;border:1px solid var(--border,#d0d5dd);border-radius:8px">
+  <strong>Selected file preview</strong><div id="validationSelectedFileInfo" class="note" style="margin:6px 0"></div>
+  <textarea id="validationSelectedFileText" spellcheck="false" aria-label="Editable measured spectrum file content" style="display:block;box-sizing:border-box;width:100%;min-height:240px;max-height:520px;overflow:auto;white-space:pre;tab-size:4;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--surface,#f8fafc);padding:10px;border:1px solid var(--border,#d0d5dd);border-radius:6px;font-size:12px;margin:0"></textarea>
+  <p class="note" style="margin:8px 0 0">สามารถแก้ไขข้อมูลทุกบรรทัดในช่องนี้ได้ ระบบจะใช้ข้อความที่แก้ไขแล้วเมื่อกด Upload selected file</p>
+ </div>
+ <div class="actions" style="margin:10px 0"><button id="uploadValidationFile" class="primary" type="button" disabled>Upload selected file</button></div>
+ <div id="validationFileStatus" class="status" aria-live="polite">ยังไม่ได้เลือกไฟล์สเปกตรัมจริง</div>
+</div>
+<div class="actions" style="margin:12px 0">
+ <button id="runValidation" class="primary" type="button">Compare spectra and calculate statistics</button>
+ <button id="exportValidationCSV" type="button">Export comparison data (.csv)</button>
+ <button id="clearValidation" type="button">Clear comparison data</button>
+</div>
+<div id="validationStatus" class="status" aria-live="polite">รับข้อมูลจำลองจาก Tab 4 และอัปโหลดสเปกตรัมจริงก่อนเริ่มเปรียบเทียบ</div>
+<h3>Measured vs simulated spectrum</h3>
+<canvas id="validationSpectrumCanvas" width="1000" height="420" aria-label="Measured and simulated spectrum comparison"></canvas>
+<h3>Accuracy statistics</h3>
+<p class="note">ค่า Maximum absolute error แสดงเป็นกรอบตัวเลขร่วมกับค่าสถิติอื่น โดยค่าความคลาดเคลื่อนยิ่งต่ำยิ่งดี ส่วน R² ยิ่งสูงยิ่งดี</p>
+<p class="note">เกณฑ์สีเป็นเกณฑ์เบื้องต้นที่ผู้พัฒนากำหนดสำหรับระบบนี้ ไม่ใช่มาตรฐานสากล: ดีมาก (สีเขียว), ยอมรับได้เบื้องต้น (สีเหลือง), ควรปรับปรุง (สีแดง) โดยคำนวณเปอร์เซ็นต์ความคลาดเคลื่อนเทียบกับช่วง Absorbance ของข้อมูลจริง (Amax − Amin) ยกเว้น R² และจำนวนจุด</p>
+<div id="validationMetricCards" class="metrics"><div class="metric"><span>R²</span><strong>—</strong></div><div class="metric"><span>RMSE</span><strong>—</strong></div><div class="metric"><span>MAE</span><strong>—</strong></div><div class="metric"><span>Maximum absolute error</span><strong>—</strong></div><div class="metric"><span>NRMSE</span><strong>—</strong></div><div class="metric"><span>Bias (sim − measured)</span><strong>—</strong></div><div class="metric"><span>Matched points</span><strong>—</strong></div></div>
+<div id="validationOverallSummary" class="validation-summary neutral" role="status" aria-live="polite"><div><div class="summary-title">สรุปภาพรวมผลการเปรียบเทียบ</div><div class="summary-level">รอข้อมูล</div></div><div class="summary-detail">อัปโหลดสเปกตรัมจริงและกด Compare spectra and calculate statistics เพื่อประเมินระดับผลการเปรียบเทียบ</div></div>
+<h3>Paired data preview</h3><div id="validationDataTable" class="tablewrap">ยังไม่มีข้อมูลเปรียบเทียบ</div>
+</section>
+
+<section id="historyPanel" class="panel hidden">
+<h2>Fitting history</h2>
+<p class="note">ประวัติจะเก็บไว้ใน local storage ของเบราว์เซอร์เครื่องนี้</p>
+<div class="actions">
+<button id="refreshHistory" type="button">Refresh</button>
+<button id="exportHistory" type="button">Export history CSV</button>
+<button id="clearHistory" type="button">Clear history</button>
+</div>
+<div id="historyStatus" class="status"></div>
+<div id="historyTable">ยังไม่มีประวัติ</div>
+</section>
+</main>
+
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+let spectrum=[],fitResult=null,columnNames=[];
+let rgbRows=[];
+let correlationCalculated=false;
+const HISTORY_KEY="rgb_uvvis_gaussian_history_v2";
+const RGB_KEY="rgb_uvvis_rgb_table_v2";
+const SIM_DB_KEY="rgb_uvvis_simulation_database_snapshots_v1";
+
+function num(v,d=6){return Number.isFinite(v)?Number(v).toFixed(d):"—"}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function status(id,msg,type=""){$(id).className="status "+type;$(id).textContent=msg}
+function parseCSV(text){
+ const lines=text.replace(/^\uFEFF/,"").split(/\r?\n/).filter(s=>s.trim());
+ if(!lines.length)throw Error("ไม่พบข้อมูล");
+ const delim=[",","\t",";"].sort((a,b)=>lines[0].split(b).length-lines[0].split(a).length)[0];
+ const rows=lines.map(line=>{
+  const out=[];let cell="",quoted=false;
+  for(let i=0;i<line.length;i++){
+   const c=line[i];
+   if(c==='"'){if(quoted&&line[i+1]==='"'){cell+='"';i++}else quoted=!quoted}
+   else if(c===delim&&!quoted){out.push(cell.trim());cell=""}
+   else cell+=c;
+  }
+  out.push(cell.trim());return out;
+ });
+ const hasHeader=rows[0].filter(v=>v!==""&&Number.isFinite(Number(v))).length<2;
+ columnNames=hasHeader?rows[0].map((v,i)=>v||`Column ${i+1}`):rows[0].map((_,i)=>`Column ${i+1}`);
+ return {rows:hasHeader?rows.slice(1):rows,hasHeader};
+}
+function populateColumns(){
+ const x=$("xColumn"),y=$("yColumn");x.innerHTML="";y.innerHTML="";
+ columnNames.forEach((name,i)=>{
+  [x,y].forEach(sel=>{const o=document.createElement("option");o.value=i;o.textContent=`${i+1}: ${name}`;sel.appendChild(o)});
+ });
+ x.value="0";y.value=String(Math.min(1,columnNames.length-1));
+}
+function loadSpectrum(){
+ try{
+  const parsed=parseCSV($("rawData").value);populateColumns();
+  const xi=Number($("xColumn").value),yi=Number($("yColumn").value);
+  const pts=parsed.rows.map(r=>({x:Number(r[xi]),y:Number(r[yi])}))
+   .filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y)).sort((a,b)=>a.x-b.x);
+  if(pts.length<5)throw Error("ต้องมีข้อมูลตัวเลขอย่างน้อย 5 จุด");
+  if(new Set(pts.map(p=>p.x)).size<5)throw Error("ต้องมี wavelength ไม่ซ้ำกันอย่างน้อย 5 ค่า");
+  spectrum=pts;fitResult=null;
+  $("pointCount").textContent=pts.length;
+  $("exportFit").disabled=$("exportFitForRGB").disabled=$("saveFit").disabled=$("saveToRGB").disabled=true;
+  const maxPoint=pts.reduce((best,p)=>p.y>best.y?p:best,pts[0]);
+  $("lambdaMaxValue").textContent=num(maxPoint.x,3);
+  $("lambdaMaxAbsValue").textContent=num(maxPoint.y,6);
+  $("lambdaMaxSummary").style.display="grid";
+  clearFitOutput();drawSpectrum();
+  status("dataStatus",`โหลดข้อมูลสำเร็จ ${pts.length} จุด (${pts[0].x}–${pts.at(-1).x} nm)`,"ok");
+  status("fitStatus","ข้อมูลพร้อมแล้ว กด Run Gaussian Fit");
+ }catch(e){status("dataStatus",e.message,"error")}
+}
+function clearFitOutput(){
+ ["r2","rmse","sse"].forEach(id=>$(id).textContent="—");
+ $("parameterTable").innerHTML="<tr><td colspan='3'>ยังไม่มีผล Fit</td></tr>";
+ if($("fitPeakComparison"))$("fitPeakComparison").innerHTML="<tr><td colspan='3'>ยังไม่มีผล Fit</td></tr>";
+ if($("fitPeakComparisonStatus"))status("fitPeakComparisonStatus","รอผล Gaussian Fit");
+}
+function model(p,x,n,base){
+ let i=base?1:0,y=base?p[0]:0;
+ for(let k=0;k<n;k++){const H=p[i++],mu=p[i++],s=p[i++];y+=H*Math.exp(-.5*((x-mu)/s)**2)}
+ return y;
+}
+function sse(p,n,base,data=spectrum){
+ return data.reduce((sum,q)=>sum+(q.y-model(p,q.x,n,base))**2,0);
+}
+function getFitRange(){
+ const rawMin=$("fitMin").value.trim(),rawMax=$("fitMax").value.trim();
+ const min=rawMin===""?spectrum[0]?.x:Number(rawMin);
+ const max=rawMax===""?spectrum.at(-1)?.x:Number(rawMax);
+ if(!Number.isFinite(min)||!Number.isFinite(max)||min>=max)throw Error("ช่วง fitting ไม่ถูกต้อง: λ minimum ต้องน้อยกว่า λ maximum");
+ const data=spectrum.filter(q=>q.x>=min&&q.x<=max);
+ if(data.length<5)throw Error(`ช่วงที่เลือกมีข้อมูลเพียง ${data.length} จุด ต้องมีอย่างน้อย 5 จุด`);
+ return {min,max,data};
+}
+function solve(A,b){
+ const n=b.length,M=A.map((r,i)=>r.slice().concat(b[i]));
+ for(let k=0;k<n;k++){
+  let pivot=k;for(let i=k+1;i<n;i++)if(Math.abs(M[i][k])>Math.abs(M[pivot][k]))pivot=i;
+  if(Math.abs(M[pivot][k])<1e-22)return null;
+  [M[k],M[pivot]]=[M[pivot],M[k]];
+  const d=M[k][k];for(let j=k;j<=n;j++)M[k][j]/=d;
+  for(let i=0;i<n;i++)if(i!==k){const f=M[i][k];for(let j=k;j<=n;j++)M[i][j]-=f*M[k][j]}
+ }
+ return M.map(r=>r[n]);
+}
+function constrain(p,n,base,xmin,xmax,minS){
+ let i=base?1:0;
+ if(base)p[0]=Math.max(-1e6,Math.min(1e6,p[0]));
+ for(let k=0;k<n;k++){
+  p[i]=Math.max(0,Math.min(1e6,p[i]));i++;
+  p[i]=Math.max(xmin,Math.min(xmax,p[i]));i++;
+  p[i]=Math.max(minS,Math.min((xmax-xmin)*2+minS,Math.abs(p[i])));i++;
+ }
+ return p;
+}
+function runFit(){
+ if(spectrum.length<5){status("fitStatus","กรุณาโหลดข้อมูลก่อน","error");return}
+ let fitRange;
+ try{fitRange=getFitRange()}catch(e){status("fitStatus",e.message,"error");return}
+ const fitData=fitRange.data;
+ const n=Number($("peakCount").value),base=$("baselineMode").value==="fit";
+ const xmin=fitData[0].x,xmax=fitData.at(-1).x,range=Math.max(xmax-xmin,1);
+ const ys=fitData.map(q=>q.y),low=Math.min(...ys),high=Math.max(...ys);
+ const minS=Math.max(Number($("minSigma").value)||1,.01);
+ if(!Number.isFinite(minS)||minS<=0||minS>(xmax-xmin)*2){status("fitStatus","ค่า Minimum σ ต้องมากกว่า 0 และไม่ควรเกิน 2 เท่าของช่วง fitting","error");return}
+ let p=base?[low]:[];
+ const mus=[Number($("mu1").value),Number($("mu2").value)];
+ const sigs=[Number($("sigma1").value),Number($("sigma2").value)];
+ for(let k=0;k<n;k++){
+  const mu=Number.isFinite(mus[k])?mus[k]:xmin+range*(k+1)/(n+1);
+  const near=fitData.reduce((a,q)=>Math.abs(q.x-mu)<Math.abs(a.x-mu)?q:a,fitData[0]);
+  p.push(Math.max(0,near.y-(base?low:0)),Math.max(xmin,Math.min(xmax,mu)),Math.max(minS,sigs[k]||range/10));
+ }
+ p=constrain(p,n,base,xmin,xmax,minS);
+ let lambda=.001,err=sse(p,n,base,fitData),converged=false,iterations=0;
+ const maxIter=Math.max(10,Math.min(2000,Number($("maxIter").value)||500));
+ for(let it=0;it<maxIter;it++){
+  iterations=it+1;const m=p.length,JtJ=Array.from({length:m},()=>Array(m).fill(0)),Jtr=Array(m).fill(0);
+  for(const q of fitData){
+   const residual=q.y-model(p,q.x,n,base),jac=[];
+   for(let j=0;j<m;j++){
+    const step=1e-5*(Math.abs(p[j])+1),a=p.slice(),b=p.slice();
+    a[j]+=step;b[j]-=step;
+    jac.push((model(a,q.x,n,base)-model(b,q.x,n,base))/(2*step));
+   }
+   for(let a=0;a<m;a++){Jtr[a]+=jac[a]*residual;for(let b=0;b<m;b++)JtJ[a][b]+=jac[a]*jac[b]}
+  }
+  const damp=JtJ.map((r,i)=>r.map((v,j)=>i===j?v+lambda*(Math.abs(v)+1e-10):v));
+  const delta=solve(damp,Jtr);if(!delta)break;
+  const trial=constrain(p.map((v,i)=>v+delta[i]),n,base,xmin,xmax,minS),next=sse(trial,n,base,fitData);
+  if(Number.isFinite(next)&&next<err){
+   const improvement=err-next;p=trial;err=next;lambda=Math.max(lambda/3,1e-12);
+   if(improvement<1e-12*(err+1)||Math.sqrt(delta.reduce((a,v)=>a+v*v,0))<1e-7){converged=true;break}
+  }else{lambda=Math.min(lambda*10,1e15);if(lambda>=1e14)break}
+ }
+ let i=base?1:0;
+ const peaks=[];
+ for(let k=0;k<n;k++){peaks.push({H:p[i],mu:p[i+1],sigma:p[i+2]});i+=3}
+ peaks.sort((a,b)=>a.mu-b.mu);
+ const baseline=base?p[0]:0,mean=ys.reduce((a,b)=>a+b,0)/ys.length;
+ const sst=ys.reduce((a,y)=>a+(y-mean)**2,0);
+ const r2=sst===0?NaN:1-err/sst,rmse=Math.sqrt(err/fitData.length);
+ const parameters=[...(base?[baseline]:[]),...peaks.flatMap(a=>[a.H,a.mu,a.sigma])];
+ // Compare measured and fitted maxima over the SAME fitting interval.
+ const measuredMax=fitData.reduce((best,q)=>q.y>best.y?q:best,fitData[0]);
+ const fitSpan=fitRange.max-fitRange.min;
+ const fineStep=Math.min(0.05,Math.max(fitSpan/200000,0.001));
+ let fitMaxPoint={x:fitRange.min,y:model(parameters,fitRange.min,n,base)};
+ for(let x=fitRange.min;x<=fitRange.max+fineStep*1e-8;x+=fineStep){
+  const xx=Math.min(x,fitRange.max),y=model(parameters,xx,n,base);
+  if(y>fitMaxPoint.y)fitMaxPoint={x:xx,y};
+ }
+ const maxAbsDifference=fitMaxPoint.y-measuredMax.y;
+ const maxAbsDifferencePct=Math.abs(measuredMax.y)>1e-12?maxAbsDifference/Math.abs(measuredMax.y)*100:NaN;
+ // Store fitted points only within the selected fitting interval.
+ fitResult={peaks,baseline,base,n,r2,rmse,sse:err,iterations,converged,
+  fitMin:fitRange.min,fitMax:fitRange.max,fitPointCount:fitData.length,
+  measuredLambdaMax:measuredMax.x,measuredAbsAtMax:measuredMax.y,
+  fitLambdaMax:fitMaxPoint.x,fitAbsAtMax:fitMaxPoint.y,
+  maxAbsDifference,maxAbsDifferencePct,
+  fitted:fitData.map(q=>({x:q.x,y:q.y,fit:model(parameters,q.x,n,base)})),
+  date:new Date().toLocaleString()};
+ renderFit();
+}
+function renderFit(){
+ const r=fitResult;
+ $("r2").textContent=num(r.r2);$("rmse").textContent=num(r.rmse,7);$("sse").textContent=num(r.sse,8);
+ $("pointCount").textContent=r.fitted.length;
+ const rows=[["Baseline B",r.baseline,"Constant baseline"]];
+ r.peaks.forEach((p,i)=>{
+  rows.push([`Peak ${i+1} H`,p.H,"Peak height above baseline"]);
+  rows.push([`Peak ${i+1} μ`,p.mu,"Peak position (nm)"]);
+  rows.push([`Peak ${i+1} σ`,p.sigma,"Gaussian standard deviation (nm)"]);
+  rows.push([`Peak ${i+1} FWHM`,2*Math.sqrt(2*Math.log(2))*p.sigma,"Full width at half maximum (nm)"]);
+ });
+ $("parameterTable").innerHTML=rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${num(r[1],8)}</td><td>${esc(r[2])}</td></tr>`).join("");
+ $("fitPeakComparison").innerHTML=`<tr><td>Measured maximum (within fit range)</td><td>${num(r.measuredLambdaMax,4)}</td><td>${num(r.measuredAbsAtMax,8)}</td></tr><tr><td>Gaussian total-fit maximum</td><td>${num(r.fitLambdaMax,4)}</td><td>${num(r.fitAbsAtMax,8)}</td></tr><tr><td>Difference (fit − measured)</td><td>${num(r.fitLambdaMax-r.measuredLambdaMax,4)}</td><td>${num(r.maxAbsDifference,8)}${Number.isFinite(r.maxAbsDifferencePct)?` (${num(r.maxAbsDifferencePct,3)}% of measured maximum)`:""}</td></tr>`;
+ const pct=Math.abs(r.maxAbsDifferencePct);
+ status("fitPeakComparisonStatus",Number.isFinite(pct)&&pct>10?"จุดสูงสุดของ Gaussian Fit ต่างจากข้อมูลจริงมากกว่า 10% ภายในช่วง fitting นี้ ควรตรวจกราฟและ residual ก่อนนำไปจำลอง":"เปรียบเทียบจุดสูงสุดของ Gaussian Fit กับข้อมูลจริงแล้ว; ตรวจค่า ΔAbsorbance และกราฟประกอบ",Number.isFinite(pct)&&pct>10?"error":"ok");
+ $("exportFit").disabled=$("exportFitForRGB").disabled=$("saveFit").disabled=$("saveToRGB").disabled=false;
+ status("fitStatus",`Fit เสร็จในช่วง ${num(r.fitMin,2)}–${num(r.fitMax,2)} nm (${r.fitPointCount} จุด) · ${r.iterations} iterations · ${r.converged?"Convergence criterion reached":"ควรตรวจสอบค่าเริ่มต้นและกราฟ"}`,r.converged?"ok":"");
+ drawSpectrum();
+}
+function drawChart(canvas,points,fitPoints=null,xLabel="Wavelength (nm)",yLabel="Absorbance",options={}){
+ const ctx=canvas.getContext("2d"),w=canvas.width,h=canvas.height;
+ ctx.clearRect(0,0,w,h);ctx.fillStyle="#fff";ctx.fillRect(0,0,w,h);
+ const measured=options.showMeasured===false?[]:points;
+ const series=(options.series||[]).filter(s=>s.points&&s.points.length);
+ if(fitPoints&&options.showTotalFit!==false)series.unshift({name:"Total Fit",color:"#d94841",points:fitPoints,width:2.5});
+ const visiblePoints=[...measured,...series.flatMap(s=>s.points)];
+ if(!visiblePoints.length){ctx.fillStyle="#667085";ctx.font="16px sans-serif";ctx.fillText("No data to plot",25,40);return}
+ let xmin=Math.min(...visiblePoints.map(p=>p.x)),xmax=Math.max(...visiblePoints.map(p=>p.x));
+ if(xmin===xmax){xmin-=1;xmax+=1}
+ let ymin=Math.min(...visiblePoints.map(p=>p.y)),ymax=Math.max(...visiblePoints.map(p=>p.y));
+ if(ymin===ymax){ymin-=1;ymax+=1}const pad=(ymax-ymin)*.1;ymin-=pad;ymax+=pad;
+ const L=75,R=25,T=25,B=58,pw=w-L-R,ph=h-T-B;
+ const X=x=>L+(x-xmin)/(xmax-xmin)*pw,Y=y=>T+(ymax-y)/(ymax-ymin)*ph;
+ ctx.strokeStyle="#e4e9f0";ctx.font="12px sans-serif";ctx.fillStyle="#475467";
+ for(let i=0;i<=5;i++){
+  const yy=T+ph*i/5;ctx.beginPath();ctx.moveTo(L,yy);ctx.lineTo(w-R,yy);ctx.stroke();
+  ctx.textAlign="right";ctx.fillText((ymax-(ymax-ymin)*i/5).toFixed(3),L-9,yy+4);
+  const xx=L+pw*i/5;ctx.beginPath();ctx.moveTo(xx,T);ctx.lineTo(xx,T+ph);ctx.stroke();
+  ctx.textAlign="center";ctx.fillText((xmin+(xmax-xmin)*i/5).toFixed(1),xx,T+ph+20);
+ }
+ ctx.strokeStyle="#667085";ctx.beginPath();ctx.moveTo(L,T);ctx.lineTo(L,T+ph);ctx.lineTo(w-R,T+ph);ctx.stroke();
+ ctx.fillStyle="#172033";ctx.font="14px sans-serif";ctx.textAlign="center";ctx.fillText(xLabel,L+pw/2,h-12);
+ ctx.save();ctx.translate(18,T+ph/2);ctx.rotate(-Math.PI/2);ctx.fillText(yLabel,0,0);ctx.restore();
+ // Draw measured spectrum as a connected line plus points when requested; this makes the four main spectra visible together.
+ if(measured.length){
+  if(options.measuredAsLine){
+   const arr=measured.slice().sort((a,b)=>a.x-b.x);ctx.save();ctx.strokeStyle="#2865bd";ctx.lineWidth=2;ctx.beginPath();
+   arr.forEach((p,i)=>{if(!i)ctx.moveTo(X(p.x),Y(p.y));else ctx.lineTo(X(p.x),Y(p.y))});ctx.stroke();ctx.restore();
+  }
+  ctx.fillStyle="#2865bd";measured.forEach(p=>{ctx.beginPath();ctx.arc(X(p.x),Y(p.y),options.pointRadius||(options.measuredAsLine?2:3),0,2*Math.PI);ctx.fill()})
+ }
+ series.forEach(s=>{
+  const arr=s.points.slice().sort((a,b)=>a.x-b.x);if(!arr.length)return;
+  ctx.save();ctx.strokeStyle=s.color;ctx.lineWidth=s.width||(s.name==="Total Fit"?3:2);ctx.setLineDash(s.dash||[]);ctx.beginPath();
+  arr.forEach((p,i)=>{if(!i)ctx.moveTo(X(p.x),Y(p.y));else ctx.lineTo(X(p.x),Y(p.y))});ctx.stroke();ctx.restore();
+ });
+ const legend=[];if(measured.length)legend.push({name:"Measured",color:"#2865bd",point:!options.measuredAsLine});
+ series.forEach(s=>legend.push({name:s.name,color:s.color,dash:s.dash}));
+ ctx.font="12px sans-serif";ctx.textAlign="left";
+ let lx=L+8,ly=T+15;
+ legend.forEach(item=>{
+  if(lx> w-145){lx=L+8;ly+=17}
+  ctx.strokeStyle=item.color;ctx.fillStyle=item.color;ctx.lineWidth=2;
+  if(item.point){ctx.beginPath();ctx.arc(lx+3,ly-4,3,0,2*Math.PI);ctx.fill()}
+  else{ctx.save();ctx.setLineDash(item.dash||[]);ctx.beginPath();ctx.moveTo(lx,ly-4);ctx.lineTo(lx+15,ly-4);ctx.stroke();ctx.restore()}
+  ctx.fillStyle=item.color;ctx.fillText(item.name,lx+(item.point?10:20),ly);lx+= (item.point?10:20)+ctx.measureText(item.name).width+18;
+ });
+}
+function drawSpectrum(){
+ const hasFit=!!fitResult;
+ const series=[];
+ if(hasFit){
+  const xValues=fitResult.fitted.map(p=>p.x);
+  const palette=["#16a085","#8e44ad","#d68910","#2874a6","#c0392b","#7d3c98"];
+  (fitResult.peaks||[]).forEach((p,i)=>{
+   const checkboxId=i===0?"showPeak1":i===1?"showPeak2":null;
+   const show=checkboxId?$(checkboxId).checked:true;
+   if(show)series.push({name:`Peak ${i+1}`,color:palette[i%palette.length],points:xValues.map(x=>({x,y:p.H*Math.exp(-0.5*Math.pow((x-p.mu)/p.sigma,2))}))});
+  });
+  if($("showBaseline").checked&&fitResult.base){
+   series.push({name:"Baseline",color:"#667085",dash:[6,4],points:xValues.map(x=>({x,y:fitResult.baseline}))});
+  }
+ }
+ const totalFit=hasFit&&$("showTotalFit").checked?fitResult.fitted.map(p=>({x:p.x,y:p.fit})):null;
+ drawChart($("spectrumPlot"),spectrum,totalFit,"Wavelength (nm)","Absorbance",{
+  showMeasured:$ ("showMeasured").checked,
+  showTotalFit:$ ("showTotalFit").checked,
+  measuredAsLine:true,
+  series
+ });
+}
+function downloadCSV(filename,lines){
+ try{
+  const blob=new Blob(["\uFEFF"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download=filename;a.style.display="none";document.body.appendChild(a);
+  a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+  return true;
+ }catch(err){
+  console.error("CSV export failed",err);
+  alert("ส่งออก CSV ไม่สำเร็จ: "+(err&&err.message?err.message:"Unknown error"));
+  return false;
+ }
+}
+function downloadCanvasPNG(canvas,filename){
+ return new Promise((resolve,reject)=>{
+  try{
+   canvas.toBlob(blob=>{
+    if(!blob){reject(new Error("ไม่สามารถสร้างไฟล์กราฟ PNG ได้"));return}
+    const url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download=filename;a.style.display="none";document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),2000);resolve(true);
+   },"image/png");
+  }catch(err){reject(err)}
+ });
+}
+function makeExportSpectrumChart(){
+ const canvas=document.createElement("canvas");canvas.width=1600;canvas.height=700;
+ const peaks=fitResult.peaks||[],xValues=fitResult.fitted.map(p=>p.x);
+ const palette=["#16a085","#8e44ad","#d68910","#2874a6"];
+ const series=peaks.map((p,i)=>({name:`Peak ${i+1}`,color:palette[i%palette.length],points:xValues.map(x=>({x,y:p.H*Math.exp(-0.5*Math.pow((x-p.mu)/p.sigma,2))}))}));
+ drawChart(canvas,spectrum,fitResult.fitted.map(p=>({x:p.x,y:p.fit})),"Wavelength (nm)","Absorbance",{showMeasured:true,showTotalFit:true,measuredAsLine:true,series});
+ return canvas;
+}
+async function exportFittedCSV(){
+ if(!fitResult){status("fitStatus","กรุณา Run Gaussian Fit ก่อนส่งออกสเปกตรัม","error");return}
+ try{
+  const peaks=fitResult.peaks||[];
+  const headers=["Wavelength_nm","Measured_Absorbance",...peaks.map((p,i)=>`Peak_${i+1}_Contribution`),"Total_Peaks_Contribution","Baseline_Contribution","Total_Fitted_Absorbance","Residual","Residual_Squared"];
+  const lines=[headers.join(",")];
+  fitResult.fitted.forEach(p=>{
+   const contributions=peaks.map(pk=>pk.H*Math.exp(-0.5*Math.pow((p.x-pk.mu)/pk.sigma,2)));
+   const peakSum=contributions.reduce((a,v)=>a+v,0);
+   const baseline=fitResult.base?fitResult.baseline:0;
+   const residual=p.y-p.fit;
+   lines.push([p.x,p.y,...contributions,peakSum,baseline,p.fit,residual,residual*residual].map(v=>csvCell(v)).join(","));
+  });
+  if(!downloadCSV("Gaussian_Fit_Results.csv",lines))return;
+  try{
+   const chart=makeExportSpectrumChart();
+   await downloadCanvasPNG(chart,"Gaussian_Fit_Spectrum.png");
+   status("fitStatus",`ส่งออกสำเร็จ 2 ไฟล์: CSV ข้อมูล ${fitResult.fitted.length} จุด และ PNG กราฟสเปกตรัม (Measured, ${peaks.length} peak${peaks.length===1?"":"s"}, Total Fit)`,"ok");
+  }catch(graphErr){
+   status("fitStatus",`ส่งออก CSV สำเร็จ แต่ส่งออกกราฟ PNG ไม่สำเร็จ: ${graphErr.message}`,"error");
+  }
+ }catch(err){console.error(err);status("fitStatus","ส่งออกสเปกตรัมไม่สำเร็จ: "+err.message,"error")}
+}
+function exportFitParametersForRGB(){
+ try{
+  if(!fitResult||!Array.isArray(fitResult.peaks)||!fitResult.peaks.length){status("fitStatus","กรุณา Run Gaussian Fit ก่อนส่งออกพารามิเตอร์","error");return}
+  const rgbIds=["fitRed","fitGreen","fitBlue"];
+  const rgb=rgbIds.map(id=>$(id).value.trim());
+  if(rgb.some(v=>v===""||!Number.isFinite(Number(v))||Number(v)<0)){
+   status("fitStatus","กรุณากรอกค่า R, G และ B ให้ครบ โดยแต่ละค่าต้องเป็นตัวเลขตั้งแต่ 0 ขึ้นไป","error");return;
+  }
+  const peaks=fitResult.peaks;
+  const row={
+   compound:$("fitCompoundName").value.trim(),
+   concentration:$("fitConcentration").value.trim(),
+   id:$("fitSampleName").value.trim()||"GaussianFit-1",
+   R:Number(rgb[0]),G:Number(rgb[1]),B:Number(rgb[2]),
+   lambdaMax:$('lambdaMaxValue').textContent==='—'?'':Number($('lambdaMaxValue').textContent),
+   absorbanceAtLambdaMax:$('lambdaMaxAbsValue').textContent==='—'?'':Number($('lambdaMaxAbsValue').textContent),
+   baseline:fitResult.baseline,
+   H1:peaks[0]?.H??"",mu1:peaks[0]?.mu??"",sigma1:peaks[0]?.sigma??"",
+   H2:peaks[1]?.H??"",mu2:peaks[1]?.mu??"",sigma2:peaks[1]?.sigma??""
+  };
+  const headers=["compound","concentration","id","R","G","B","lambdaMax_nm","absorbance_at_lambda_max","fit_lambdaMax_nm","fit_absorbance_at_lambda_max","fit_max_abs_difference","fit_max_abs_difference_percent","baseline","H1","mu1","sigma1","H2","mu2","sigma2"];
+  row.fit_lambdaMax_nm=fitResult.fitLambdaMax;row.fit_absorbance_at_lambda_max=fitResult.fitAbsAtMax;row.fit_max_abs_difference=fitResult.maxAbsDifference;row.fit_max_abs_difference_percent=fitResult.maxAbsDifferencePct;
+  const ok=downloadCSV("Gaussian_Fit_for_Correlation_Analysis.csv",[headers.join(","),headers.map(k=>csvCell(row[k])).join(",")]);
+  if(ok)status("fitStatus","ส่งออก CSV สำเร็จ พร้อม Import RGB CSV ในแท็บ 2 ได้แล้ว","ok");
+ }catch(err){console.error("Export fit parameters for RGB failed",err);status("fitStatus","ส่งออกพารามิเตอร์ไม่สำเร็จ: "+(err&&err.message?err.message:"Unknown error"),"error")}
+}
+function readHistory(){try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]")}catch(e){return []}}
+function renderHistory(){
+ const a=readHistory();
+ if(!a.length){$("historyTable").innerHTML="<p>ยังไม่มีประวัติ</p>";return}
+ $("historyTable").innerHTML=`<div class="tablewrap"><table><thead><tr><th>Date</th><th>Peaks</th><th>N</th><th>R²</th><th>RMSE</th><th>Delete</th></tr></thead><tbody>${a.map((r,i)=>`<tr><td>${esc(r.date)}</td><td>${r.peaks}</td><td>${r.n}</td><td>${num(r.r2,5)}</td><td>${num(r.rmse,6)}</td><td><button data-hdel="${i}">Delete</button></td></tr>`).join("")}</tbody></table></div>`;
+ $("historyTable").querySelectorAll("[data-hdel]").forEach(b=>b.addEventListener("click",()=>{
+  const rows=readHistory();rows.splice(Number(b.dataset.hdel),1);localStorage.setItem(HISTORY_KEY,JSON.stringify(rows));renderHistory();
+ }));
+}
+function saveHistory(){
+ if(!fitResult)return;
+ try{
+  const a=readHistory();a.unshift({date:fitResult.date,n:fitResult.fitted.length,peaks:fitResult.n,baseline:fitResult.baseline,r2:fitResult.r2,rmse:fitResult.rmse,sse:fitResult.sse,params:fitResult.peaks});
+  localStorage.setItem(HISTORY_KEY,JSON.stringify(a.slice(0,100)));renderHistory();status("fitStatus","บันทึกประวัติแล้ว","ok");
+ }catch(e){status("fitStatus","บันทึกประวัติไม่ได้ในเบราว์เซอร์นี้","error")}
+}
+function exportHistory(){
+ const a=readHistory();if(!a.length){alert("ยังไม่มีประวัติ");return}
+ const lines=["Date,Peaks,N,Baseline,R2,RMSE,SSE,H1,mu1,sigma1,H2,mu2,sigma2"];
+ a.forEach(r=>{const p=r.params||[],p1=p[0]||{},p2=p[1]||{};lines.push([r.date,r.peaks,r.n,r.baseline,r.r2,r.rmse,r.sse,p1.H??"",p1.mu??"",p1.sigma??"",p2.H??"",p2.mu??"",p2.sigma??""].join(","))});
+ downloadCSV("Gaussian_Fit_History.csv",lines);
+}
+function analysisRows(){
+ const chosen=$("rgbAnalysisSubstance")?.value;
+ return rgbRows.filter(r=>(String(r.compound||"").trim()||"(ไม่ระบุชื่อสาร)")===chosen);
+}
+function renderCalibrationCurve(){
+ const canvas=$("calibrationPlot");
+ if(!canvas)return;
+ const q=regression(analysisRows(),"concentration","absorbanceAtLambdaMax");
+ $("calibrationN").textContent=`Valid data points: ${q.n}`;
+ if(q.n<2||!Number.isFinite(q.slope)||!Number.isFinite(q.intercept)){
+  drawChart(canvas,[],null,"Concentration (Molar)","Absorbance at λmax");
+  $("calibrationEquation").textContent="—";
+  $("calibrationR2").textContent="—";
+  $("calibrationEquationDetail").textContent="ต้องมีข้อมูลที่มีความเข้มข้นและ Absorbance at λmax อย่างน้อย 2 จุด และความเข้มข้นต้องไม่เท่ากันทั้งหมด";
+  return;
+ }
+ const xs=q.pairs.map(p=>p.x),xmin=Math.min(...xs),xmax=Math.max(...xs);
+ const linePoints=xmin===xmax?[]:[{x:xmin,y:q.slope*xmin+q.intercept},{x:xmax,y:q.slope*xmax+q.intercept}];
+ drawChart(canvas,q.pairs,linePoints,"Concentration (Molar)","Absorbance at λmax",{pointRadius:7,series:[{name:"Linear fit",color:"#dc2626",points:linePoints,width:2.5}]});
+ const fmt=(v)=>Number.isFinite(v)?(Math.abs(v)<1e-10?"0":Number(v.toPrecision(6)).toString()):"—";
+ const sign=q.intercept<0?" − "+fmt(Math.abs(q.intercept)):" + "+fmt(q.intercept);
+ $("calibrationEquation").textContent=`A = ${fmt(q.slope)}C${sign}`;
+ $("calibrationR2").textContent=Number.isFinite(q.r2)?q.r2.toFixed(5):"—";
+ $("calibrationEquationDetail").textContent="Amax = Absorbance at λmax จากข้อมูล UV–Vis ที่วัดจริง; C = concentration (Molar). ใช้เฉพาะข้อมูลตัวเลข และควรใช้ λmax/วิธี baseline เดียวกันทุกตัวอย่าง";
+}
+function correlationPlaceholder(message="กรุณากด Calculate correlation เพื่อคำนวณและแสดงผล"){
+ correlationCalculated=false;
+ $("corrN").textContent="0";$("pearsonR").textContent="—";$("corrR2").textContent="—";$("corrSlope").textContent="—";
+ if($("corrModelStatus"))$("corrModelStatus").textContent=message;
+ drawChart($("correlationPlot"),[]);
+ $("equationTable").innerHTML=`<p>${message}</p>`;
+ $("combinedEquationTable").innerHTML=`<p>${message}</p>`;
+ $("rgbSummaryTable").innerHTML=`<p>${message}</p>`;
+ drawChart($("calibrationPlot"),[],null,"Concentration (Molar)","Absorbance at λmax");
+ $("calibrationEquation").textContent="—";$("calibrationR2").textContent="—";$("calibrationN").textContent="Valid data points: 0";
+ $("calibrationEquationDetail").textContent=message;
+}
+function renderRGB(){
+ const substanceSelect=$("rgbAnalysisSubstance"),previous=substanceSelect?.value||"";
+ if(substanceSelect){
+  const substances=[...new Set(rgbRows.map(r=>String(r.compound||"").trim()||"(ไม่ระบุชื่อสาร)"))];
+  substanceSelect.innerHTML=substances.length?substances.map(s=>'<option value="'+esc(s)+'">'+esc(s)+'</option>').join(""):'<option value="">ยังไม่มีข้อมูลสาร</option>';
+  substanceSelect.value=substances.includes(previous)?previous:(substances[0]||"");
+  substanceSelect.disabled=!substances.length;
+ }
+ if(!rgbRows.length){$("rgbTable").innerHTML="<p>ยังไม่มีข้อมูล RGB</p>";}
+ else {
+  const keys=["compound","concentration","id","R","G","B","lambdaMax","absorbanceAtLambdaMax","baseline","H1","mu1","sigma1","H2","mu2","sigma2"];
+  const labels=["Substance","ความเข้มข้น (Molar)","Sample","R","G","B","λmax (nm)","Absorbance at λmax","Baseline B","H1","μ1","σ1","H2","μ2","σ2"];
+  $("rgbTable").innerHTML=`<table><thead><tr>${labels.map(v=>`<th>${v}</th>`).join("")}<th>Delete</th></tr></thead><tbody>${rgbRows.map((r,i)=>`<tr>${keys.map(k=>`<td>${esc(r[k]??"")}</td>`).join("")}<td><button data-rdel="${i}">Delete</button></td></tr>`).join("")}</tbody></table>`;
+  $("rgbTable").querySelectorAll("[data-rdel]").forEach(b=>b.addEventListener("click",()=>{rgbRows.splice(Number(b.dataset.rdel),1);saveRGB();correlationPlaceholder();renderRGB();status("rgbStatus","ลบข้อมูลแล้ว กรุณากด Calculate correlation เพื่อคำนวณผลใหม่","ok")}));
+ }
+ if(!correlationCalculated)correlationPlaceholder();
+}
+function renderRGBSummary(){
+ const params=["baseline","H1","mu1","sigma1","H2","mu2","sigma2"],plabels={baseline:"Baseline B",H1:"H1",mu1:"μ1 (nm)",sigma1:"σ1 (nm)",H2:"H2",mu2:"μ2 (nm)",sigma2:"σ2 (nm)"};
+ const rows=analysisRows(),selectedForMultiple=getRGBSuitableParameters(rows);
+ const summaryParams=params.filter(k=>!selectedForMultiple.has(k));
+ $("rgbSummaryTable").innerHTML=summaryParams.length?`<table><thead><tr><th>Parameter</th><th>Valid n</th><th>Mean</th><th>SD</th></tr></thead><tbody>${summaryParams.map(k=>{const a=rows.map(r=>r[k]===""||r[k]==null?NaN:Number(r[k])).filter(Number.isFinite),mean=a.length?a.reduce((x,y)=>x+y,0)/a.length:NaN,sd=a.length>1?Math.sqrt(a.reduce((x,y)=>x+(y-mean)**2,0)/(a.length-1)):NaN;return `<tr><td>${plabels[k]}</td><td>${a.length}</td><td>${num(mean)}</td><td>${num(sd)}</td></tr>`}).join("")}</tbody></table>`:`<p>พารามิเตอร์ทั้งหมดของสารนี้มีโมเดล Regression จึงไม่มีพารามิเตอร์เหลือสำหรับสรุป Mean และ SD</p>`;
+}
+function regression(rows,xk,yk){
+ const pairs=rows.map(r=>({x:r[xk]===""||r[xk]==null?NaN:Number(r[xk]),y:r[yk]===""||r[yk]==null?NaN:Number(r[yk])})).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y));
+ if(pairs.length<2)return {n:pairs.length,pairs,r:NaN,r2:NaN,slope:NaN,intercept:NaN};
+ const mx=pairs.reduce((s,p)=>s+p.x,0)/pairs.length,my=pairs.reduce((s,p)=>s+p.y,0)/pairs.length;
+ const sxx=pairs.reduce((s,p)=>s+(p.x-mx)**2,0),syy=pairs.reduce((s,p)=>s+(p.y-my)**2,0),sxy=pairs.reduce((s,p)=>s+(p.x-mx)*(p.y-my),0);
+ const r=sxx>0&&syy>0?sxy/Math.sqrt(sxx*syy):NaN,slope=sxx>0?sxy/sxx:NaN,intercept=my-slope*mx;
+ return {n:pairs.length,pairs,r,r2:Number.isFinite(r)?r*r:NaN,slope,intercept};
+}
+// Nonlinear candidates are fitted to actual observed pairs only. No experimental
+// data are synthesized; the only generated values are fitted curve predictions.
+const SINGLE_MODEL_FAMILIES=["linear","quadratic","exponential","logarithmic","power"];
+const FAMILY_LABELS={linear:"Linear",quadratic:"Quadratic",exponential:"Exponential",logarithmic:"Logarithmic",power:"Power"};
+function independentPairs(rows,xk,yk){
+ const groups=new Map();
+ rows.forEach((r,i)=>{
+  const x=r[xk]===""||r[xk]==null?NaN:Number(r[xk]),y=r[yk]===""||r[yk]==null?NaN:Number(r[yk]);
+  if(!Number.isFinite(x)||!Number.isFinite(y))return;
+  const conc=r.concentration===""||r.concentration==null?NaN:Number(r.concentration);
+  const key=Number.isFinite(conc)?(String(r.compound||"")+"|"+String(conc)):"row-"+i;
+  if(!groups.has(key))groups.set(key,[]);
+  groups.get(key).push({x,y});
+ });
+ return [...groups.values()].map(a=>({x:a.reduce((s,p)=>s+p.x,0)/a.length,y:a.reduce((s,p)=>s+p.y,0)/a.length}));
+}
+function singleFeature(x,type){
+ if(!Number.isFinite(x))return null;
+ if(type==="linear"||type==="exponential")return [x];
+ if(type==="quadratic")return [x,x*x];
+ if(type==="logarithmic"||type==="power")return x>0?[Math.log(x)]:null;
+ return null;
+}
+function fitSingleFamily(pairs,type){
+ // One held-out concentration must still leave enough training levels for
+ // fitting: five independent levels permit quadratic LOCO (4 fit + 1 test).
+ const p=type==="quadratic"?3:2,minN=type==="quadratic"?4:3;
+ if(!SINGLE_MODEL_FAMILIES.includes(type)||pairs.length<minN)return null;
+ const features=pairs.map(row=>singleFeature(row.x,type));
+ if(features.some(f=>!f||f.some(v=>!Number.isFinite(v))))return null;
+ if((type==="exponential"||type==="power")&&pairs.some(v=>v.y<=0))return null;
+ const means=features[0].map((_,j)=>features.reduce((s,f)=>s+f[j],0)/features.length);
+ const scales=means.map((m,j)=>Math.sqrt(features.reduce((s,f)=>s+(f[j]-m)**2,0)/features.length));
+ if(scales.some(v=>!Number.isFinite(v)||v<1e-12))return null;
+ const X=features.map(f=>[1,...f.map((v,j)=>(v-means[j])/scales[j])]);
+ const y=pairs.map(z=>type==="exponential"||type==="power"?Math.log(z.y):z.y);
+ const coef=solveLeastSquaresQR(X,y);
+ return coef?.every(Number.isFinite)?{type,coef,means,scales}:null;
+}
+function predictSingleFamily(fit,x){
+ const f=singleFeature(x,fit?.type);if(!f)return NaN;
+ const z=fit.coef[0]+f.reduce((s,v,j)=>s+fit.coef[j+1]*(v-fit.means[j])/fit.scales[j],0);
+ const result=fit.type==="exponential"||fit.type==="power"?Math.exp(z):z;
+ return Number.isFinite(result)?result:NaN;
+}
+function regressionCoefficient(v){
+ if(!Number.isFinite(v))return "—";
+ return Number(v.toPrecision(7)).toString();
+}
+function regressionTerms(intercept,coefficients,names){
+ return regressionCoefficient(intercept)+coefficients.map((v,i)=>
+  (v<0?" − ":" + ")+regressionCoefficient(Math.abs(v))+"·"+names[i]
+ ).join("");
+}
+function singleEquation(fit){
+ if(!fit)return "—";
+ const betas=fit.coef.slice(1).map((v,i)=>v/fit.scales[i]);
+ const intercept=fit.coef[0]-betas.reduce((s,v,i)=>s+v*fit.means[i],0);
+ if(fit.type==="power")return "y = "+regressionCoefficient(Math.exp(intercept))+"·x^("+regressionCoefficient(betas[0])+")";
+ const names=fit.type==="quadratic"?["x","x²"]:fit.type==="logarithmic"?["ln(x)"]:["x"];
+ const expression=regressionTerms(intercept,betas,names);
+ return fit.type==="exponential"?"y = exp("+expression+")":"y = "+expression;
+}
+function analyzeSingleRelationship(rows,xk,yk,mode="auto"){
+ const pairs=independentPairs(rows,xk,yk),n=pairs.length;
+ if(n<3)return {pairs,n,fit:null,type:null,r2:NaN,rmse:NaN,cvRMSE:NaN,baselineCVRMSE:NaN};
+ const mean=pairs.reduce((s,p)=>s+p.y,0)/n;
+ const sst=pairs.reduce((s,p)=>s+(p.y-mean)**2,0);
+ const baselineSSE=pairs.reduce((s,p)=>{const tm=(n*mean-p.y)/(n-1);return s+(p.y-tm)**2},0);
+ const baselineCVRMSE=Math.sqrt(baselineSSE/n);
+ const choices=mode==="auto"?SINGLE_MODEL_FAMILIES:[mode];
+ let best=null;
+ for(const type of choices){
+  const fit=fitSingleFamily(pairs,type);if(!fit)continue;
+  const pred=pairs.map(p=>predictSingleFamily(fit,p.x));
+  if(!pred.every(Number.isFinite))continue;
+  const sse=pred.reduce((s,v,i)=>s+(v-pairs[i].y)**2,0);
+  let cvSSE=0,cvValid=true;
+  for(let i=0;i<n;i++){
+   const train=pairs.filter((_,j)=>i!==j),fold=fitSingleFamily(train,type);
+   const estimate=fold?predictSingleFamily(fold,pairs[i].x):NaN;
+   if(!Number.isFinite(estimate)){cvValid=false;break}
+   cvSSE+=(estimate-pairs[i].y)**2;
+  }
+  if(!cvValid)continue;
+  const cvRMSE=Math.sqrt(cvSSE/n);
+  const result={pairs,n,type,fit,r2:sst>1e-20?1-sse/sst:NaN,rmse:Math.sqrt(sse/n),cvRMSE,baselineCVRMSE};
+  if(!best||cvRMSE<best.cvRMSE*.98||(cvRMSE<=best.cvRMSE*1.02&&type==="linear"))best=result;
+ }
+ return best||{pairs,n,fit:null,type:null,r2:NaN,rmse:NaN,cvRMSE:NaN,baselineCVRMSE};
+}
+function parameterCV(rows, key){
+ const values=rows.map(r=>r[key]===""||r[key]==null?NaN:Number(r[key])).filter(Number.isFinite);
+ const n=values.length;
+ if(n<2)return {n,mean:NaN,sd:NaN,cv:NaN};
+ const mean=values.reduce((a,v)=>a+v,0)/n;
+ const sd=Math.sqrt(values.reduce((a,v)=>a+(v-mean)**2,0)/(n-1));
+ const cv=Math.abs(mean)>1e-12?sd/Math.abs(mean)*100:NaN;
+ return {n,mean,sd,cv};
+}
+function relationshipMode(){return $("rgbModelFamily")?.value||"auto"}
+function isRelationshipSuitable(q,stats){
+ return !!q.fit&&q.n>=5&&Number.isFinite(q.r2)&&q.r2>=.70&&
+  Number.isFinite(q.cvRMSE)&&Number.isFinite(q.baselineCVRMSE)&&
+  q.baselineCVRMSE>1e-12&&q.cvRMSE<q.baselineCVRMSE*.95&&
+  Number.isFinite(stats.cv)&&stats.cv>=5;
+}
+function getGreenRGBChannels(y, sourceRows=rgbRows){
+ const xs=["R","G","B"],selected=[];
+ xs.forEach(x=>{const q=analyzeSingleRelationship(sourceRows,x,y,relationshipMode()),stats=parameterCV(sourceRows,y);
+  if(isRelationshipSuitable(q,stats))selected.push(x);
+ });
+ return selected;
+}
+function getRGBSuitableParameters(rows=rgbRows){
+ const ys=["baseline","H1","mu1","sigma1","H2","mu2","sigma2"],selected=new Set();
+ const groups=new Map();
+ rows.forEach(r=>{const s=String(r.compound||"");if(!groups.has(s))groups.set(s,[]);groups.get(s).push(r)});
+ ys.forEach(y=>{if([...groups.values()].some(group=>multipleRegressionRGB(group,y).predictive))selected.add(y);});
+ return selected;
+}
+function renderEquationTable(){
+ const xs=["R","G","B"],ys=["baseline","H1","mu1","sigma1","H2","mu2","sigma2"],labels={R:"R",G:"G",B:"B",baseline:"Baseline B",H1:"H1",mu1:"μ1",sigma1:"σ1",H2:"H2",mu2:"μ2",sigma2:"σ2"};
+ const rows=[];
+ xs.forEach(x=>ys.forEach(y=>{
+  const q=analyzeSingleRelationship(analysisRows(),x,y,relationshipMode()),stats=parameterCV(analysisRows(),y);
+  const linear=regression(analysisRows(),x,y),suitable=isRelationshipSuitable(q,stats);
+  rows.push(`<tr class="${suitable?"rgb-suitable":""}"><td>${labels[x]} vs ${labels[y]}</td><td>${q.n}</td><td>${q.fit?FAMILY_LABELS[q.type]:"—"}</td><td style="white-space:normal;min-width:260px">${esc(singleEquation(q.fit))}</td><td>${num(q.r2,4)}</td><td>${num(q.cvRMSE,6)}</td><td>${num(q.baselineCVRMSE,6)}</td><td>${num(linear.r,4)}</td><td>${num(stats.cv,2)}${Number.isFinite(stats.cv)?"%":""}</td></tr>`);
+ }));
+ $("equationTable").innerHTML=`<table><thead><tr><th>X vs Y</th><th>Independent N</th><th>Model</th><th>Equation</th><th>Train R²</th><th>LOCO RMSE</th><th>Mean LOCO RMSE</th><th>Pearson r (linear)</th><th>CV (%)</th></tr></thead><tbody>${rows.join("")}</tbody></table>`;
+ renderCombinedEquationTable();
+}
+function solveLeastSquaresQR(X,y){
+ // Modified Gram-Schmidt QR on the design matrix; avoids forming X'X, which squares the condition number.
+ const n=X.length,p=X[0]?.length||0;if(n<p)return null;
+ const cols=Array.from({length:p},(_,j)=>X.map(row=>row[j]));
+ const Q=[],R=Array.from({length:p},()=>Array(p).fill(0));
+ for(let j=0;j<p;j++){
+  let v=cols[j].slice();
+  for(let k=0;k<j;k++){
+   const proj=Q[k].reduce((a,qv,i)=>a+qv*v[i],0);R[k][j]=proj;
+   for(let i=0;i<n;i++)v[i]-=proj*Q[k][i];
+  }
+  const norm=Math.sqrt(v.reduce((a,z)=>a+z*z,0));
+  const original=Math.sqrt(cols[j].reduce((a,z)=>a+z*z,0));
+  if(!Number.isFinite(norm)||norm<=Math.max(1e-10,original*1e-8))return null;
+  R[j][j]=norm;Q.push(v.map(z=>z/norm));
+ }
+ const qty=Q.map(q=>q.reduce((a,v,i)=>a+v*y[i],0)),beta=Array(p).fill(0);
+ for(let i=p-1;i>=0;i--){let z=qty[i];for(let j=i+1;j<p;j++)z-=R[i][j]*beta[j];if(Math.abs(R[i][i])<1e-12)return null;beta[i]=z/R[i][i];}
+ return beta;
+}
+function fitRGBSubset(data,keys){
+ const n=data.length,p=keys.length+1;if(!keys.length||n<p)return {coef:null,reason:"insufficient-data"};
+ const means=keys.map(k=>data.reduce((a,z)=>a+z[k],0)/n);
+ const sds=keys.map((k,j)=>Math.sqrt(data.reduce((a,z)=>a+(z[k]-means[j])**2,0)/n));
+ if(sds.some(v=>!Number.isFinite(v)||v<1e-8))return {coef:null,reason:"constant-channel"};
+ const X=data.map(z=>[1,...keys.map((k,j)=>(z[k]-means[j])/sds[j])]),y=data.map(z=>z.y);
+ const beta=solveLeastSquaresQR(X,y);if(!beta)return {coef:null,reason:"rank-deficient-RGB"};
+ const coef=[beta[0],0,0,0];keys.forEach((k,j)=>{const idx={R:1,G:2,B:3}[k];coef[idx]=beta[j+1]/sds[j];});
+ keys.forEach(k=>{const idx={R:1,G:2,B:3}[k];coef[0]-=coef[idx]*means[keys.indexOf(k)];});
+ return {coef,keys};
+}
+function fitRGBCore(data){return fitRGBSubset(data,["R","G","B"]);}
+function fitRGBLOORegularized(data,keys){
+ // With n=4, each LOOCV training fold has 3 rows for 4 coefficients.
+ // Use a small ridge penalty on standardized RGB coefficients so the held-out fold remains computable.
+ const n=data.length,p=keys.length+1;if(!keys.length||n<1)return {coef:null};
+ const means=keys.map(k=>data.reduce((a,z)=>a+z[k],0)/n);
+ const sds=keys.map((k,j)=>Math.sqrt(data.reduce((a,z)=>a+(z[k]-means[j])**2,0)/n));
+ if(sds.some(v=>!Number.isFinite(v)||v<1e-8))return {coef:null};
+ const X=data.map(z=>[1,...keys.map((k,j)=>(z[k]-means[j])/sds[j])]), y=data.map(z=>z.y);
+ const A=Array.from({length:p},(_,i)=>Array.from({length:p},(_,j)=>X.reduce((a,row)=>a+row[i]*row[j],0)));
+ const b=Array.from({length:p},(_,i)=>X.reduce((a,row,r)=>a+row[i]*y[r],0));
+ const lambda=1e-8;for(let i=1;i<p;i++)A[i][i]+=lambda;
+ for(let i=0;i<p;i++){let pivot=i;for(let r=i+1;r<p;r++)if(Math.abs(A[r][i])>Math.abs(A[pivot][i]))pivot=r;
+  if(Math.abs(A[pivot][i])<1e-14)return {coef:null};
+  [A[i],A[pivot]]=[A[pivot],A[i]];[b[i],b[pivot]]=[b[pivot],b[i]];
+  const d=A[i][i];for(let j=i;j<p;j++)A[i][j]/=d;b[i]/=d;
+  for(let r=0;r<p;r++){if(r===i)continue;const f=A[r][i];for(let j=i;j<p;j++)A[r][j]-=f*A[i][j];b[r]-=f*b[i];}
+ }
+ const coef=[b[0],0,0,0];keys.forEach((k,j)=>{const idx={R:1,G:2,B:3}[k];coef[idx]=b[j+1]/sds[j];coef[0]-=coef[idx]*means[j];});
+ return {coef,keys};
+}
+function multipleRegressionRGB(rows,yk){
+ const data=rows.map(r=>({R:r.R===""||r.R==null?NaN:Number(r.R),G:r.G===""||r.G==null?NaN:Number(r.G),B:r.B===""||r.B==null?NaN:Number(r.B),y:r[yk]===""||r[yk]==null?NaN:Number(r[yk])})).filter(p=>[p.R,p.G,p.B,p.y].every(Number.isFinite));
+ const n=data.length;
+ // Green highlighting selects the target Gaussian parameter. Once selected, use all three RGB channels together as predictors.
+ const greenChannels=getGreenRGBChannels(yk,rows);
+ const keys=greenChannels.length?["R","G","B"]:[];
+ if(!keys.length)return {n,coef:null,keys:[],r2:NaN,rmse:NaN,cvR2:NaN,cvRMSE:NaN,baselineCVRMSE:NaN,predictive:false,reason:"ไม่มีตัวแปร RGB ที่ผ่านเกณฑ์แถบสีเขียว"};
+ if(n<4)return {n,coef:null,keys,r2:NaN,rmse:NaN,cvR2:NaN,cvRMSE:NaN,baselineCVRMSE:NaN,predictive:false,reason:"ต้องมีข้อมูลอย่างน้อย 4 ตัวอย่าง"};
+ const fit=fitRGBSubset(data,keys);
+ if(!fit.coef)return {n,coef:null,keys:[],r2:NaN,rmse:NaN,cvR2:NaN,cvRMSE:NaN,baselineCVRMSE:NaN,predictive:false,reason:"ข้อมูล RGB ซ้ำซ้อนหรือไม่สามารถคำนวณสัมประสิทธิ์ได้"};
+ const pred=p=>fit.coef[0]+fit.coef[1]*p.R+fit.coef[2]*p.G+fit.coef[3]*p.B;
+ const y=data.map(p=>p.y),preds=data.map(pred),my=y.reduce((a,v)=>a+v,0)/n;
+ const sst=y.reduce((a,v)=>a+(v-my)**2,0),sse=y.reduce((a,v,i)=>a+(v-preds[i])**2,0),r2=sst>1e-20?1-sse/sst:NaN,rmse=Math.sqrt(sse/n);
+ let baselineCVSSE=0,cvSSE=0,cvPossible=n>=4;
+ if(n>1){for(let i=0;i<n;i++){const trainMean=(y.reduce((a,v)=>a+v,0)-y[i])/(n-1);baselineCVSSE+=(y[i]-trainMean)**2;}}
+ const baselineCVRMSE=n>1?Math.sqrt(baselineCVSSE/n):NaN;
+ if(cvPossible){
+  for(let i=0;i<n;i++){
+   const train=data.filter((_,j)=>j!==i),test=data[i],loo=(train.length>=keys.length+1?fitRGBSubset(train,keys):fitRGBLOORegularized(train,keys));
+   if(!loo.coef){cvPossible=false;break;}
+   const yp=loo.coef[0]+loo.coef[1]*test.R+loo.coef[2]*test.G+loo.coef[3]*test.B;
+   cvSSE+=(test.y-yp)**2;
+  }
+ }
+ const cvRMSE=cvPossible?Math.sqrt(cvSSE/n):NaN,cvR2=cvPossible&&sst>1e-20?1-cvSSE/sst:NaN;
+ const beatsMean=Number.isFinite(cvRMSE)&&Number.isFinite(baselineCVRMSE)&&cvRMSE<baselineCVRMSE-1e-12;
+ return {n,coef:fit.coef,keys,r2,rmse,cvR2,cvRMSE,baselineCVRMSE,predictive:Boolean(beatsMean),method:"Multiple regression using all RGB channels for parameters with at least one green-highlighted RGB correlation",reason:beatsMean?"LOOCV RMSE ต่ำกว่าแบบจำลอง Mean":(n<4?"ข้อมูลไม่พอสำหรับ LOOCV": "สมการสร้างได้ แต่ LOOCV RMSE ไม่ดีกว่า Mean")};
+}
+// Model selection for RGB -> Gaussian parameters. Concentration replicates
+// remain together during validation and are averaged into one independent level.
+const MULTI_MODEL_FAMILIES=["linear","quadratic","exponential","logarithmic","power"];
+function independentRGBData(rows,yk){
+ const groups=new Map();
+ rows.forEach((r,i)=>{
+  const z={R:r.R===""||r.R==null?NaN:Number(r.R),G:r.G===""||r.G==null?NaN:Number(r.G),B:r.B===""||r.B==null?NaN:Number(r.B),y:r[yk]===""||r[yk]==null?NaN:Number(r[yk])};
+  if(![z.R,z.G,z.B,z.y].every(Number.isFinite))return;
+  const conc=r.concentration===""||r.concentration==null?NaN:Number(r.concentration);
+  const key=Number.isFinite(conc)?String(r.compound||"")+"|"+conc:"single-"+i;
+  if(!groups.has(key))groups.set(key,[]);
+  groups.get(key).push(z);
+ });
+ return [...groups.values()].map(g=>Object.fromEntries(["R","G","B","y"].map(k=>[k,g.reduce((s,r)=>s+r[k],0)/g.length])));
+}
+function rgbFamilyFeatures(row,type){
+ const {R,G,B}=row;
+ if(![R,G,B].every(Number.isFinite))return null;
+ if(type==="linear"||type==="exponential")return [R,G,B];
+ if(type==="quadratic")return [R,G,B,R*R,G*G,B*B];
+ if(type==="logarithmic"||type==="power")return R>0&&G>0&&B>0?[Math.log(R),Math.log(G),Math.log(B)]:null;
+ return null;
+}
+function fitRGBFamily(data,type){
+ const features=data.map(row=>rgbFamilyFeatures(row,type)),dim=type==="quadratic"?6:3;
+ if(!MULTI_MODEL_FAMILIES.includes(type)||data.length<dim+1||features.some(v=>!v||v.some(x=>!Number.isFinite(x))))return null;
+ if((type==="exponential"||type==="power")&&data.some(p=>p.y<=0))return null;
+ const means=Array.from({length:dim},(_,j)=>features.reduce((s,v)=>s+v[j],0)/features.length);
+ const scales=means.map((m,j)=>Math.sqrt(features.reduce((s,v)=>s+(v[j]-m)**2,0)/features.length));
+ if(scales.some(v=>!Number.isFinite(v)||v<1e-12))return null;
+ const X=features.map(f=>[1,...f.map((v,j)=>(v-means[j])/scales[j])]);
+ const y=data.map(p=>type==="exponential"||type==="power"?Math.log(p.y):p.y);
+ const coef=solveLeastSquaresQR(X,y);
+ return coef?.every(Number.isFinite)?{type,coef,means,scales}:null;
+}
+function predictRGBFamily(model,row){
+ const f=rgbFamilyFeatures(row,model?.type);if(!f||f.length!==model.coef.length-1)return NaN;
+ const latent=model.coef[0]+f.reduce((s,v,j)=>s+model.coef[j+1]*(v-model.means[j])/model.scales[j],0);
+ const prediction=model.type==="exponential"||model.type==="power"?Math.exp(latent):latent;
+ return Number.isFinite(prediction)?prediction:NaN;
+}
+function rgbFamilyEquation(model){
+ if(!model)return "—";
+ const names=model.type==="quadratic"?["R","G","B","R²","G²","B²"]:(model.type==="logarithmic"||model.type==="power"?["ln(R)","ln(G)","ln(B)"]:["R","G","B"]);
+ const betas=model.coef.slice(1).map((v,i)=>v/model.scales[i]);
+ const intercept=model.coef[0]-betas.reduce((s,v,i)=>s+v*model.means[i],0);
+ const expr=regressionTerms(intercept,betas,names);
+ return (model.type==="exponential"||model.type==="power")?"ŷ = exp("+expr+")":"ŷ = "+expr;
+}
+function multiFamilyRegression(rows,yk){
+ const data=independentRGBData(rows,yk),n=data.length,keys=["R","G","B"];
+ const empty={n,coef:null,model:null,keys:[],r2:NaN,rmse:NaN,cvR2:NaN,cvRMSE:NaN,baselineCVRMSE:NaN,predictive:false,reason:"จำนวนข้อมูลอิสระหรือ Rank ไม่เพียงพอ"};
+ if(n<4)return empty;
+ const y=data.map(d=>d.y),mean=y.reduce((s,v)=>s+v,0)/n;
+ const sst=y.reduce((s,v)=>s+(v-mean)**2,0);
+ const baselineSSE=y.reduce((s,v)=>{const trainMean=(n*mean-v)/(n-1);return s+(v-trainMean)**2},0);
+ const baselineCVRMSE=Math.sqrt(baselineSSE/n);
+ let best=null,provisional=null;
+ for(const type of MULTI_MODEL_FAMILIES){
+  const model=fitRGBFamily(data,type);if(!model)continue;
+  const fitted=data.map(p=>predictRGBFamily(model,p));
+  if(!fitted.every(Number.isFinite))continue;
+  const sse=fitted.reduce((s,v,i)=>s+(v-y[i])**2,0),rmse=Math.sqrt(sse/n),r2=sst>1e-20?1-sse/sst:NaN;
+  let cvSSE=0,cvPossible=n>model.coef.length;
+  if(cvPossible)for(let i=0;i<n;i++){
+   const train=data.filter((_,j)=>j!==i),fold=fitRGBFamily(train,type);
+   const prediction=fold?predictRGBFamily(fold,data[i]):NaN;
+   if(!Number.isFinite(prediction)){cvPossible=false;break}
+   cvSSE+=(prediction-y[i])**2;
+  }
+  const cvRMSE=cvPossible?Math.sqrt(cvSSE/n):NaN,cvR2=cvPossible&&sst>1e-20?1-cvSSE/sst:NaN;
+  const candidate={n,coef:model.coef,model,type,keys,r2,rmse,cvR2,cvRMSE,baselineCVRMSE,predictive:Number.isFinite(cvRMSE)&&baselineCVRMSE>1e-12&&cvRMSE<baselineCVRMSE*.95};
+  if(!provisional||type==="linear")provisional=candidate;
+  if(Number.isFinite(cvRMSE)&&(!best||cvRMSE<best.cvRMSE*.98||(cvRMSE<=best.cvRMSE*1.02&&type==="linear")))best=candidate;
+ }
+ const chosen=best||provisional;
+ if(!chosen)return {...empty,baselineCVRMSE};
+ chosen.method=FAMILY_LABELS[chosen.type]+" RGB regression";
+ chosen.formula=rgbFamilyEquation(chosen.model);
+ chosen.reason=chosen.predictive?"LOCO CV RMSE ดีกว่า Mean ≥5%":"ผลทำนายยังไม่ผ่านเกณฑ์ LOCO CV เทียบกับ Mean (exploratory)";
+ return chosen;
+}
+// Preserve the legacy function and its historical output for older snapshots;
+// current calculations use the nonlinear-aware implementation.
+const multipleRegressionRGBLegacy=multipleRegressionRGB;
+multipleRegressionRGB=multiFamilyRegression;
+function renderCombinedEquationTable(){
+ const ys=["baseline","H1","mu1","sigma1","H2","mu2","sigma2"],labels={baseline:"Baseline B",H1:"H1",mu1:"μ1",sigma1:"σ1",H2:"H2",mu2:"μ2",sigma2:"σ2"};
+ const groups=simulationGroups();
+ if(!groups.length){$("combinedEquationTable").innerHTML="<p>ยังไม่มีข้อมูลสำหรับคำนวณสมการ RGB</p>";return;}
+ const out=[];
+ groups.forEach(({compound,rows})=>ys.forEach(y=>{
+  const q=multipleRegressionRGB(rows,y);if(!q.model)return;
+  out.push(`<tr><td>${esc(compound)}</td><td>${labels[y]}</td><td>${FAMILY_LABELS[q.type]}</td><td>${q.n}</td><td style="white-space:normal;min-width:280px">${esc(q.formula)}</td><td>${num(q.r2,4)}</td><td>${num(q.rmse,6)}</td><td>${num(q.cvR2,4)}</td><td>${num(q.cvRMSE,6)}</td><td>${num(q.baselineCVRMSE,6)}</td><td>${q.predictive?"ผ่าน CV":"สำรวจเท่านั้น"}</td></tr>`);
+ }));
+ $("combinedEquationTable").innerHTML=out.length?`<table><thead><tr><th>Substance</th><th>Gaussian parameter</th><th>Selected model</th><th>Independent concentrations</th><th>Model equation</th><th>Training R²</th><th>Training RMSE</th><th>LOCO R²</th><th>LOCO RMSE</th><th>Mean LOCO RMSE</th><th>Assessment</th></tr></thead><tbody>${out.join("")}</tbody></table><p class="muted">แต่ละระดับความเข้มข้นถูกกันออกจากชุดฝึกทั้งกลุ่มในการคำนวณ LOCO; Training metrics เป็นความพอดีของชุดฝึก ไม่ใช่ผลทดสอบอิสระ</p>`:"<p>ยังไม่มีโมเดล RGB ที่มีข้อมูลและ Rank เพียงพอสำหรับสร้างสมการ</p>";
+}
+function simulationGroups(){
+ const groups=new Map();
+ rgbRows.forEach(r=>{const name=String(r.compound||"").trim()||"(ไม่ระบุชื่อสาร)";if(!groups.has(name))groups.set(name,[]);groups.get(name).push(r)});
+ return [...groups.entries()].map(([compound,rows])=>({compound,rows}));
+}
+function simulationParameterData(rows,key){
+ const labelMap={baseline:"Baseline B",H1:"H₁",mu1:"μ₁",sigma1:"σ₁",H2:"H₂",mu2:"μ₂",sigma2:"σ₂"};
+ const q=multipleRegressionRGB(rows,key);
+ // Preserve the original exploratory H1/H2 behaviour, but explicitly mark
+ // training-only or non-validated predictions when LOCO cannot establish accuracy.
+ const mustPredictFromRGB=(key==="H1"||key==="H2");
+ if(q.model&&(q.predictive||mustPredictFromRGB)){
+  return {key,label:labelMap[key],method:q.method,model:q.model,expression:q.formula,mean:null,n:q.n,r2:q.r2,rmse:q.rmse,cvR2:q.cvR2,cvRMSE:q.cvRMSE,modelNote:q.reason};
+ }
+ const values=rows.map(r=>r[key]===""||r[key]==null?NaN:Number(r[key])).filter(Number.isFinite);
+ const mean=values.length?values.reduce((a,b)=>a+b,0)/values.length:NaN;
+ return {key,label:labelMap[key],method:"Mean",expression:Number.isFinite(mean)?num(mean):"—",mean,n:values.length,r2:NaN,rmse:NaN,cvR2:q.cvR2,cvRMSE:q.cvRMSE,modelNote:q.reason||"ใช้ Mean เพราะข้อมูลไม่เพียงพอสำหรับสร้างสมการที่ผ่าน LOOCV"};
+}
+function buildSimulationDatabase(){
+ return simulationGroups().map(({compound,rows})=>{
+  const params=["baseline","H1","mu1","sigma1","H2","mu2","sigma2"].map(k=>simulationParameterData(rows,k));
+  const byKey=Object.fromEntries(params.map(p=>[p.key,p]));
+  const peakTerms=[];
+  const baseParam=byKey.baseline;
+  const cleanExpression=s=>String(s).replace(/^ŷ\s*=\s*/,"");
+  const baselineTerm=baseParam&&baseParam.expression!=="—"?(baseParam.method==="Mean"?baseParam.expression:`(${cleanExpression(baseParam.expression)})`):"0";
+  for(let i=1;i<=2;i++){
+   const H=byKey[`H${i}`],mu=byKey[`mu${i}`],sigma=byKey[`sigma${i}`];
+   const complete=[H,mu,sigma].every(p=>p&&p.expression!=="—");
+   if(complete){
+    const h=H.method==="Mean"?H.expression:`(${cleanExpression(H.expression)})`;
+    const m=mu.method==="Mean"?mu.expression:`(${cleanExpression(mu.expression)})`;
+    const sg=sigma.method==="Mean"?sigma.expression:`(${cleanExpression(sigma.expression)})`;
+    peakTerms.push(`${h}·exp(−(λ − ${m})²/(2·(${sg})²))`);
+   }
+  }
+  const cal=regression(rows,"concentration","absorbanceAtLambdaMax");
+  const calibration=cal.n>=2&&Number.isFinite(cal.slope)&&Math.abs(cal.slope)>1e-15&&Number.isFinite(cal.intercept)?{
+   slope:cal.slope,intercept:cal.intercept,r2:cal.r2,n:cal.n,
+   equation:`Amax = ${num(cal.slope)}C ${cal.intercept<0?"−":"+"} ${num(Math.abs(cal.intercept))}`,
+   concentrationEquation:`C = (Amax ${cal.intercept<0?"+":"−"} ${num(Math.abs(cal.intercept))}) / ${num(cal.slope)}`
+  }:null;
+  return {compound,rows,params,equation:peakTerms.length?`A(λ; R,G,B) = ${baselineTerm} + ${peakTerms.join(" + ")}`:"ยังสร้างสมการรวมไม่ได้ เนื่องจากข้อมูล H, μ หรือ σ ไม่ครบอย่างน้อยหนึ่ง peak",peakCount:peakTerms.length,calibration};
+ });
+}
+function readSimulationDatabases(){
+ try{const v=JSON.parse(localStorage.getItem(SIM_DB_KEY)||"[]");return Array.isArray(v)?v:[]}catch(e){return []}
+}
+function saveSimulationDatabases(db){try{localStorage.setItem(SIM_DB_KEY,JSON.stringify(db));return true}catch(e){return false}}
+function renderSimulationDatabase(){
+ const root=$("simulationDBContent"),saved=readSimulationDatabases();
+ if(!saved.length){root.innerHTML="<p>ยังไม่มีฐานข้อมูลที่บันทึกไว้ กด <strong>Build new database</strong> เพื่อสร้างชุดแรก</p>";status("simulationDBStatus","ยังไม่มีฐานข้อมูลที่บันทึกไว้","");return;}
+ root.innerHTML=saved.map((snapshot,idx)=>{
+  const when=new Date(snapshot.createdAt).toLocaleString();
+  const cards=(snapshot.substances||[]).map((g,j)=>{
+   const rows=g.params.map(p=>`<tr><td>${p.label}</td><td>${esc(p.method)}</td><td style="white-space:normal;min-width:250px">${esc(p.expression)}</td><td>${p.method==="Mean"&&Number.isFinite(p.mean)?num(p.mean):"—"}</td><td>${p.n}</td>${p.model||p.method==="Multiple linear equation"?`<td>${num(p.r2)}</td><td>${num(p.rmse)}</td>`:`<td>—</td><td>—</td>`}</tr>`).join("");
+   return `<article style="border:1px solid var(--line);border-radius:10px;padding:14px;margin:14px 0"><h4>${j+1}. ${esc(g.compound)}</h4><p class="note">ตัวอย่างในชุดต้นทาง: ${g.rows.length} · จำนวน peak ที่ประกอบสมการได้: ${g.peakCount}</p><div class="tablewrap"><table><thead><tr><th>Gaussian parameter</th><th>วิธีประมาณ</th><th>สมการ / ค่าใช้ใน Simulation</th><th>Mean (ใช้เฉพาะวิธี Mean)</th><th>N</th><th>R²</th><th>RMSE</th></tr></thead><tbody>${rows}</tbody></table></div><h4>สมการ Gaussian รวมสำหรับ Simulation</h4><div style="background:#f5f7fb;border:1px solid var(--line);border-radius:8px;padding:12px;white-space:normal;overflow-wrap:anywhere;font-family:ui-monospace,SFMono-Regular,Menlo,monospace">${esc(g.equation)}</div><p class="note">สมการรวมใช้รูปแบบ A(λ) = B + Σ Hᵢ exp[−(λ−μᵢ)²/(2σᵢ²)] โดย B มาจาก Gaussian fit; สำหรับฐานข้อมูลเดิมที่ไม่มี baseline จะใช้ B = 0</p><p class="note"><strong>วิธีเลือกค่าที่ใช้จำลอง:</strong> ถ้า Method เป็น RGB regression โปรแกรมใช้สัมประสิทธิ์และชนิดโมเดลที่บันทึกไว้คำนวณจาก R, G, B โดยตรง (Linear/Quadratic/Exponential/Logarithmic/Power) ส่วน Expression เป็นตัวเลขปัดเศษเพื่อแสดงผล; Mean ใช้เฉพาะรายการ Method = Mean และฐานข้อมูลรุ่นเก่ายังรองรับสมการเดิม สำหรับ H1/H2 ระบบจะคงสมการ RGB ไว้เมื่อคำนวณสมการได้ แม้ LOCO ยังไม่ดีกว่าการใช้ค่าเฉลี่ย โดยถือว่าผลทำนายเป็น exploratory และควรเพิ่มจำนวนตัวอย่างก่อนสรุปความแม่นยำ</p><h4>สมการสำหรับคำนวณความเข้มข้นของสาร</h4><div style="background:#f5f7fb;border:1px solid var(--line);border-radius:8px;padding:12px;overflow-wrap:anywhere;font-family:ui-monospace,SFMono-Regular,Menlo,monospace">${esc(g.calibration?.concentrationEquation||"ยังไม่มีสมการ: ต้องมีข้อมูล Calibration curve อย่างน้อย 2 จุดและ slope ไม่เป็นศูนย์")}</div><p class="note">สมการ Calibration curve: ${esc(g.calibration?.equation||"ไม่สามารถคำนวณได้")} · R² = ${Number.isFinite(g.calibration?.r2)?num(g.calibration.r2,5):"—"} · n = ${g.calibration?.n??0}</p></article>`;
+  }).join("");
+  const editorFields=(snapshot.substances||[]).map((g,gi)=>`<fieldset style="border:1px solid var(--line);border-radius:8px;padding:12px;margin:12px 0"><legend>สาร ${gi+1}</legend><label>ชื่อสาร</label><input data-edit-field="compound" data-gi="${gi}" value="${esc(g.compound)}" style="width:100%;margin:4px 0 10px"><label>สมการ Gaussian รวม</label><textarea data-edit-field="equation" data-gi="${gi}" rows="2" style="width:100%;margin:4px 0 10px">${esc(g.equation)}</textarea><label>สมการสำหรับคำนวณความเข้มข้น (จาก Calibration curve)</label><input value="${esc(g.calibration?.concentrationEquation||"ไม่มีสมการ")}" readonly style="width:100%;margin:4px 0 10px"><div class="tablewrap"><table><thead><tr><th>Parameter</th><th>Method</th><th>Expression</th><th>Mean (ใช้เฉพาะวิธี Mean)</th><th>N</th><th>R²</th><th>RMSE</th></tr></thead><tbody>${g.params.map((p,pi)=>`<tr><td>${esc(p.label||p.key)}</td><td><input data-edit-field="method" data-gi="${gi}" data-pi="${pi}" value="${esc(p.method)}" style="width:145px"></td><td><input data-edit-field="expression" data-gi="${gi}" data-pi="${pi}" value="${esc(p.expression)}" style="min-width:230px;width:100%"></td><td>${(p.model||p.method==="Multiple linear equation")?"— (ไม่ใช้)":`<input data-edit-field="mean" data-gi="${gi}" data-pi="${pi}" value="${Number.isFinite(p.mean)?p.mean:""}" style="width:95px">`}</td><td><input data-edit-field="n" data-gi="${gi}" data-pi="${pi}" value="${p.n??0}" style="width:65px"></td><td><input data-edit-field="r2" data-gi="${gi}" data-pi="${pi}" value="${Number.isFinite(p.r2)?p.r2:""}" style="width:85px"></td><td><input data-edit-field="rmse" data-gi="${gi}" data-pi="${pi}" value="${Number.isFinite(p.rmse)?p.rmse:""}" style="width:85px"></td></tr>`).join("")}</tbody></table></div></fieldset>`).join("");
+  return `<section style="border:2px solid var(--line);border-radius:12px;padding:16px;margin:18px 0"><div style="display:flex;gap:12px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap"><div><h3 style="margin:0 0 6px">Database ${saved.length-idx}: ${esc(snapshot.label||"Snapshot")}</h3><p class="note" style="margin:0">สร้างเมื่อ: ${esc(when)} · ตัวอย่างต้นทาง: ${snapshot.sourceRows} · จำนวนสาร: ${(snapshot.substances||[]).length}</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" data-edit-simdb="${esc(snapshot.id)}">Edit database</button><button type="button" data-delete-simdb="${esc(snapshot.id)}">Delete this database</button></div></div><div data-simdb-editor="${esc(snapshot.id)}" hidden style="border:1px solid var(--line);border-radius:10px;padding:14px;margin:12px 0"><h4>Edit database</h4><label>ชื่อชุดฐานข้อมูล</label><input data-edit-field="label" value="${esc(snapshot.label||"")}" style="width:100%;margin:4px 0 10px"><label>จำนวนตัวอย่างต้นทาง (แก้ไขเป็นข้อมูลกำกับเท่านั้น)</label><input data-edit-field="sourceRows" value="${snapshot.sourceRows??0}" type="number" min="0" style="width:140px;margin:4px 0 10px">${editorFields}<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" data-save-simdb="${esc(snapshot.id)}" class="primary">Save changes</button><button type="button" data-cancel-edit-simdb="${esc(snapshot.id)}">Cancel</button></div><p class="note">การแก้ไขนี้เปลี่ยนเฉพาะฐานข้อมูลชุดที่เลือก ไม่เปลี่ยนข้อมูลต้นทางใน Tab 2 และไม่สร้างสมการใหม่จากข้อมูล RGB</p></div>${cards}</section>`;
+ }).join("");
+ root.insertAdjacentHTML("afterbegin",'<div class="note" style="padding:10px;border:1px solid #dce8f6;border-radius:8px;margin-bottom:12px">ฐานข้อมูลใหม่อาจใช้ Linear, Quadratic, Exponential, Logarithmic หรือ Power regression โดยบันทึกค่าสัมประสิทธิ์เต็มสำหรับหน้า Simulation (สมการที่แสดงเป็นค่าปัดเพื่ออ่านเท่านั้น) · ฐานข้อมูลเก่ายังคำนวณด้วยสมการเดิม</div>');
+ status("simulationDBStatus",`มีฐานข้อมูลที่บันทึกไว้ ${saved.length} ชุด · การ Build ครั้งใหม่จะเพิ่มชุดใหม่โดยไม่เขียนทับชุดเดิม`,"ok");
+}
+function buildAndSaveSimulationDatabase(){
+ if(!rgbRows.length){status("simulationDBStatus","ยังไม่มีข้อมูล RGB Analysis ให้สร้างฐานข้อมูล","error");return;}
+ const saved=readSimulationDatabases(),substances=buildSimulationDatabase(),now=new Date();
+ const snapshot={id:`db-${now.getTime()}-${Math.random().toString(36).slice(2,7)}`,createdAt:now.toISOString(),label:`Build ${now.toLocaleString()}`,sourceRows:rgbRows.length,substances};
+ saved.unshift(snapshot);
+ if(!saveSimulationDatabases(saved)){status("simulationDBStatus","บันทึกฐานข้อมูลไม่สำเร็จ อาจเกิดจากพื้นที่ Local Storage เต็ม กรุณาส่งออกชุดเดิมก่อน","error");return;}
+ renderSimulationDatabase();refreshSimulationSelect();status("simulationDBStatus",`สร้างฐานข้อมูลชุดใหม่สำเร็จ · เก็บฐานข้อมูลเดิมไว้ทั้งหมด (${saved.length} ชุด)` ,"ok");
+}
+function deleteSimulationDatabase(id){
+ const saved=readSimulationDatabases(),target=saved.find(x=>x.id===id);if(!target)return;
+ if(!confirm(`ต้องการลบฐานข้อมูลชุด "${target.label||target.id}" หรือไม่? การลบนี้ไม่สามารถย้อนกลับได้`))return;
+ saveSimulationDatabases(saved.filter(x=>x.id!==id));renderSimulationDatabase();refreshSimulationSelect();
+}
+// Export the EXACT recorded snapshots, including full regression coefficients.
+// CSV is unsuitable for transferring models because its display expressions
+// have rounded coefficients and discard feature normalization.
+function exportSimulationDatabaseJSON(){
+ const snapshots=readSimulationDatabases();
+ if(!snapshots.length){status("simulationDBStatus","ยังไม่มีฐานข้อมูล กรุณากด Build new database ก่อน","error");return;}
+ const data={format:"spectral-lab-simulation-db",schemaVersion:1,exportedAt:new Date().toISOString(),origin:"RGB-UVVis-Gaussian-Lab",snapshots};
+ try{
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json;charset=utf-8"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download=`SpectralLab_Simulation_Database_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+  status("simulationDBStatus",`ส่งออกฐานข้อมูล ${snapshots.length} ชุดสำหรับ Frontend แล้ว (JSON)`,"ok");
+ }catch(e){status("simulationDBStatus","ส่งออกไม่สำเร็จ: "+e.message,"error");}
+}
+function exportSimulationDatabase(){
+ const db=readSimulationDatabases();if(!db.length){status("simulationDBStatus","ยังไม่มีฐานข้อมูลที่บันทึกไว้ให้ส่งออก","error");return;}
+ const lines=[["Database_ID","Created_at","Source_rows","Substance","Parameter","Method","Expression_for_Simulation","Mean","N","R2","RMSE","Gaussian_Simulation_Equation","Calibration_Equation","Concentration_Equation","Calibration_R2","Calibration_N"].join(",")];
+ db.forEach(snap=>(snap.substances||[]).forEach(g=>g.params.forEach(p=>lines.push([snap.id,snap.createdAt,snap.sourceRows,g.compound,p.key,p.method,p.expression,p.method==="Mean"&&Number.isFinite(p.mean)?p.mean:"",p.n,Number.isFinite(p.r2)?p.r2:"",Number.isFinite(p.rmse)?p.rmse:"",g.equation,g.calibration?.equation||"",g.calibration?.concentrationEquation||"",Number.isFinite(g.calibration?.r2)?g.calibration.r2:"",g.calibration?.n??0].map(csvCell).join(",")))));
+ downloadCSV("Saved_Simulation_Databases.csv",lines);status("simulationDBStatus",`ส่งออกฐานข้อมูลที่บันทึกไว้ ${db.length} ชุดสำเร็จ`,"ok");
+}
+
+let simulatedSpectrumData=[];
+let validationSimData=[], validationMeasuredRows=[], validationPairedData=[], validationColumnNames=[], pendingValidationFileText="", pendingValidationFile=null;
+function simulationOptionValue(snapshotId,substanceIndex){return `${snapshotId}::${substanceIndex}`;}
+function refreshSimulationSelect(keepValue=true){
+ const select=$("simDatabaseSelect"),previous=keepValue?select.value:"",db=readSimulationDatabases();
+ const options=['<option value="">— เลือกฐานข้อมูล —</option>'];
+ db.forEach((snap,si)=>(snap.substances||[]).forEach((g,gi)=>{
+  const value=simulationOptionValue(snap.id,gi),label=`${g.compound||'Unnamed substance'} · ${snap.label||`Database ${db.length-si}`}`;
+  options.push(`<option value="${esc(value)}">${esc(label)}</option>`);
+ }));
+ select.innerHTML=options.join("");
+ if(previous&&[...select.options].some(o=>o.value===previous))select.value=previous;
+ else if(select.options.length===2)select.selectedIndex=1;
+ renderSelectedSimulationParameters();
+}
+function getSelectedSimulation(){
+ const value=$("simDatabaseSelect").value;if(!value)return null;
+ const cut=value.lastIndexOf("::");if(cut<0)return null;
+ const id=value.slice(0,cut),gi=Number(value.slice(cut+2));
+ const snapshot=readSimulationDatabases().find(s=>s.id===id),substance=snapshot?.substances?.[gi];
+ return snapshot&&substance?{snapshot,substance}:null;
+}
+function parseSimulationExpression(p,R,G,B){
+ if(!p)return NaN;
+ // New snapshots store the precise regression coefficients and normalization.
+ // Never parse rounded display equations to produce a scientific prediction.
+ if(p.model&&p.method!=="Mean")return predictRGBFamily(p.model,{R,G,B});
+ if(p.method==="Mean"){
+  const raw=String(p.expression??"").replace(/[−–]/g,"-").trim();
+  const v=Number(raw);if(raw!==""&&Number.isFinite(v))return v;
+  if(p.mean!==null&&p.mean!==undefined&&p.mean!==""&&Number.isFinite(Number(p.mean)))return Number(p.mean);
+  return NaN;
+ }
+ const expression=String(p.expression??"").replace(/[−–]/g,"-").replace(/ŷ\s*=|y\s*=/gi,"").replace(/\s+/g,"");
+ if(!expression||expression.includes("—")||expression.includes("ไม่สามารถ"))return NaN;
+ const tokens=expression.match(/[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?[RGB]?/gi);
+ if(!tokens||tokens.join("")!==expression)return NaN;
+ let value=0;
+ for(const token of tokens){const m=token.match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)([RGB])?$/i);if(!m)return NaN;const c=Number(m[1]),v=(m[2]||"").toUpperCase();value+=c*(v==="R"?R:v==="G"?G:v==="B"?B:1);}
+ return Number.isFinite(value)?value:NaN;
+}
+function resolveSimulationParameters(g,R,G,B){
+ const get=k=>(g.params||[]).find(p=>p.key===k);
+ const baselineParam=get("baseline");
+ const p={baseline:baselineParam?parseSimulationExpression(baselineParam,R,G,B):0,H1:parseSimulationExpression(get("H1"),R,G,B),mu1:parseSimulationExpression(get("mu1"),R,G,B),sigma1:parseSimulationExpression(get("sigma1"),R,G,B),H2:parseSimulationExpression(get("H2"),R,G,B),mu2:parseSimulationExpression(get("mu2"),R,G,B),sigma2:parseSimulationExpression(get("sigma2"),R,G,B)};
+ if(!Number.isFinite(p.baseline))p.baseline=0;
+ // Keep the raw prediction for transparency, but enforce the physical simulation constraint B >= 0.
+ p.baselineRaw=p.baseline;
+ p.baseline=Math.max(0,p.baselineRaw);
+ p.baselineClamped=p.baselineRaw<0;
+ p.peak1Valid=[p.H1,p.mu1,p.sigma1].every(Number.isFinite)&&p.H1>=0&&p.sigma1>0;
+ p.peak2Valid=[p.H2,p.mu2,p.sigma2].every(Number.isFinite)&&p.H2>=0&&p.sigma2>0;
+ return p;
+}
+function renderRGBColorPreview(){
+ const input=["simR","simG","simB"].map(id=>$(id).value.trim());
+ const values=input.map(Number);
+ const swatch=$("simRGBSwatch"),label=$("simRGBColorValue");
+ if(input.some(v=>v==="")||!values.every(v=>Number.isFinite(v)&&v>=0)){
+  swatch.style.background="#ffffff";swatch.style.backgroundImage="repeating-linear-gradient(135deg,#fff 0 8px,#e5e7eb 8px 16px)";
+  swatch.setAttribute("aria-label","ค่า RGB ไม่ถูกต้อง");label.textContent="กรุณากรอก R, G และ B เป็นตัวเลขตั้งแต่ 0 ขึ้นไป";return;
+ }
+ swatch.style.backgroundImage="none";
+ // Clamp only the CSS color swatch (8-bit display); never clamp RGB inputs used for regression or simulation.
+ const bytes=values.map(v=>Math.min(255,Math.round(v))),hex="#"+bytes.map(v=>v.toString(16).padStart(2,"0")).join("").toUpperCase();
+ swatch.style.background=`rgb(${bytes[0]}, ${bytes[1]}, ${bytes[2]})`;
+ const outOfRange=values.some(v=>v>255);
+ swatch.setAttribute("aria-label",outOfRange?"ตัวอย่างสีจำกัดที่ 255 เฉพาะการแสดงผล":`สี RGB ${bytes.join(", ")}`);
+ label.textContent=`Input RGB (${values.join(", ")}) · Preview HEX ${hex}${outOfRange?" · ตัวอย่างสีจำกัดที่ 255 เฉพาะหน้าจอ; การคำนวณใช้ค่าอินพุตเต็ม":""}`;
+}
+function renderSelectedSimulationParameters(){
+ renderRGBColorPreview();
+ const root=$("simParameterInfo"),selected=getSelectedSimulation();
+ if(!selected){root.innerHTML="<p>ยังไม่ได้เลือกฐานข้อมูล</p>";return;}
+ const {snapshot,substance}=selected;
+ const rgb={R:Number($("simR").value),G:Number($("simG").value),B:Number($("simB").value)};
+ const p=resolveSimulationParameters(substance,rgb.R,rgb.G,rgb.B);
+ const rows=[["Baseline B","baseline",p.baseline],["H₁","H1",p.H1],["μ₁ (nm)","mu1",p.mu1],["σ₁ (nm)","sigma1",p.sigma1],["H₂","H2",p.H2],["μ₂ (nm)","mu2",p.mu2],["σ₂ (nm)","sigma2",p.sigma2]];
+ const trainingRows=(substance.rows||[]).filter(row=>["R","G","B"].every(k=>Number.isFinite(Number(row[k]))));
+ const rgbOutside=["R","G","B"].some(k=>trainingRows.length&&(rgb[k]<Math.min(...trainingRows.map(row=>Number(row[k])))||rgb[k]>Math.max(...trainingRows.map(row=>Number(row[k])))));
+ const invalidPeak=(Number.isFinite(p.H1)&&p.H1<0)||(Number.isFinite(p.H2)&&p.H2<0)||(Number.isFinite(p.sigma1)&&p.sigma1<=0)||(Number.isFinite(p.sigma2)&&p.sigma2<=0);
+ const warnings=[];
+ if(rgbOutside)warnings.push("RGB ที่ป้อนอยู่นอกช่วงข้อมูลฝึกอย่างน้อยหนึ่งช่อง จึงเป็นการ extrapolation และไม่ควรคาดหวังความแม่นยำ");
+ if(p.baselineClamped)warnings.push(`สมการทำนาย Baseline B = ${num(p.baselineRaw,6)} ซึ่งติดลบ จึงกำหนดค่า B ที่ใช้จำลองเป็น 0 เพื่อไม่ให้ baseline ติดลบ`);
+ if(invalidPeak)warnings.push("สมการทำนายพารามิเตอร์ peak ที่ไม่เป็นไปตามข้อจำกัดทางกายภาพ (H ต้องไม่ติดลบ และ σ ต้องมากกว่า 0) peak ที่ไม่ผ่านเงื่อนไขจะไม่ถูกนำไปจำลอง");
+ root.innerHTML=`<p><strong>${esc(substance.compound||"Unnamed substance")}</strong> · ${esc(snapshot.label||snapshot.id)} · RGB = (${num(rgb.R,0)}, ${num(rgb.G,0)}, ${num(rgb.B,0)})</p><div class="tablewrap"><table><thead><tr><th>Parameter</th><th>Method</th><th>Expression from database</th><th>Value used</th></tr></thead><tbody>${rows.map(([label,key,value])=>{const q=(substance.params||[]).find(x=>x.key===key);return `<tr><td>${label}</td><td>${esc(q?.method||"—")}</td><td style="white-space:normal;min-width:200px">${esc(q?.expression||"—")}</td><td>${Number.isFinite(value)?num(value,6):"Not available"}</td></tr>`}).join("")}</tbody></table></div><p class="note">สมการจากฐานข้อมูล: ${esc(substance.equation||"—")}</p><p class="note">ค่าที่นำไปสร้างสเปกตรัมคำนวณจากคอลัมน์ “Value used”: วิธี Multiple linear equation ใช้สมการที่แทน R, G, B แล้ว ส่วนวิธี Mean ใช้ค่าเฉลี่ยที่แสดงในฐานข้อมูล โดยกำหนด Baseline B ที่ใช้จำลองให้ไม่น้อยกว่า 0; หากสมการทำนาย B ติดลบ โปรแกรมใช้ B = 0 และแจ้งเตือน</p>${warnings.length?`<div class="status error">${warnings.map(esc).join(" · ")}</div>`:`<div class="status">ตรวจช่วง RGB และข้อจำกัดพื้นฐานของพารามิเตอร์แล้ว ทั้งนี้ยังต้องยืนยันความแม่นยำด้วยชุดทดสอบอิสระ</div>`}`;
+}
+function renderSimulatedSummary(){
+ const lambdaEl=$("simLambdaMaxResult"),absEl=$("simAbsAtMaxResult"),concEl=$("simConcentrationResult"),eqEl=$("simConcentrationEquationResult");
+ if(!simulatedSpectrumData.length){if(lambdaEl)lambdaEl.textContent="—";if(absEl)absEl.textContent="—";if(concEl)concEl.textContent="—";if(eqEl)eqEl.textContent="กด Simulate spectrum เพื่อคำนวณ";return;}
+ const selected=getSelectedSimulation();
+ const R=Number($("simR").value),G=Number($("simG").value),B=Number($("simB").value);
+ const p=selected?resolveSimulationParameters(selected.substance,R,G,B):null;
+ let peak=simulatedSpectrumData.reduce((best,d)=>d.combined>best.combined?d:best,simulatedSpectrumData[0]);
+ if(p&&(p.peak1Valid||p.peak2Valid)){
+  const lo=Number($("simLambdaMin").value),hi=Number($("simLambdaMax").value),fineStep=Math.min(0.05,Math.max((hi-lo)/200000,0.001));
+  for(let x=lo;x<=hi+fineStep*1e-8;x+=fineStep){
+   const a=p.baseline+(p.peak1Valid?p.H1*Math.exp(-((x-p.mu1)**2)/(2*p.sigma1**2)):0)+(p.peak2Valid?p.H2*Math.exp(-((x-p.mu2)**2)/(2*p.sigma2**2)):0);
+   if(a>peak.combined)peak={wavelength:x,combined:a};
+  }
+ }
+ lambdaEl.textContent=num(peak.wavelength,4);absEl.textContent=num(peak.combined,8);
+ const cal=selected?.substance?.calibration;
+ if(cal&&Number.isFinite(Number(cal.slope))&&Math.abs(Number(cal.slope))>1e-15&&Number.isFinite(Number(cal.intercept))){
+  const concentration=(peak.combined-Number(cal.intercept))/Number(cal.slope);
+  concEl.textContent=Number.isFinite(concentration)?num(concentration,8):"คำนวณไม่ได้";
+  eqEl.textContent=`C = (A − b) / m; ${cal.concentrationEquation||""}. ใช้ A = ${num(peak.combined,8)}; ค่าอาจอยู่นอกช่วง Calibration curve`;
+ }else{concEl.textContent="ไม่มีสมการ";eqEl.textContent="ฐานข้อมูลนี้ไม่มีสมการ Calibration curve ที่ใช้คำนวณได้ กรุณาสร้างฐานข้อมูลใหม่จากข้อมูลที่มี concentration และ Absorbance at λmax อย่างน้อย 2 จุด";}
+}
+function simulateSpectra(){
+ const selected=getSelectedSimulation();
+ if(!selected){status("simStatus","กรุณาเลือก Parameter for simulation จากฐานข้อมูลที่บันทึกไว้ก่อน","error");return;}
+ if(["simR","simG","simB"].some(id=>$(id).value.trim()==="")){status("simStatus","กรุณากรอก R, G และ B ให้ครบ","error");return;}
+ const R=Number($("simR").value),G=Number($("simG").value),B=Number($("simB").value);
+ if(![R,G,B].every(v=>Number.isFinite(v)&&v>=0)){status("simStatus","ค่า RGB ต้องเป็นตัวเลขตั้งแต่ 0 ขึ้นไป โดยไม่มีขีดจำกัดสูงสุดที่ 255","error");return;}
+ const start=Number($("simLambdaMin").value),end=Number($("simLambdaMax").value),step=Number($("simLambdaStep").value);
+ if(![start,end,step].every(Number.isFinite)||end<=start||step<=0){status("simStatus","กำหนดช่วงความยาวคลื่นให้ถูกต้อง โดย end ต้องมากกว่า start และ interval ต้องมากกว่า 0","error");return;}
+ if((end-start)/step>20000){status("simStatus","จำนวนจุดมากเกินไป กรุณาเพิ่มช่วง interval ให้ไม่เกิน 20,000 จุด","error");return;}
+ const p=resolveSimulationParameters(selected.substance,R,G,B);
+ if(!p.peak1Valid&&!p.peak2Valid){status("simStatus","ฐานข้อมูลนี้ไม่สามารถคำนวณ peak ได้ กรุณาตรวจสอบ H, μ และ σ ของแต่ละ peak ใน Tab 3","error");renderSelectedSimulationParameters();return;}
+ simulatedSpectrumData=[];
+ for(let i=0;i<=Math.floor((end-start)/step+1e-9);i++){
+  const wavelength=Number((start+i*step).toFixed(8));
+  const peak1=p.peak1Valid?p.H1*Math.exp(-((wavelength-p.mu1)**2)/(2*p.sigma1**2)):0;
+  const peak2=p.peak2Valid?p.H2*Math.exp(-((wavelength-p.mu2)**2)/(2*p.sigma2**2)):0;
+  simulatedSpectrumData.push({wavelength,peak1,peak2,baseline:p.baseline,combined:p.baseline+peak1+peak2});
+ }
+ renderSelectedSimulationParameters();renderSimulatedSpectrum();renderSimulatedSummary();
+ status("simStatus",`จำลองสำเร็จ ${simulatedSpectrumData.length} จุด · ${selected.substance.compound||"สารไม่ระบุชื่อ"} · RGB (${R}, ${G}, ${B})` ,"ok");
+}
+function renderSimulatedSpectrum(){
+ const canvas=$("simSpectrumCanvas"),ctx=canvas.getContext("2d"),w=canvas.width,h=canvas.height,pad={l:72,r:25,t:25,b:58};
+ ctx.clearRect(0,0,w,h);ctx.fillStyle="#fff";ctx.fillRect(0,0,w,h);
+ if(!simulatedSpectrumData.length){ctx.fillStyle="#667085";ctx.font="16px Arial";ctx.fillText("Simulate spectrum to display graph",pad.l, h/2);$("simDataTable").innerHTML="ยังไม่มีข้อมูลจำลอง";renderSimulatedSummary();return;}
+ const shown=[];if($("simShowPeak1").checked)shown.push({key:"peak1",label:"Peak 1",color:"#dc2626"});if($("simShowPeak2").checked)shown.push({key:"peak2",label:"Peak 2",color:"#2563eb"});if($("simShowTotal").checked)shown.push({key:"combined",label:"Combined",color:"#111827"});
+ const x0=simulatedSpectrumData[0].wavelength,x1=simulatedSpectrumData[simulatedSpectrumData.length-1].wavelength;
+ const ymax=Math.max(1e-12,...simulatedSpectrumData.flatMap(d=>shown.map(s=>d[s.key])))*1.08;
+ const X=x=>pad.l+(x-x0)/(x1-x0||1)*(w-pad.l-pad.r),Y=y=>h-pad.b-y/ymax*(h-pad.t-pad.b);
+ ctx.strokeStyle="#e5e7eb";ctx.fillStyle="#475467";ctx.font="12px Arial";ctx.lineWidth=1;
+ for(let i=0;i<=5;i++){const y=ymax*i/5,py=Y(y);ctx.beginPath();ctx.moveTo(pad.l,py);ctx.lineTo(w-pad.r,py);ctx.stroke();ctx.textAlign="right";ctx.fillText(y.toPrecision(3),pad.l-9,py+4);}
+ for(let i=0;i<=5;i++){const x=x0+(x1-x0)*i/5,px=X(x);ctx.beginPath();ctx.moveTo(px,pad.t);ctx.lineTo(px,h-pad.b);ctx.stroke();ctx.textAlign="center";ctx.fillText(Number(x.toFixed(2)).toString(),px,h-pad.b+20);}
+ ctx.strokeStyle="#344054";ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,h-pad.b);ctx.lineTo(w-pad.r,h-pad.b);ctx.stroke();
+ shown.forEach(series=>{ctx.beginPath();ctx.strokeStyle=series.color;ctx.lineWidth=series.key==="combined"?2.8:1.8;simulatedSpectrumData.forEach((d,i)=>{const x=X(d.wavelength),y=Y(d[series.key]);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.stroke();});
+ ctx.fillStyle="#344054";ctx.font="14px Arial";ctx.textAlign="center";ctx.fillText("Wavelength (nm)", (pad.l+w-pad.r)/2,h-13);ctx.save();ctx.translate(20,(pad.t+h-pad.b)/2);ctx.rotate(-Math.PI/2);ctx.fillText("Absorbance (a.u.)",0,0);ctx.restore();
+ let lx=pad.l;shown.forEach(s=>{ctx.strokeStyle=s.color;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(lx,pad.t+4);ctx.lineTo(lx+22,pad.t+4);ctx.stroke();ctx.fillStyle="#344054";ctx.textAlign="left";ctx.fillText(s.label,lx+28,pad.t+8);lx+=110;});
+ const rows=simulatedSpectrumData.map(d=>`<tr><td>${num(d.wavelength,4)}</td><td>${num(d.peak1,8)}</td><td>${num(d.peak2,8)}</td><td>${num(d.combined,8)}</td></tr>`).join("");
+ $("simDataTable").innerHTML=`<div class="tablewrap"><table><thead><tr><th>Wavelength (nm)</th><th>Peak 1 absorbance</th><th>Peak 2 absorbance</th><th>Combined absorbance</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function exportSimulatedSpectrum(){
+ if(!simulatedSpectrumData.length){status("simStatus","กรุณากด Simulate spectrum ก่อน Export CSV","error");return;}
+ const selected=getSelectedSimulation(),lines=[["Wavelength_nm","Baseline","Peak1_Absorbance","Peak2_Absorbance","Combined_Absorbance"].join(","),...simulatedSpectrumData.map(d=>[d.wavelength,d.baseline??0,d.peak1,d.peak2,d.combined].map(csvCell).join(","))];
+ const name=(selected?.substance?.compound||"Simulated_Spectrum").replace(/[^\w-]+/g,"_");
+ downloadCSV(`${name}_Simulated_Spectrum.csv`,lines);status("simStatus",`ส่งออก CSV แล้ว จำนวน ${simulatedSpectrumData.length} จุด โดยมี Peak 1, Peak 2 และ Combined spectrum` ,"ok");
+}
+
+function setValidationSimulationFromLatest(){
+ if(!simulatedSpectrumData.length){status("validationStatus","ยังไม่มีสเปกตรัมจำลอง กรุณาไป Tab 4 แล้วกด Simulate spectrum ก่อน","error");return;}
+ validationSimData=simulatedSpectrumData.map(d=>({wavelength:Number(d.wavelength),absorbance:Number(d.combined)})).filter(d=>Number.isFinite(d.wavelength)&&Number.isFinite(d.absorbance)).sort((a,b)=>a.wavelength-b.wavelength);
+ $("validationSimInfo").className="status ok";
+ $("validationSimInfo").textContent="รับข้อมูลจำลองล่าสุดเรียบร้อยแล้ว";
+ status("validationStatus","ข้อมูลจำลองพร้อมแล้ว กรุณาอัปโหลดสเปกตรัมจริงเพื่อเริ่มเปรียบเทียบ");
+}
+function interpValidationSimulation(x){
+ if(!validationSimData.length||x<validationSimData[0].wavelength||x>validationSimData[validationSimData.length-1].wavelength)return NaN;
+ let lo=0,hi=validationSimData.length-1;
+ while(lo<=hi){const mid=(lo+hi)>>1,v=validationSimData[mid].wavelength;if(v===x)return validationSimData[mid].absorbance;if(v<x)lo=mid+1;else hi=mid-1;}
+ const a=validationSimData[Math.max(0,hi)],b=validationSimData[Math.min(validationSimData.length-1,lo)];
+ if(!a||!b||b.wavelength===a.wavelength)return a?.absorbance??NaN;
+ return a.absorbance+(x-a.wavelength)*(b.absorbance-a.absorbance)/(b.wavelength-a.wavelength);
+}
+function runSimulationValidation(){
+ if(!validationSimData.length){status("validationStatus","กรุณากด Use latest simulation data ก่อน","error");return;}
+ if(!validationMeasuredRows.length){status("validationStatus","กรุณาอัปโหลดสเปกตรัมจริงก่อน","error");return;}
+ const xi=Number($("validationXColumn").value),yi=Number($("validationYColumn").value);
+ const pts=validationMeasuredRows.map(row=>({wavelength:Number(row[xi]),measured:Number(row[yi])})).filter(d=>Number.isFinite(d.wavelength)&&Number.isFinite(d.measured)).sort((a,b)=>a.wavelength-b.wavelength);
+ const unique=[];for(const d of pts){if(!unique.length||d.wavelength!==unique[unique.length-1].wavelength)unique.push(d);else unique[unique.length-1]=d;}
+ validationPairedData=unique.map(d=>({...d,simulated:interpValidationSimulation(d.wavelength)})).filter(d=>Number.isFinite(d.simulated));
+ if(validationPairedData.length<2){status("validationStatus","มีจุดข้อมูลในช่วง wavelength ที่ซ้อนทับกันน้อยกว่า 2 จุด กรุณาตรวจสอบช่วงของข้อมูลทั้งสองชุด","error");renderValidationComparison();return;}
+ const n=validationPairedData.length,mean=validationPairedData.reduce((s,d)=>s+d.measured,0)/n;
+ const errors=validationPairedData.map(d=>d.simulated-d.measured),abs=errors.map(Math.abs),sq=errors.map(v=>v*v);
+ const mae=abs.reduce((a,b)=>a+b,0)/n,rmse=Math.sqrt(sq.reduce((a,b)=>a+b,0)/n),maxae=Math.max(...abs),bias=errors.reduce((a,b)=>a+b,0)/n;
+ const sst=validationPairedData.reduce((sum,d)=>sum+(d.measured-mean)**2,0),sse=sq.reduce((a,b)=>a+b,0),r2=sst>0?1-sse/sst:NaN;
+ const ymin=Math.min(...validationPairedData.map(d=>d.measured)),ymax=Math.max(...validationPairedData.map(d=>d.measured)),range=ymax-ymin,nrmse=range>0?rmse/range*100:NaN;
+ const stats={n,mae,rmse,maxae,bias,r2,nrmse,ymin,ymax};
+ renderValidationMetrics(stats);renderValidationComparison();
+ status("validationStatus",`เปรียบเทียบสำเร็จ ${n} จุด ในช่วง ${num(validationPairedData[0].wavelength,3)}–${num(validationPairedData.at(-1).wavelength,3)} nm · ใช้ interpolation เชิงเส้นกับข้อมูลจำลอง`,"ok");
+}
+function renderValidationMetrics(s){
+ const range=s.ymax-s.ymin;
+ const tier=(value,goodLimit,acceptableLimit,lowerIsBetter=true)=>{
+  if(!Number.isFinite(value))return 'na';
+  if(lowerIsBetter)return value<=goodLimit?'good':value<=acceptableLimit?'medium':'bad';
+  return value>=goodLimit?'good':value>=acceptableLimit?'medium':'bad';
+ };
+ const r2Tier=tier(s.r2,0.95,0.90,false);
+ const rmsePct=range>0?s.rmse/range*100:NaN;
+ const maePct=range>0?s.mae/range*100:NaN;
+ const maxPct=range>0?s.maxae/range*100:NaN;
+ const biasPct=range>0?Math.abs(s.bias)/range*100:NaN;
+ const rmseTier=tier(rmsePct,5,10), maeTier=tier(maePct,3,5), maxTier=tier(maxPct,10,20), nrmseTier=tier(s.nrmse,5,10), biasTier=tier(biasPct,2,5);
+ const label={good:'ผลดีมาก',medium:'ยอมรับได้เบื้องต้น',bad:'ควรปรับปรุง',na:'ประเมินไม่ได้'};
+ const cards=[
+  ['R²',Number.isFinite(s.r2)?num(s.r2,5):'N/A',`ดีมาก ≥ 0.95 · ยอมรับได้ ≥ 0.90 · ควรปรับปรุง < 0.90`,r2Tier],
+  ['RMSE',num(s.rmse,6),`RMSE คิดเป็น ${Number.isFinite(rmsePct)?num(rmsePct,3)+'%':'N/A'} ของช่วง Abs จริง · ดีมาก ≤ 5% · ยอมรับได้ ≤ 10%`,rmseTier],
+  ['MAE',num(s.mae,6),`MAE คิดเป็น ${Number.isFinite(maePct)?num(maePct,3)+'%':'N/A'} ของช่วง Abs จริง · ดีมาก ≤ 3% · ยอมรับได้ ≤ 5%`,maeTier],
+  ['Maximum absolute error',num(s.maxae,6),`คิดเป็น ${Number.isFinite(maxPct)?num(maxPct,3)+'%':'N/A'} ของช่วง Abs จริง · ดีมาก ≤ 10% · ยอมรับได้ ≤ 20%`,maxTier],
+  ['NRMSE',Number.isFinite(s.nrmse)?num(s.nrmse,3)+'%':'N/A','ดีมาก ≤ 5% · ยอมรับได้เบื้องต้น ≤ 10%',nrmseTier],
+  ['Bias (sim − measured)',num(s.bias,6),`|Bias| คิดเป็น ${Number.isFinite(biasPct)?num(biasPct,3)+'%':'N/A'} ของช่วง Abs จริง · ดีมาก ≤ 2% · ยอมรับได้ ≤ 5% · ${s.bias>0?'ค่าจำลองสูงกว่าค่าจริงโดยเฉลี่ย':s.bias<0?'ค่าจำลองต่ำกว่าค่าจริงโดยเฉลี่ย':'ค่าเฉลี่ยไม่เอนเอียง'}`,biasTier],
+  ['Matched points',String(s.n),'จำนวนจุดที่ใช้คำนวณ ไม่ใช่ตัวชี้วัดความแม่นยำ','na']
+ ];
+ $("validationMetricCards").innerHTML=cards.map(([name,val,desc,t])=>`<div class="metric ${t==='na'?'':t}" title="${esc(desc)}"><span>${esc(name)}</span><strong>${esc(val)}</strong><small style="display:block;color:#667085;margin-top:5px;font-size:11px">${esc(desc)}${t!=='na'?' · '+label[t]:''}</small></div>`).join('');
+ // Overall rating uses five non-duplicative indicators: R², NRMSE, MAE, maximum error and absolute bias.
+ // RMSE is shown separately but not counted twice because NRMSE is RMSE normalized by measured range.
+ const primary=[r2Tier,nrmseTier,maeTier,maxTier,biasTier];
+ const redCount=primary.filter(t=>t==='bad').length;
+ const allGreen=primary.every(t=>t==='good');
+ const noRed=primary.every(t=>t==='good'||t==='medium');
+ let level,cls,detail;
+ if(primary.includes('na')){
+  level='ประเมินไม่ได้';cls='neutral';detail='ข้อมูลมีช่วง Absorbance เป็นศูนย์หรือมีค่าสถิติที่คำนวณไม่ได้ จึงยังสรุประดับภาพรวมไม่ได้';
+ }else if(allGreen){
+  level='ดีมาก';cls='good';detail='ตัวชี้วัดหลักทั้ง 5 รายการอยู่ในเกณฑ์ผลดีมาก';
+ }else if(noRed){
+  level='ดี';cls='good';detail='ตัวชี้วัดหลักไม่มีรายการใดอยู่ในระดับควรปรับปรุง แต่มีบางรายการอยู่ในระดับยอมรับได้เบื้องต้น';
+ }else if(r2Tier!=='bad'&&nrmseTier!=='bad'&&redCount<=1){
+  level='ยอมรับได้';cls='medium';detail='ค่า R² และ NRMSE ยังอยู่ในเกณฑ์ยอมรับได้ และมีตัวชี้วัดหลักที่ควรปรับปรุงไม่เกิน 1 รายการ';
+ }else{
+  level='ควรปรับปรุง';cls='bad';detail=`มีตัวชี้วัดหลัก ${redCount} รายการอยู่ในระดับควรปรับปรุง หรือ R²/NRMSE ต่ำกว่าเกณฑ์ยอมรับได้ ควรตรวจสอบความคลาดเคลื่อนและทดสอบกับข้อมูลเพิ่มเติม`;
+ }
+ const summary=$("validationOverallSummary");summary.className=`validation-summary ${cls}`;
+ summary.innerHTML=`<div><div class="summary-title">สรุปภาพรวมผลการเปรียบเทียบ</div><div class="summary-level">${esc(level)}</div></div><div class="summary-detail">${esc(detail)}<br><span style="font-size:12px">ประเมินจาก R², NRMSE, MAE, Maximum absolute error และ |Bias| โดยไม่นับ RMSE ซ้ำกับ NRMSE</span></div>`;
+}
+function renderValidationComparison(){
+ const c=$("validationSpectrumCanvas"),ctx=c.getContext('2d'),w=c.width,h=c.height,pad={l:72,r:25,t:28,b:58};ctx.clearRect(0,0,w,h);ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);
+ if(!validationPairedData.length){ctx.fillStyle='#667085';ctx.font='16px Arial';ctx.fillText('Upload measured data and run comparison',pad.l,h/2);$("validationDataTable").textContent='ยังไม่มีข้อมูลเปรียบเทียบ';return;}
+ const x0=validationPairedData[0].wavelength,x1=validationPairedData.at(-1).wavelength||x0+1,allY=validationPairedData.flatMap(d=>[d.measured,d.simulated]),low=Math.min(0,...allY),high=Math.max(...allY),span=high-low||1,y0=low-span*.06,y1=high+span*.08;
+ const X=x=>pad.l+(x-x0)/(x1-x0||1)*(w-pad.l-pad.r),Y=y=>h-pad.b-(y-y0)/(y1-y0)*(h-pad.t-pad.b);
+ ctx.font='12px Arial';for(let i=0;i<=5;i++){const v=y0+(y1-y0)*i/5,py=Y(v);ctx.strokeStyle='#e5e7eb';ctx.beginPath();ctx.moveTo(pad.l,py);ctx.lineTo(w-pad.r,py);ctx.stroke();ctx.fillStyle='#475467';ctx.textAlign='right';ctx.fillText(v.toPrecision(3),pad.l-9,py+4);const xv=x0+(x1-x0)*i/5,px=X(xv);ctx.strokeStyle='#f2f4f7';ctx.beginPath();ctx.moveTo(px,pad.t);ctx.lineTo(px,h-pad.b);ctx.stroke();ctx.textAlign='center';ctx.fillStyle='#475467';ctx.fillText(Number(xv.toFixed(2)).toString(),px,h-pad.b+20);}
+ ctx.strokeStyle='#344054';ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,h-pad.b);ctx.lineTo(w-pad.r,h-pad.b);ctx.stroke();
+ const series=[{key:'measured',label:'Measured spectrum',color:'#2563eb'},{key:'simulated',label:'Simulated spectrum',color:'#dc2626'}];series.forEach(s=>{ctx.beginPath();ctx.strokeStyle=s.color;ctx.lineWidth=2.4;validationPairedData.forEach((d,i)=>{const px=X(d.wavelength),py=Y(d[s.key]);if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py)});ctx.stroke();});
+ ctx.fillStyle='#344054';ctx.font='14px Arial';ctx.textAlign='center';ctx.fillText('Wavelength (nm)',(pad.l+w-pad.r)/2,h-13);ctx.save();ctx.translate(20,(pad.t+h-pad.b)/2);ctx.rotate(-Math.PI/2);ctx.fillText('Absorbance (a.u.)',0,0);ctx.restore();let lx=pad.l;series.forEach(s=>{ctx.strokeStyle=s.color;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(lx,pad.t+4);ctx.lineTo(lx+22,pad.t+4);ctx.stroke();ctx.fillStyle='#344054';ctx.textAlign='left';ctx.fillText(s.label,lx+28,pad.t+8);lx+=190;});
+ const rows=validationPairedData.map(d=>`<tr><td>${num(d.wavelength,5)}</td><td>${num(d.measured,8)}</td><td>${num(d.simulated,8)}</td><td>${num(d.simulated-d.measured,8)}</td><td>${num(Math.abs(d.simulated-d.measured),8)}</td></tr>`).join('');$("validationDataTable").innerHTML=`<div class="tablewrap"><table><thead><tr><th>Wavelength (nm)</th><th>Measured absorbance</th><th>Simulated absorbance</th><th>Residual (sim − measured)</th><th>Absolute error</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function exportValidationComparison(){
+ if(!validationPairedData.length){status('validationStatus','กรุณาเปรียบเทียบข้อมูลก่อน Export CSV','error');return;}
+ const n=validationPairedData.length,mean=validationPairedData.reduce((s,d)=>s+d.measured,0)/n;
+ const errors=validationPairedData.map(d=>d.simulated-d.measured),abs=errors.map(Math.abs),sq=errors.map(v=>v*v);
+ const mae=abs.reduce((a,b)=>a+b,0)/n,rmse=Math.sqrt(sq.reduce((a,b)=>a+b,0)/n),maxae=Math.max(...abs),bias=errors.reduce((a,b)=>a+b,0)/n;
+ const sst=validationPairedData.reduce((sum,d)=>sum+(d.measured-mean)**2,0),sse=sq.reduce((a,b)=>a+b,0),r2=sst>0?1-sse/sst:NaN;
+ const ymin=Math.min(...validationPairedData.map(d=>d.measured)),ymax=Math.max(...validationPairedData.map(d=>d.measured)),range=ymax-ymin,nrmse=range>0?rmse/range*100:NaN;
+ const lines=[
+  ['Record_Type','Wavelength_nm','Measured_Absorbance','Simulated_Absorbance','Residual_SimMinusMeasured','Absolute_Error','Statistic','Value','Unit','Description'].map(csvCell).join(','),
+  ...(()=>{const xi=Number($("validationXColumn").value),yi=Number($("validationYColumn").value);return validationMeasuredRows.map(row=>({w:Number(row[xi]),a:Number(row[yi])})).filter(d=>Number.isFinite(d.w)&&Number.isFinite(d.a)).map(d=>['Measured_Raw',d.w,d.a,'','','','','','',''].map(csvCell).join(','));})(),
+  ...validationSimData.map(d=>['Simulated_Raw',d.wavelength,d.absorbance,'','','','','','',''].map(csvCell).join(',')),
+  ...validationPairedData.map(d=>['Paired_Comparison',d.wavelength,d.measured,d.simulated,d.simulated-d.measured,Math.abs(d.simulated-d.measured),'','','',''].map(csvCell).join(',')),
+  ...[
+   ['R2',r2,'dimensionless','Coefficient of determination: 1 - SSE/SST; may be negative'],
+   ['RMSE',rmse,'Absorbance','Root mean square error'],
+   ['MAE',mae,'Absorbance','Mean absolute error'],
+   ['Maximum absolute error',maxae,'Absorbance','Maximum absolute difference between simulated and measured values'],
+   ['NRMSE',nrmse,'%','RMSE divided by measured absorbance range, multiplied by 100'],
+   ['Bias',bias,'Absorbance','Mean of simulated minus measured'],
+   ['Matched points',n,'points','Number of wavelength points compared'],
+   ['Measured minimum',ymin,'Absorbance','Minimum measured absorbance in paired range'],
+   ['Measured maximum',ymax,'Absorbance','Maximum measured absorbance in paired range'],
+   ['Measured range',range,'Absorbance','Measured maximum minus measured minimum'],
+   ['Wavelength start',validationPairedData[0].wavelength,'nm','First wavelength included in comparison'],
+   ['Wavelength end',validationPairedData[n-1].wavelength,'nm','Last wavelength included in comparison']
+  ].map(([stat,val,unit,desc])=>['Statistic','','','','','',stat,Number.isFinite(val)?val:'',unit,desc].map(csvCell).join(','))
+ ];
+ downloadCSV('Simulation_Accuracy_Validation_Full_Analysis.csv',lines);status('validationStatus',`ส่งออกข้อมูลสเปกตรัมที่จับคู่กัน ${n} จุด พร้อมค่าสถิติทั้งหมดเป็น CSV แล้ว`,'ok');
+}
+
+function saveRGB(){try{localStorage.setItem(RGB_KEY,JSON.stringify(rgbRows))}catch(e){}}
+function addRGBRow(){
+ const conc=$("concentration").value.trim();
+ if(["red","green","blue"].some(id=>$(id).value.trim()==="")){status("rgbStatus","กรุณากรอก R, G และ B ให้ครบ","error");return;}
+ const r={compound:$("compoundName").value.trim(),concentration:conc===""?"":Number(conc),id:$("sampleName").value.trim()||`Sample-${rgbRows.length+1}`,R:Number($("red").value),G:Number($("green").value),B:Number($("blue").value),
+ lambdaMax:$ ("rgbLambdaMax").value.trim()===""?"":Number($("rgbLambdaMax").value),absorbanceAtLambdaMax:$ ("rgbAbsAtLambdaMax").value.trim()===""?"":Number($("rgbAbsAtLambdaMax").value),baseline:$ ("rgbBaseline").value.trim()===""?0:Number($("rgbBaseline").value),
+ H1:Number($("rgbH1").value),mu1:Number($("rgbMu1").value),sigma1:Number($("rgbS1").value),
+ H2:$("rgbH2").value.trim()===""?"":Number($("rgbH2").value),mu2:$("rgbMu2").value.trim()===""?"":Number($("rgbMu2").value),sigma2:$("rgbS2").value.trim()===""?"":Number($("rgbS2").value)};
+ if(![r.R,r.G,r.B].every(v=>Number.isFinite(v)&&v>=0)){status("rgbStatus","ค่า R, G, B ต้องเป็นตัวเลขตั้งแต่ 0 ขึ้นไป โดยไม่จำกัดที่ 255","error");return}
+ if(![r.H1,r.mu1,r.sigma1].every(Number.isFinite)){status("rgbStatus","กรุณากรอก H1, μ1 และ σ1","error");return}
+ if(![r.H2,r.mu2,r.sigma2].every(Number.isFinite))r.H2=r.mu2=r.sigma2="";
+ rgbRows.push(r);saveRGB();correlationPlaceholder("ข้อมูลเปลี่ยนแปลงแล้ว กรุณากด Calculate correlation เพื่อคำนวณผลใหม่");renderRGB();status("rgbStatus","เพิ่มข้อมูลแล้ว กรุณากด Calculate correlation เพื่อแสดงผลวิเคราะห์","ok");
+}
+function correlation(){
+ correlationCalculated=true;
+ const xk=$("rgbX").value,yk=$("rgbY").value,linear=regression(analysisRows(),xk,yk);
+ const q=analyzeSingleRelationship(analysisRows(),xk,yk,relationshipMode());
+ $("corrN").textContent=q.n;
+ $("pearsonR").textContent=num(linear.r);$("corrR2").textContent=num(q.r2);
+ $("corrSlope").textContent=q.type==="linear"?num(q.fit.coef[1]/q.fit.scales[0]):"—";
+ if(!q.fit){drawChart($("correlationPlot"),[]);}
+ else{
+  const xs=q.pairs.map(v=>v.x),xmin=Math.min(...xs),xmax=Math.max(...xs);
+  const curve=Array.from({length:121},(_,i)=>{const x=xmin+(xmax-xmin)*i/120;return{x,y:predictSingleFamily(q.fit,x)};}).filter(v=>Number.isFinite(v.y));
+  drawChart($("correlationPlot"),q.pairs,curve,xk,yk);
+ }
+ $("corrModelStatus").textContent=q.fit?`${FAMILY_LABELS[q.type]} · ${singleEquation(q.fit)} · Train R² = ${num(q.r2,4)} · LOCO RMSE = ${num(q.cvRMSE,6)} · Mean baseline LOCO RMSE = ${num(q.baselineCVRMSE,6)}${q.cvRMSE>=q.baselineCVRMSE?" · คำเตือน: ไม่ดีกว่า Mean":""}`:"จำนวนระดับข้อมูลอิสระหรือ Rank ไม่เพียงพอสำหรับโมเดลที่เลือก";
+ renderEquationTable();renderRGBSummary();renderCalibrationCurve();
+ status("rgbStatus",q.fit?"คำนวณสมการหลายรูปแบบและประเมิน LOCO CV แล้ว (แยกจาก Calibration curve ที่ยังใช้ Beer–Lambert linear)":"ไม่พบสมการที่รองรับข้อมูลชุดนี้ กรุณาเพิ่มจำนวนความเข้มข้นอิสระ",""+(q.fit?"ok":"error"));
+}
+function exportRGB(){
+ if(!rgbRows.length){alert("ยังไม่มีข้อมูล RGB");return}
+ const keys=["compound","concentration","id","R","G","B","lambdaMax","absorbanceAtLambdaMax","baseline","H1","mu1","sigma1","H2","mu2","sigma2"];
+ downloadCSV("RGB_Gaussian_Data.csv",[keys.join(","),...rgbRows.map(r=>keys.map(k=>csvCell(r[k])).join(","))]);
+ status("rgbExportStatus",`ส่งออกข้อมูล RGB จำนวน ${rgbRows.length} ตัวอย่างเป็น CSV แล้ว` ,"ok");
+}
+function downloadRGBTemplate(){
+ const headers=["compound","concentration","id","R","G","B","lambdaMax_nm","absorbance_at_lambda_max","baseline","H1","mu1","sigma1","H2","mu2","sigma2"];
+ const example=["Methyl orange",0.2,"MO-1",120,80,150,464,1.429,0,0.72,417,17,0.49,475,23];
+ downloadCSV("RGB_Gaussian_Import_Template.csv",[headers.join(","),example.join(",")]);
+}
+function fillFromFit(){
+ if(!fitResult)return;
+ const p=fitResult.peaks;
+ // Transfer the fit-tab sample metadata and RGB values into the Correlation Analysis form.
+ $("compoundName").value=$("fitCompoundName").value.trim();
+ $("concentration").value=$("fitConcentration").value.trim();
+ $("sampleName").value=$("fitSampleName").value.trim();
+ $("rgbLambdaMax").value=$("lambdaMaxValue").textContent==='—'?'':$("lambdaMaxValue").textContent;
+ $("rgbAbsAtLambdaMax").value=$("lambdaMaxAbsValue").textContent==='—'?'':$("lambdaMaxAbsValue").textContent;
+ $("rgbBaseline").value=fitResult.baseline??0;
+ [ ["fitRed","red"],["fitGreen","green"],["fitBlue","blue"] ].forEach(([src,dst])=>{
+  const v=$(src).value.trim();if(v!=="")$(dst).value=v;
+ });
+ $("rgbH1").value=p[0]?.H??"";$("rgbMu1").value=p[0]?.mu??"";$("rgbS1").value=p[0]?.sigma??"";
+ $("rgbH2").value=p[1]?.H??"";$("rgbMu2").value=p[1]?.mu??"";$("rgbS2").value=p[1]?.sigma??"";
+ document.querySelector('[data-tab="rgbPanel"]').click();
+ status("rgbStatus","โอนข้อมูลสาร ค่า λmax และ Absorbance at λmax ค่าสี RGB (ถ้ากรอกไว้) และพารามิเตอร์ Gaussian จากแท็บ Gaussian Fitting แล้ว ตรวจสอบข้อมูลก่อนกด Add sample","ok");
+}
+function projectSnapshot(){
+ return {
+  app:"RGB-UVVis-Gaussian-Lab",schemaVersion:1,savedAt:new Date().toISOString(),
+  spectrum,rawData:$ ("rawData").value,
+  fitSettings:{peakCount:$ ("peakCount").value,baselineMode:$ ("baselineMode").value,fitMin:$ ("fitMin").value,fitMax:$ ("fitMax").value,maxIter:$ ("maxIter").value,minSigma:$ ("minSigma").value,mu1:$ ("mu1").value,sigma1:$ ("sigma1").value,mu2:$ ("mu2").value,sigma2:$ ("sigma2").value,xColumn:$ ("xColumn").value,yColumn:$ ("yColumn").value,showMeasured:$ ("showMeasured").checked,showTotalFit:$ ("showTotalFit").checked,showPeak1:$ ("showPeak1").checked,showPeak2:$ ("showPeak2").checked,showBaseline:$ ("showBaseline").checked},
+  fitResult,
+  fitSampleInfo:{fitCompoundName:$ ("fitCompoundName").value,fitConcentration:$ ("fitConcentration").value,fitSampleName:$ ("fitSampleName").value,fitRed:$ ("fitRed").value,fitGreen:$ ("fitGreen").value,fitBlue:$ ("fitBlue").value},
+  rgbForm:{compoundName:$ ("compoundName").value,concentration:$ ("concentration").value,sampleName:$ ("sampleName").value,red:$ ("red").value,green:$ ("green").value,blue:$ ("blue").value,rgbBaseline:$ ("rgbBaseline").value,rgbH1:$ ("rgbH1").value,rgbMu1:$ ("rgbMu1").value,rgbS1:$ ("rgbS1").value,rgbH2:$ ("rgbH2").value,rgbMu2:$ ("rgbMu2").value,rgbS2:$ ("rgbS2").value,rgbX:$ ("rgbX").value,rgbY:$ ("rgbY").value},
+  rgbRows,history:readHistory()
+ };
+}
+function saveProject(evt){
+ const statusId=evt&&evt.currentTarget&&evt.currentTarget.id==="saveRGBProject"?"rgbExportStatus":"projectStatus";
+ try{
+  const data=projectSnapshot(),blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json;charset=utf-8"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`RGB-UVVis-Gaussian-Project-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  status(statusId,"บันทึกโปรเจกต์เป็น JSON แล้ว หากดาวน์โหลดไม่เริ่ม ให้ตรวจสอบการอนุญาตดาวน์โหลดของเบราว์เซอร์","ok");
+ }catch(e){status(statusId,"บันทึกโปรเจกต์ไม่สำเร็จ: "+e.message,"error")}
+}
+function syncPeakSettings(){
+ const two=Number($("peakCount").value)===2;
+ $("peak2Settings").classList.toggle("hidden",!two);
+ $("showPeak2Label").classList.toggle("hidden",!two);
+ if(!two)$("showPeak2").checked=false;
+}
+function loadProjectObject(data){
+ if(!data||data.app!=="RGB-UVVis-Gaussian-Lab"||!Array.isArray(data.rgbRows))throw Error("ไฟล์นี้ไม่ใช่ Project ของ RGB–UVVis Gaussian Lab หรือโครงสร้างไฟล์ไม่ถูกต้อง");
+ const setVal=(id,v)=>{if(v!==undefined&&$(id))$(id).value=v};
+ const setCheck=(id,v)=>{if(v!==undefined&&$(id))$(id).checked=!!v};
+ const fs=data.fitSettings||{};
+ setVal("rawData",data.rawData||"");
+ ["peakCount","baselineMode","fitMin","fitMax","maxIter","minSigma","mu1","sigma1","mu2","sigma2"].forEach(k=>setVal(k,fs[k]));
+ if((data.rawData||"").trim()){
+  const parsed=parseCSV(data.rawData);populateColumns();
+  setVal("xColumn",fs.xColumn??"0");setVal("yColumn",fs.yColumn??String(Math.min(1,columnNames.length-1)));
+  const xi=Number($("xColumn").value),yi=Number($("yColumn").value);
+  const parsedSpectrum=parsed.rows.map(row=>({x:Number(row[xi]),y:Number(row[yi])})).filter(pt=>Number.isFinite(pt.x)&&Number.isFinite(pt.y)).sort((a,b)=>a.x-b.x);
+  spectrum=Array.isArray(data.spectrum)?data.spectrum:parsedSpectrum;
+  $("pointCount").textContent=String(spectrum.length);
+  status("dataStatus",spectrum.length?`โหลดข้อมูลโปรเจกต์แล้ว ${spectrum.length} จุด`:"ไม่มีข้อมูลสเปกตรัมในโปรเจกต์",spectrum.length?"ok":"");
+ }else{spectrum=Array.isArray(data.spectrum)?data.spectrum:[];populateColumns();}
+ if(Array.isArray(data.spectrum))spectrum=data.spectrum;
+ ["showMeasured","showTotalFit","showPeak1","showPeak2","showBaseline"].forEach(k=>setCheck(k,fs[k]));
+ syncPeakSettings();
+ const fi=data.fitSampleInfo||{};Object.keys(fi).forEach(k=>setVal(k,fi[k]));
+ const rf=data.rgbForm||{};Object.keys(rf).forEach(k=>setVal(k,rf[k]));
+ rgbRows=data.rgbRows.map(r=>({...r,baseline:r.baseline===""||r.baseline==null||!Number.isFinite(Number(r.baseline))?0:Number(r.baseline)}));saveRGB();
+ if(Array.isArray(data.history)){try{localStorage.setItem(HISTORY_KEY,JSON.stringify(data.history))}catch(e){}}
+ fitResult=data.fitResult||null;
+ if(fitResult&&Array.isArray(fitResult.fitted)&&Array.isArray(fitResult.peaks))renderFit();
+ else{fitResult=null;clearFitOutput();$("pointCount").textContent=String(spectrum.length);$("exportFit").disabled=$("exportFitForRGB").disabled=$("saveFit").disabled=$("saveToRGB").disabled=true;status("fitStatus",spectrum.length?"โหลดข้อมูลสเปกตรัมแล้ว ยังไม่มีผล Gaussian Fit ในโปรเจกต์":"ยังไม่ได้โหลดข้อมูล")}
+ correlationPlaceholder();renderRGB();renderHistory();drawSpectrum();
+ status("projectStatus",`เปิดโปรเจกต์สำเร็จ · ${rgbRows.length} ตัวอย่าง RGB${fitResult?" · มีผล Gaussian Fit":""}`,"ok");
+}
+function loadProjectFile(file){
+ const reader=new FileReader();reader.onload=()=>{try{loadProjectObject(JSON.parse(reader.result))}catch(e){status("projectStatus","เปิดโปรเจกต์ไม่สำเร็จ: "+e.message,"error")}};reader.onerror=()=>status("projectStatus","อ่านไฟล์ไม่สำเร็จ","error");reader.readAsText(file);
+}
+function csvCell(v){if(v===null||v===undefined)return "";const s=String(v);return /[",\r\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}
+function exampleData(){
+ const lines=["Wavelength,Absorbance"];
+ for(let x=350;x<=550;x+=2){
+  const y=.018+.72*Math.exp(-.5*((x-417)/17)**2)+.49*Math.exp(-.5*((x-475)/23)**2);
+  lines.push(`${x},${y.toFixed(8)}`);
+ }
+ $("rawData").value=lines.join("\n");
+ $("mu1").value=417;$("sigma1").value=17;$("mu2").value=475;$("sigma2").value=23;
+ loadSpectrum();
+}
+$("saveProject").addEventListener("click",saveProject);
+$("saveRGBProject").addEventListener("click",saveProject);
+$("loadProject").addEventListener("click",()=>$ ("projectFile").click());
+$("projectFile").addEventListener("change",e=>{const file=e.target.files&&e.target.files[0];if(file)loadProjectFile(file);e.target.value=""});
+$("exampleData").addEventListener("click",exampleData);
+$("loadData").addEventListener("click",loadSpectrum);
+$("clearData").addEventListener("click",()=>{
+ $("rawData").value="";spectrum=[];fitResult=null;clearFitOutput();drawSpectrum();
+ $("pointCount").textContent="0";$("exportFit").disabled=$("exportFitForRGB").disabled=$("saveFit").disabled=$("saveToRGB").disabled=true;
+ $("lambdaMaxSummary").style.display="none";$("lambdaMaxValue").textContent="—";$("lambdaMaxAbsValue").textContent="—";
+ status("dataStatus","ล้างข้อมูลแล้ว");
+});
+["showMeasured","showTotalFit","showPeak1","showPeak2","showBaseline"].forEach(id=>{
+ $(id).addEventListener("change",drawSpectrum);
+});
+$("peakCount").addEventListener("change",syncPeakSettings);
+$("fitButton").addEventListener("click",runFit);
+$("exportFit").addEventListener("click",exportFittedCSV);
+$("exportFitForRGB").addEventListener("click",exportFitParametersForRGB);
+$("saveFit").addEventListener("click",saveHistory);
+$("saveToRGB").addEventListener("click",fillFromFit);
+$("refreshHistory").addEventListener("click",renderHistory);
+$("exportHistory").addEventListener("click",exportHistory);
+$("clearHistory").addEventListener("click",()=>{
+ if(confirm("ต้องการลบประวัติทั้งหมดหรือไม่?")){localStorage.removeItem(HISTORY_KEY);renderHistory();status("historyStatus","ลบประวัติแล้ว","ok")}
+});
+$("refreshSimulationDB").addEventListener("click",buildAndSaveSimulationDatabase);
+$("simDatabaseSelect").addEventListener("change",()=>{simulatedSpectrumData=[];renderSelectedSimulationParameters();renderSimulatedSpectrum();renderSimulatedSummary();});
+["simR","simG","simB"].forEach(id=>$(id).addEventListener("input",()=>{renderRGBColorPreview();renderSelectedSimulationParameters();}));
+renderRGBColorPreview();
+syncPeakSettings();
+$("runSimulation").addEventListener("click",simulateSpectra);
+$("exportSimSpectrum").addEventListener("click",exportSimulatedSpectrum);
+["simShowPeak1","simShowPeak2","simShowTotal"].forEach(id=>$(id).addEventListener("change",renderSimulatedSpectrum));
+["simLambdaMin","simLambdaMax","simLambdaStep"].forEach(id=>$(id).addEventListener("change",()=>{if(simulatedSpectrumData.length)simulateSpectra();}));
+$("exportSimulationDB").addEventListener("click",exportSimulationDatabase);
+$("exportSimulationDBJSON").addEventListener("click",exportSimulationDatabaseJSON);
+$("clearSimulationDB").addEventListener("click",()=>{
+ const saved=readSimulationDatabases();if(!saved.length){status("simulationDBStatus","ไม่มีฐานข้อมูลให้ลบ","");return;}
+ if(confirm(`ต้องการลบฐานข้อมูลที่บันทึกไว้ทั้งหมด ${saved.length} ชุดหรือไม่? การลบนี้ไม่สามารถย้อนกลับได้`)){
+  localStorage.removeItem(SIM_DB_KEY);renderSimulationDatabase();refreshSimulationSelect(false);status("simulationDBStatus","ลบฐานข้อมูลที่บันทึกไว้ทั้งหมดแล้ว","ok");
+ }
+});
+$("simulationDBContent").addEventListener("click",e=>{
+ const edit=e.target.closest("[data-edit-simdb]");if(edit){const panel=document.querySelector(`[data-simdb-editor="${CSS.escape(edit.dataset.editSimdb)}"]`);if(panel)panel.hidden=!panel.hidden;return;}
+ const cancel=e.target.closest("[data-cancel-edit-simdb]");if(cancel){const panel=document.querySelector(`[data-simdb-editor="${CSS.escape(cancel.dataset.cancelEditSimdb)}"]`);if(panel)panel.hidden=true;return;}
+ const del=e.target.closest("[data-delete-simdb]");if(del){deleteSimulationDatabase(del.dataset.deleteSimdb);return;}
+ const save=e.target.closest("[data-save-simdb]");if(save){
+  const id=save.dataset.saveSimdb,saved=readSimulationDatabases(),snap=saved.find(x=>x.id===id),panel=document.querySelector(`[data-simdb-editor="${CSS.escape(id)}"]`);if(!snap||!panel)return;
+  const val=field=>panel.querySelector(`[data-edit-field="${field}"]`);
+  snap.label=val("label")?.value.trim()||"Edited database";
+  const sr=Number(val("sourceRows")?.value);if(Number.isFinite(sr)&&sr>=0)snap.sourceRows=Math.floor(sr);
+  panel.querySelectorAll('[data-edit-field="compound"]').forEach(el=>{const g=snap.substances[Number(el.dataset.gi)];if(g)g.compound=el.value.trim()||"(unnamed substance)";});
+  panel.querySelectorAll('[data-edit-field="equation"]').forEach(el=>{const g=snap.substances[Number(el.dataset.gi)];if(g)g.equation=el.value.trim();});
+  panel.querySelectorAll('[data-pi][data-edit-field]').forEach(el=>{
+   const g=snap.substances[Number(el.dataset.gi)],p=g?.params?.[Number(el.dataset.pi)];if(!p)return;
+   const f=el.dataset.editField;
+   if(f==="method"||f==="expression"){
+    const updated=el.value.trim();
+    // The verified coefficients must never silently disagree with a manually edited equation.
+    if(p.model&&updated!==p[f]){p.model=null;p.modelNote="Manual edit replaced fitted coefficients; build a new database to obtain a validated nonlinear model";}
+    p[f]=updated;
+   }else if(["mean","n","r2","rmse"].includes(f)){
+    const v=el.value.trim()===""?null:Number(el.value);p[f]=v===null?NaN:(Number.isFinite(v)?v:p[f]);
+   }
+  });
+  if(!saveSimulationDatabases(saved)){status("simulationDBStatus","บันทึกการแก้ไขไม่สำเร็จ พื้นที่ Local Storage อาจเต็ม","error");return;}
+  const discarded=snap.substances.some(g=>g.params.some(p=>String(p.modelNote||"").startsWith("Manual edit replaced")));
+  renderSimulationDatabase();refreshSimulationSelect();
+  status("simulationDBStatus",discarded?"บันทึกแล้ว แต่การแก้สมการด้วยมือยกเลิกโมเดลที่เคยฟิตไว้สำหรับพารามิเตอร์นั้น กรุณา Build new database เพื่อสร้างโมเดลไม่เชิงเส้นใหม่":"บันทึกการแก้ไขฐานข้อมูลชุดที่เลือกแล้ว",discarded?"error":"ok");return;
+ }
+});
+$("useLatestSimulation").addEventListener("click",setValidationSimulationFromLatest);
+$("validationFile").addEventListener("change",async e=>{
+ const file=e.target.files&&e.target.files[0];if(!file)return;
+ try{
+  pendingValidationFile=file;pendingValidationFileText=await file.text();
+  $("validationSelectedFilePreview").classList.remove("hidden");
+  $("validationSelectedFileInfo").textContent=`ชื่อไฟล์: ${file.name} · ขนาด: ${file.size.toLocaleString()} bytes · แสดงตัวอย่างไม่เกิน 12 บรรทัดแรก`;
+  $("validationSelectedFileText").value=pendingValidationFileText;
+  $("uploadValidationFile").disabled=false;
+  status('validationFileStatus',`เลือกไฟล์ ${file.name} แล้ว · ตรวจสอบข้อมูลตัวอย่างด้านบน จากนั้นกด Upload selected file`,'');
+ }catch(err){pendingValidationFile=null;pendingValidationFileText="";$("uploadValidationFile").disabled=true;status('validationFileStatus','อ่านไฟล์ไม่ได้: '+err.message,'error')}
+});
+$("validationSelectedFileText").addEventListener("input",()=>{
+ if(pendingValidationFile){
+  status('validationFileStatus',`แก้ไขข้อมูลตัวอย่างแล้ว · เมื่อกด Upload selected file ระบบจะใช้เนื้อหาที่แก้ไขในช่องนี้`,'');
+ }
+});
+$("uploadValidationFile").addEventListener("click",()=>{
+ if(!pendingValidationFile||!pendingValidationFileText){status('validationFileStatus','กรุณาเลือกไฟล์ก่อน','error');return;}
+ try{
+  pendingValidationFileText=$("validationSelectedFileText").value;
+ const parsed=parseCSV(pendingValidationFileText);validationColumnNames=columnNames.slice();validationMeasuredRows=parsed.rows;
+  const opts=validationColumnNames.map((name,i)=>`<option value="${i}">${i+1}: ${esc(name)}</option>`).join('');$("validationXColumn").innerHTML=opts;$("validationYColumn").innerHTML=opts;$("validationXColumn").disabled=$("validationYColumn").disabled=false;
+  const findHeader=(terms)=>validationColumnNames.findIndex(n=>terms.some(t=>n.toLowerCase().replace(/[ _()-]/g,'').includes(t)));
+  const xi=findHeader(['wavelength','lambda','nm']);let yi=findHeader(['absorbance','abs','opticaldensity']);
+  if(xi>=0)$("validationXColumn").value=String(xi);if(yi>=0)$("validationYColumn").value=String(yi);else if(validationColumnNames.length>1)$("validationYColumn").value=String(validationColumnNames.length-1);
+  const numericCount=validationMeasuredRows.filter(r=>Number.isFinite(Number(r[Number($("validationXColumn").value)]))&&Number.isFinite(Number(r[Number($("validationYColumn").value)]))).length;
+  status('validationFileStatus',`อัปโหลดไฟล์ ${pendingValidationFile.name} แล้ว · ${numericCount} แถวที่มีค่าตัวเลข · ตรวจสอบคอลัมน์ wavelength และ absorbance ก่อนเปรียบเทียบ`,'ok');validationPairedData=[];renderValidationComparison();
+ }catch(err){validationMeasuredRows=[];status('validationFileStatus','อ่านไฟล์ไม่ได้: '+err.message,'error')}
+});
+$("clearValidation").addEventListener("click",()=>{
+ validationMeasuredRows=[];validationPairedData=[];validationColumnNames=[];pendingValidationFile=null;pendingValidationFileText="";
+ $("validationFile").value="";$("validationSelectedFilePreview").classList.add("hidden");$("validationSelectedFileInfo").textContent="";$("validationSelectedFileText").value="";$("uploadValidationFile").disabled=true;
+ $("validationXColumn").innerHTML='<option value="0">Upload file first</option>';$("validationYColumn").innerHTML='<option value="1">Upload file first</option>';$("validationXColumn").disabled=$("validationYColumn").disabled=true;
+ $("validationMetricCards").innerHTML='<div class="metric"><span>R²</span><strong>—</strong></div><div class="metric"><span>RMSE</span><strong>—</strong></div><div class="metric"><span>MAE</span><strong>—</strong></div><div class="metric"><span>Maximum absolute error</span><strong>—</strong></div><div class="metric"><span>NRMSE</span><strong>—</strong></div><div class="metric"><span>Bias (sim − measured)</span><strong>—</strong></div><div class="metric"><span>Matched points</span><strong>—</strong></div>';
+ $("validationOverallSummary").className="validation-summary neutral";$("validationOverallSummary").innerHTML='<div><div class="summary-title">สรุปภาพรวมผลการเปรียบเทียบ</div><div class="summary-level">รอข้อมูล</div></div><div class="summary-detail">อัปโหลดสเปกตรัมจริงและกด Compare spectra and calculate statistics เพื่อประเมินระดับผลการเปรียบเทียบ</div>';
+ status('validationFileStatus','ล้างไฟล์สเปกตรัมจริงแล้ว','');status('validationStatus','ล้างข้อมูลการเปรียบเทียบแล้ว · ข้อมูลจำลองจาก Tab 4 ยังคงอยู่ สามารถเลือกไฟล์ใหม่เพื่อเปรียบเทียบได้','');renderValidationComparison();
+});
+$("runValidation").addEventListener("click",runSimulationValidation);
+$("exportValidationCSV").addEventListener("click",exportValidationComparison);
+
+$("addRGB").addEventListener("click",addRGBRow);
+$("downloadRGBTemplate").addEventListener("click",downloadRGBTemplate);
+$("exportRGB").addEventListener("click",exportRGB);
+$("clearRGB").addEventListener("click",()=>{
+ if(confirm("ต้องการลบข้อมูล RGB ทั้งหมดหรือไม่?")){rgbRows=[];saveRGB();correlationPlaceholder();renderRGB();status("rgbStatus","ล้างข้อมูล RGB แล้ว กรุณากด Calculate correlation หลังเพิ่มข้อมูลใหม่","ok")}
+});
+$("runCorrelation").addEventListener("click",correlation);
+$("rgbX").addEventListener("change",()=>correlationPlaceholder("เปลี่ยนตัวแปรแล้ว กรุณากด Calculate correlation เพื่อคำนวณผลใหม่"));
+$("rgbY").addEventListener("change",()=>correlationPlaceholder("เปลี่ยนตัวแปรแล้ว กรุณากด Calculate correlation เพื่อคำนวณผลใหม่"));
+$("rgbAnalysisSubstance").addEventListener("change",()=>correlationPlaceholder("เปลี่ยนสารแล้ว กรุณากด Calculate correlation เพื่อวิเคราะห์เฉพาะสารนี้"));
+$("rgbModelFamily").addEventListener("change",()=>correlationPlaceholder("เปลี่ยนรูปแบบสมการแล้ว กรุณากด Calculate correlation เพื่อคำนวณผลใหม่"));
+$("importRGB").addEventListener("click",()=>$("rgbFile").click());
+$("rgbFile").addEventListener("change",async e=>{
+ const file=e.target.files[0];if(!file)return;
+ try{
+  const parsed=parseCSV(await file.text()),headers=columnNames.map(x=>x.toLowerCase().trim());
+  const keys=["compound","concentration","id","R","G","B","lambdaMax","absorbanceAtLambdaMax","baseline","H1","mu1","sigma1","H2","mu2","sigma2"];
+  // Normalize header names so uppercase columns (R, G, B, H1, H2) match correctly.
+  const aliases={
+   compound:["compound","substance","substance name","ชื่อสาร"],
+   concentration:["concentration","conc","ความเข้มข้น"],
+   id:["id","sample","sample name","samplename"],
+   R:["r","red","red value"],G:["g","green","green value"],B:["b","blue","blue value"],
+   lambdaMax:["lambdamax","lambda max","lambda_max_nm","lambdamax_nm","λmax","λmax (nm)"],
+   absorbanceAtLambdaMax:["absorbance_at_lambda_max","absorbance at λmax","absorbance at lambdamax","absorbanceatλmax","absorbanceatlamdamax"],
+   baseline:["baseline","baseline b"],
+   H1:["h1","h_1","height1","peak1h"],mu1:["mu1","μ1","mu_1","peak1mu"],sigma1:["sigma1","σ1","sigma_1","peak1sigma"],
+   H2:["h2","h_2","height2","peak2h"],mu2:["mu2","μ2","mu_2","peak2mu"],sigma2:["sigma2","σ2","sigma_2","peak2sigma"]
+  };
+  const idx=keys.map(k=>headers.findIndex(h=>(aliases[k]||[k]).map(a=>a.toLowerCase().trim()).includes(h)));
+  const imported=parsed.rows.map((row,i)=>{
+   const o={};keys.forEach((k,j)=>{const v=idx[j]>=0?(row[idx[j]]??""):"";if(k==="id")o[k]=v||`Imported-${i+1}`;else if(k==="compound")o[k]=v;else o[k]=v===""?"":Number(v)});
+   if(o.baseline===""||!Number.isFinite(o.baseline))o.baseline=0;
+   return o;
+  }).filter(r=>Number.isFinite(Number(r.R))&&Number.isFinite(Number(r.G))&&Number.isFinite(Number(r.B)));
+  rgbRows=rgbRows.concat(imported);saveRGB();correlationPlaceholder("นำเข้าข้อมูลใหม่แล้ว กรุณากด Calculate correlation เพื่อคำนวณผล");renderRGB();status("rgbStatus",`นำเข้า ${imported.length} ตัวอย่างแล้ว กรุณากด Calculate correlation เพื่อแสดงผล`,`ok`);
+ }catch(err){status("rgbStatus","นำเข้าไม่ได้: "+err.message,"error")}
+ e.target.value="";
+});
+$("csvFile").addEventListener("change",async e=>{
+ const file=e.target.files[0];if(!file)return;
+ try{$("rawData").value=await file.text();loadSpectrum()}catch(err){status("dataStatus",err.message,"error")}
+});
+document.querySelectorAll("nav button").forEach(btn=>btn.addEventListener("click",()=>{
+ document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+ btn.classList.add("active");
+ ["fitPanel","rgbPanel","simulationPanel","simulateSpectraPanel","validateSimulationPanel","historyPanel"].forEach(id=>$(id).classList.add("hidden"));
+ $(btn.dataset.tab).classList.remove("hidden");
+ if(btn.dataset.tab==="validateSimulationPanel"){renderValidationComparison();}
+ if(btn.dataset.tab==="historyPanel")renderHistory();
+ if(btn.dataset.tab==="rgbPanel")renderRGB();
+ if(btn.dataset.tab==="simulationPanel")renderSimulationDatabase();
+ if(btn.dataset.tab==="simulateSpectraPanel"){refreshSimulationSelect();renderSelectedSimulationParameters();renderSimulatedSpectrum();}
+}));
+try{rgbRows=JSON.parse(localStorage.getItem(RGB_KEY)||"[]");if(!Array.isArray(rgbRows))rgbRows=[];rgbRows=rgbRows.map(r=>({...r,baseline:r.baseline===""||r.baseline==null||!Number.isFinite(Number(r.baseline))?0:Number(r.baseline)}))}catch(e){rgbRows=[]}
+correlationPlaceholder();renderRGB();renderHistory();renderSimulationDatabase();refreshSimulationSelect(false);renderSimulatedSpectrum();renderSimulatedSummary();renderValidationComparison();drawSpectrum();
+</script>
+</body>
+</html>
