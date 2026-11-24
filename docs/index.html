@@ -308,12 +308,11 @@
         <p class="muted readout-meta">Color Conversion Status · ยังไม่มีการสอบเทียบสี</p>
       </div>
       <div class="card controls">
-        <h2>Select Simulation Database</h2>
-        <label for="database">Database Snapshot</label><select id="database" disabled></select>
-        <label for="substance">Substance</label><select id="substance" disabled></select>
-        <p class="muted readout-meta">Model Type · <span id="modelTypes">—</span></p>
-        <label for="importDb">นำเข้า JSON จากหลังบ้าน</label><input id="importDb" type="file" accept=".json,application/json">
-        <p id="databaseNote" class="notice" role="status">กำลังโหลดฐานข้อมูล…</p>
+        <h2>Spectrum Simulation</h2>
+        <label for="substance">Select Substance</label><select id="substance" disabled></select>
+        <p class="muted readout-meta">Regression Model · <span id="modelTypes">กำลังโหลด…</span></p>
+        <p id="databaseNote" class="notice" role="status">กำลังค้นหาโมเดลสารจากฐานข้อมูลจริง…</p>
+        <p class="muted readout-meta">เมื่อมีโมเดลที่ยืนยัน Sensor Raw Counts ระบบจะเก็บค่าเฉลี่ย RGB ใหม่ภายใน 3 วินาที แล้วสร้าง Gaussian Spectrum</p>
         <button id="simulate" disabled>Simulate Spectrum</button>
         <progress id="measurementProgress" aria-label="ความคืบหน้าการเก็บ RGB" max="3000" value="0" hidden></progress>
         <p id="measurement" role="status"></p>
@@ -352,7 +351,7 @@
         <div id="legend" class="legend" hidden><span class="peak1">Gaussian Peak 1</span><span class="peak2">Gaussian Peak 2</span><span class="total">Total Spectrum</span><span class="baseline" id="baselineLegend">Baseline</span></div>
         <div class="actions export-actions"><button id="png" class="secondary" disabled>Export Graph as PNG</button><button id="csv" class="secondary" disabled>Export Predicted Spectrum as CSV</button></div>
       </div>
-      <div class="card results-card"><h2>Results Summary</h2><dl id="results"><div><dt>สถานะ</dt><dd>รอการวัด</dd></div></dl></div>
+      <div class="card results-card"><h2>Results Summary</h2><dl id="results"></dl></div>
     </div>
   </div>
 </section>

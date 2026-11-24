@@ -3,7 +3,7 @@ const dimensions = {linear: 3, quadratic: 6, exponential: 3, logarithmic: 3, pow
 const finite = Number.isFinite;
 export const channels = keys;
 
-export function latestSnapshots(data) {
+export function snapshotsByDate(data) {
   const list = Array.isArray(data) ? data : data?.format === 'spectral-lab-simulation-db'
     ? (data.schemaVersion === 1 ? data.snapshots : null) : data?.simulationDatabases;
   if (!Array.isArray(list) || !list.length) throw Error('ไม่พบ Snapshots ที่รองรับใน JSON');
@@ -19,7 +19,11 @@ export function latestSnapshots(data) {
     }
     ids.add(s.id);
   }
-  return [...list].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)).slice(0, 3);
+  return [...list].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+}
+
+export function latestSnapshots(data) {
+  return snapshotsByDate(data).slice(0,3);
 }
 
 export function summarize(frames) {

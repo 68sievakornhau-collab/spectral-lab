@@ -1,5 +1,5 @@
 import {Sensor} from './ble.mjs';
-import {channels, latestSnapshots, preview, reconstruct, summarize} from './science.mjs';
+import {channels, snapshotsByDate, preview, reconstruct, summarize} from './science.mjs';
 import {drawChart, download, spectrumCsv} from './chart.mjs';
 import {Measurement} from './measurement.mjs';
 import './motion.mjs';
@@ -9,15 +9,55 @@ const $ = id => document.getElementById(id);
 const set = (id, value) => { $(id).textContent = value; };
 const labels = {disconnected:'Disconnected', waiting:'Connected — Waiting for Data', receiving:'Connected — Receiving Data'};
 const format = v => v.toLocaleString('en-US', {maximumSignificantDigits: 8});
-let snapshots = [], importing = false, reading = 0, connecting = false, status = 'disconnected';
+let snapshots = [], substanceCatalog = [], selectedSubstance = null, loadingModels = false, reading = 0, connecting = false, status = 'disconnected';
 let last = null, previewFrames = [], current = null, result = null;
 let connectionFailed = false;
-const model = () => snapshots[$('database').value]?.substances[$('substance').value];
-const snapshot = () => snapshots[$('database').value];
+const model = () => selectedSubstance?.model;
 const receiving = () => status === 'receiving';
 const clock = new Intl.DateTimeFormat('th-TH', {timeStyle:'medium'});
 const modelNames = {linear:'Linear', quadratic:'Quadratic', exponential:'Exponential', logarithmic:'Logarithmic', power:'Power'};
-const metricLabels = new Set(['Mean R ± SD','Mean G ± SD','Mean B ± SD','N','Predicted λmax','Predicted Maximum Absorbance']);
+const metricLabels = new Set(['Mean R ± SD','Mean G ± SD','Mean B ± SD','N','Maximum Absorption Wavelength (λmax)','Maximum Absorbance']);
+
+const featureDimensions = {linear:3,quadratic:6,exponential:3,logarithmic:3,power:3};
+const requiredGaussianParameters = ['H1','mu1','sigma1','H2','mu2','sigma2'];
+
+function completeParameter(parameter) {
+  if (parameter?.method === 'Mean') return Number.isFinite(parameter.mean);
+  const model = parameter?.model;
+  const size = featureDimensions[model?.type];
+  return Number.isInteger(size) &&
+    [model.coef,model.means,model.scales].every((values,i) =>
+      Array.isArray(values) && values.length === size + (i === 0 ? 1 : 0) && values.every(Number.isFinite)) &&
+    model.scales.every(value => value > 0);
+}
+
+function completeSubstance(substance) {
+  if (!Array.isArray(substance?.rows) || !substance.rows.length ||
+      substance.rows.some(row => !['R','G','B'].every(key => Number.isFinite(row?.[key])))) return false;
+  const params = new Map((substance.params ?? []).map(parameter => [parameter.key,parameter]));
+  return requiredGaussianParameters.every(key => completeParameter(params.get(key))) &&
+    (!params.has('baseline') || completeParameter(params.get('baseline')));
+}
+
+function rawCountsCompatible(substance) {
+  return substance?.rgbInputType === 'raw-counts' && completeSubstance(substance);
+}
+
+function substanceInputNotice(entry) {
+  if (!entry) return 'เลือกชนิดสารจากฐานข้อมูลก่อนเริ่มวิเคราะห์';
+  if (!entry.model || !entry.complete) return `ไม่พบ Regression และ Gaussian Parameters ที่ครบถ้วนสำหรับ ${entry.compound}`;
+  if (entry.model.rgbInputType === 'display-rgb') {
+    return `โมเดล ${entry.compound} ฝึกด้วย Display RGB (0–255) จึงใช้กับ Sensor Raw Counts ไม่ได้ ต้องใช้โมเดลที่ฝึกและบันทึกชนิดอินพุตเป็น raw-counts`;
+  }
+  if (typeof entry.model.rgbInputType === 'string') {
+    return `โมเดล ${entry.compound} ระบุอินพุตเป็น ${entry.model.rgbInputType} ซึ่งไม่ตรงกับ Sensor Raw Counts`;
+  }
+  const values = ['R','G','B'].map(key => {
+    const channel = entry.model.rows.map(row => row[key]);
+    return `${key} ${format(Math.min(...channel))}–${format(Math.max(...channel))}`;
+  }).join(', ');
+  return `ชุดฝึก ${entry.compound} มีค่า ${values} และไม่มี metadata ยืนยันหน่วยหรือการแปลงเป็น Sensor Raw Counts จึงยังทำนายไม่ได้ ต้องใช้โมเดลที่ยืนยัน rgbInputType: "raw-counts"`;
+}
 
 function route() {
   const analysis = location.hash === '#analysis';
@@ -45,10 +85,8 @@ function controls() {
   $('connect').disabled = connecting || status !== 'disconnected';
   $('disconnect').disabled = status === 'disconnected';
   $('continue').disabled = connecting || !receiving();
-  $('database').disabled = !!current || importing || !snapshots.length;
-  $('substance').disabled = !!current || importing || !model();
-  $('importDb').disabled = !!current;
-  $('simulate').disabled = connecting || !!current || importing || !receiving() || !model();
+  $('substance').disabled = !!current || loadingModels || !substanceCatalog.length;
+  $('simulate').disabled = connecting || !!current || loadingModels || !receiving() || !model() || !selectedSubstance?.compatible;
   $('png').disabled = $('csv').disabled = !result || !!current;
 }
 
@@ -58,7 +96,7 @@ function clearResult() {
   $('plot').classList.remove('reveal-spectrum');
   $('plot').hidden = $('legend').hidden = true;
   $('chartEmpty').hidden = false;
-  summary([['สถานะ', 'รอการวัด']]);
+  summary([]);
 }
 
 function summary(rows) {
@@ -139,18 +177,38 @@ const sensor = new Sensor({
 });
 
 function listSubstances() {
-  $('substance').replaceChildren(...(snapshot()?.substances ?? []).map((g,i) => new Option(g.compound, i)));
+  const groups = new Map();
+  for (const database of snapshots) for (const substance of database.substances) {
+    const key = substance.compound.trim().toLocaleLowerCase();
+    if (!groups.has(key)) groups.set(key,{compound:substance.compound.trim(),candidates:[]});
+    groups.get(key).candidates.push({snapshot:database,substance});
+  }
+  substanceCatalog = [...groups.values()].map(group => {
+    const compatible = group.candidates.find(candidate => rawCountsCompatible(candidate.substance));
+    const complete = group.candidates.find(candidate => completeSubstance(candidate.substance));
+    const selected = compatible || complete || group.candidates[0];
+    return {...group, snapshot:selected.snapshot, model:selected.substance,
+      complete:completeSubstance(selected.substance), compatible:!!compatible};
+  }).sort((a,b) => a.compound.localeCompare(b.compound,'en',{sensitivity:'base'}));
+  $('substance').replaceChildren(new Option('Select a chemical…',''),
+    ...substanceCatalog.map((entry,index) => new Option(entry.compound,String(index))));
+  $('substance').value = '';
+  selectSubstance();
+}
+
+function selectSubstance() {
+  selectedSubstance = $('substance').value === '' ? null : substanceCatalog[Number($('substance').value)] ?? null;
   refreshSubstance();
 }
 
 function refreshSubstance() {
   const g = model();
-  const types = new Set((g?.params ?? []).map(p => modelNames[p.model?.type] || (p.method === 'Mean' ? 'Mean' : null)).filter(Boolean));
+  const types = new Set((g?.params ?? []).map(parameter =>
+    modelNames[parameter.model?.type] || (parameter.method === 'Mean' ? 'Mean' : null)).filter(Boolean));
   set('modelTypes', [...types].join(' · ') || '—');
-  set('databaseNote', g?.rgbInputType === 'raw-counts'
-    ? 'โมเดลระบุอินพุตเป็น Sensor Raw Counts'
-    : g ? 'ชนิด RGB ของชุดฝึก: ' + (typeof g.rgbInputType === 'string' ? g.rgbInputType : 'ยังไม่ระบุ') +
-      ' · เก็บและสรุป Raw Counts ได้ ผลทำนายต้องรอการยืนยันชนิดอินพุต' : 'ยังไม่มีฐานข้อมูล');
+  set('databaseNote', selectedSubstance?.compatible
+    ? `โหลดโมเดล Regression/Gaussian ล่าสุดที่ยืนยัน Sensor Raw Counts สำหรับ ${selectedSubstance.compound}`
+    : substanceInputNotice(selectedSubstance));
   set('measurement', '');
   delete $('measurement').dataset.state;
   clearResult();
@@ -159,24 +217,25 @@ function refreshSubstance() {
 
 async function loadDatabase(source) {
   const attempt = ++reading;
-  importing = true;
+  loadingModels = true;
+  set('modelTypes','กำลังโหลด…');
+  set('databaseNote','กำลังค้นหาโมเดลสารที่สมบูรณ์และรองรับ Sensor Raw Counts…');
   controls();
   try {
-    const data = latestSnapshots(await source());
+    const data = snapshotsByDate(await source());
     if (attempt !== reading) return;
     snapshots = data;
-    const date = new Intl.DateTimeFormat('th-TH', {dateStyle:'medium',timeStyle:'medium'});
-    $('database').replaceChildren(...data.map((s,i) => new Option(
-      (s.label || s.id) + ' · ' + date.format(new Date(s.createdAt)), i)));
     listSubstances();
+    if (!substanceCatalog.length) set('databaseNote','ฐานข้อมูลไม่มีรายการสารเคมี');
   } catch (error) {
     if (attempt === reading) {
-      set('databaseNote', snapshots.length
-        ? 'นำเข้าไม่สำเร็จ ยังใช้ฐานข้อมูลที่เลือกไว้ · ' + error.message
-        : error.message);
+      snapshots = []; substanceCatalog = []; selectedSubstance = null;
+      $('substance').replaceChildren();
+      set('modelTypes','—');
+      set('databaseNote','โหลดฐานข้อมูลจริงไม่ได้: ' + error.message);
     }
   } finally {
-    if (attempt === reading) { importing = false; controls(); }
+    if (attempt === reading) { loadingModels = false; controls(); }
   }
 }
 
@@ -194,12 +253,11 @@ function finish(reason) {
       throw Error('Gain หรือ Integration Time เปลี่ยนระหว่างวัด กรุณาวัดใหม่');
     }
     const {mean, sd, n} = summarize(frames);
-    const rows = [['Selected Database', capture.snapshot.label || capture.snapshot.id],
-      ['Selected Substance', capture.model.compound], ['N', n],
+    const rows = [['Selected Substance', capture.selection.compound], ['N', n],
       ...channels.map(key => ['Mean ' + key + ' ± SD', format(mean[key]) + ' ± ' + format(sd[key])])];
     summary(rows);
-    if (capture.model.rgbInputType !== 'raw-counts') {
-      throw Error('หยุดก่อนทำนาย ต้องยืนยันว่าโมเดลฝึกด้วย Sensor Raw Counts');
+    if (!capture.selection.compatible) {
+      throw Error(substanceInputNotice(capture.selection));
     }
     const predicted = reconstruct(capture.model, mean);
     $('plot').hidden = $('legend').hidden = false;
@@ -208,11 +266,12 @@ function finish(reason) {
     result = predicted;
     $('baselineLegend').hidden = !result.hasBaseline;
     $('chartEmpty').hidden = true;
-    summary([...rows, ...result.peaks.map((p,i) => ['Gaussian Peak ' + (i+1),
-      'H ' + format(p.H) + ' · μ ' + format(p.mu) + ' nm · σ ' + format(p.sigma) + ' nm']),
-      ...(result.hasBaseline ? [['Baseline', format(result.baseline)]] : []),
-      ['Predicted λmax', format(result.maximum.wavelength) + ' nm'],
-      ['Predicted Maximum Absorbance', format(result.maximum.total)]]);
+    const gaussian = result.peaks.map((peak,index) => `Peak ${index + 1}: H ${format(peak.H)}, μ ${format(peak.mu)} nm, σ ${format(peak.sigma)} nm`);
+    if (result.hasBaseline) gaussian.push('Baseline ' + format(result.baseline));
+    summary([...rows,
+      ['Gaussian Parameters', gaussian.join(' · ')],
+      ['Maximum Absorption Wavelength (λmax)', format(result.maximum.wavelength) + ' nm'],
+      ['Maximum Absorbance', format(result.maximum.total)]]);
     showAnalysisPose('completed');
     set('measurement', result.outside.length
       ? 'Extrapolation · RGB นอกช่วงฝึกในช่อง ' + result.outside.join(', ')
@@ -253,7 +312,7 @@ $('simulate').onclick = () => {
   const progress = $('measurementProgress');
   progress.value = 0;
   progress.hidden = false;
-  current = {model:model(), snapshot:snapshot(), measurement, timer:setInterval(() => {
+  current = {model:model(), selection:selectedSubstance, measurement, timer:setInterval(() => {
     const left = measurement.end - performance.now();
     progress.value = progress.max - left;
     if (left <= 0) finish();
@@ -263,13 +322,7 @@ $('simulate').onclick = () => {
   set('measurement', 'Collecting RGB Data · 3.0 s');
   controls();
 };
-$('database').onchange = listSubstances;
-$('substance').onchange = refreshSubstance;
-$('importDb').onchange = async () => {
-  const file = $('importDb').files[0];
-  if (file) await loadDatabase(async () => JSON.parse(await file.text()));
-  $('importDb').value = '';
-};
+$('substance').onchange = selectSubstance;
 $('png').onclick = () => $('plot').toBlob(blob => {
   if (blob) download(blob, 'spectral-lab.png');
 }, 'image/png');
