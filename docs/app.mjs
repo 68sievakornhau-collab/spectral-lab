@@ -1,4 +1,4 @@
-import {Sensor} from './ble.mjs';
+import {Sensor, bluetoothRequestOptions} from './ble.mjs';
 import {channels, snapshotsByDate, preview, reconstruct, summarize} from './science.mjs';
 import {drawChart, download, spectrumCsv} from './chart.mjs';
 import {Measurement} from './measurement.mjs';
@@ -8,6 +8,23 @@ import {showSensorPose, showAnalysisPose} from './scientist.mjs';
 const $ = id => document.getElementById(id);
 const set = (id, value) => { $(id).textContent = value; };
 const labels = {disconnected:'Disconnected', waiting:'Connected — Waiting for Data', receiving:'Connected — Receiving Data'};
+function bluetoothAvailabilityIssue() {
+  if (!window.isSecureContext) return 'Web Bluetooth ต้องเปิดผ่าน HTTPS หรือ localhost (หน้านี้ไม่ใช่ Secure Context)';
+  if (typeof navigator.bluetooth?.requestDevice !== 'function') {
+    return 'เบราว์เซอร์นี้ไม่มี Web Bluetooth API · ใช้ Chrome รุ่นปัจจุบันบน Desktop หรือ Android และอนุญาต Bluetooth ให้เว็บไซต์';
+  }
+  const policy = document.permissionsPolicy || document.featurePolicy;
+  if (typeof policy?.allowsFeature === 'function' && !policy.allowsFeature('bluetooth')) {
+    return 'Permissions Policy ของหน้านี้ไม่อนุญาต Bluetooth';
+  }
+  return '';
+}
+function bluetoothErrorDetail(error) {
+  const name = error?.name || 'Error';
+  const message = error?.message || String(error);
+  return `${name}: ${message}`;
+}
+const bluetoothIssue = bluetoothAvailabilityIssue();
 const format = v => v.toLocaleString('en-US', {maximumSignificantDigits: 8});
 let snapshots = [], substanceCatalog = [], selectedSubstance = null, loadingModels = false, reading = 0, connecting = false, status = 'disconnected';
 let last = null, previewFrames = [], current = null, result = null;
@@ -82,7 +99,7 @@ function controls() {
   set('connection', searching ? 'Connecting…' : visualState === 'error' ? 'Connection Error' : labels[status]);
   set('simulate', current ? 'Collecting…' : 'Simulate Spectrum');
   document.body.toggleAttribute('data-collecting', !!current);
-  $('connect').disabled = connecting || status !== 'disconnected';
+  $('connect').disabled = connecting || status !== 'disconnected' || !!bluetoothIssue;
   $('disconnect').disabled = status === 'disconnected';
   $('continue').disabled = connecting || !receiving();
   $('substance').disabled = !!current || loadingModels || !substanceCatalog.length;
@@ -175,6 +192,8 @@ const sensor = new Sensor({
     current?.measurement.accept(frame);
   }
 });
+
+if (bluetoothIssue) set('sensorNotice',bluetoothIssue);
 
 function listSubstances() {
   const groups = new Map();
@@ -286,18 +305,33 @@ function finish(reason) {
   controls();
 }
 
-$('connect').onclick = async () => {
+$('connect').addEventListener('click', () => {
+  const issue = bluetoothAvailabilityIssue();
+  if (issue) {
+    connectionFailed = true;
+    set('sensorNotice',issue);
+    controls();
+    return;
+  }
+  let deviceRequest;
+  try {
+    // Must execute synchronously during this click to preserve transient user activation.
+    deviceRequest = navigator.bluetooth.requestDevice(bluetoothRequestOptions());
+  } catch (error) {
+    connectionFailed = error?.name !== 'NotFoundError';
+    set('sensorNotice',bluetoothErrorDetail(error));
+    controls();
+    return;
+  }
   connecting = true;
   connectionFailed = false;
   set('sensorNotice', '');
   controls();
-  try { await sensor.connect(); }
-  catch (error) {
-    connectionFailed = error.name !== 'NotFoundError';
-    set('sensorNotice', connectionFailed ? error.message : 'ยกเลิกการเลือกอุปกรณ์');
-  }
-  finally { connecting = false; controls(); }
-};
+  sensor.connect(deviceRequest).catch(error => {
+    connectionFailed = error?.name !== 'NotFoundError';
+    set('sensorNotice',bluetoothErrorDetail(error));
+  }).finally(() => { connecting = false; controls(); });
+});
 $('disconnect').onclick = () => sensor.disconnect();
 $('continue').onclick = () => {
   sessionStorage.setItem('spectral-visited', '1');

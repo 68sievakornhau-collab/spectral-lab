@@ -1,5 +1,8 @@
 const suffix = '-b5a3-f393-e0a9-e50e24dcca9e';
-const serviceId = '6e400001' + suffix;
+export const serviceId = '6e400001' + suffix;
+export function bluetoothRequestOptions() {
+  return {filters: [{services: [serviceId]}, {namePrefix: 'RGBMeter'}], optionalServices: [serviceId]};
+}
 const expected = {gain: 4, atime: 131, agc: 0, xled: 1, xpwr: 100, rate: 1000, stream: 1};
 const commands = ['GAIN 4', 'ATIME 131', 'XPWR 100', 'XLED 1', 'RATE 1000', 'STREAM 1', 'STATE'];
 
@@ -52,14 +55,12 @@ export function configurationVerified(state) {
 
 export class Sensor {
   constructor(events) { this.events = events; this.session = null; }
-  async connect() {
-    if (!navigator.bluetooth) throw Error('เปิดหน้าเว็บผ่าน HTTPS หรือ localhost ใน Chrome ที่รองรับ Web Bluetooth');
+  async connect(deviceRequest) {
+    if (!navigator.bluetooth?.requestDevice) throw Error('Web Bluetooth API is unavailable in this browser or page context');
     const session = {sequence: 0, enabled: false, state: {}};
     this.session = session;
     try {
-      const device = await navigator.bluetooth.requestDevice({
-        filters: [{services: [serviceId]}, {namePrefix: 'RGBMeter'}], optionalServices: [serviceId]
-      });
+      const device = await (deviceRequest ?? navigator.bluetooth.requestDevice(bluetoothRequestOptions()));
       if (this.session !== session) return;
       session.device = device;
       session.lost = () => this.disconnect(session, 'Bluetooth ขาดการเชื่อมต่อ');
